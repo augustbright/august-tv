@@ -3,5 +3,20 @@
   "version": "1.0.0",
   "license": "MIT",
   "private": true,
-  "workspaces": ["packages/*", "apps/*"]
+  "scripts": {
+    "build": "lerna run build --stream",
+    "start:dev": "dotenvx run -f .env.local -- lerna run start:dev --stream"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "lerna": "^8.1.8",
+    "prisma": "^5.20.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {}
 }
