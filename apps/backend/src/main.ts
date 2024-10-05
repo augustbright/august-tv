@@ -1,10 +1,10 @@
-import cookieParser from 'cookie-parser';
+import * as cookieParser from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { FirebaseAuthMiddleware } from './common/firebase-auth.middleware';
 
 async function bootstrap() {
-  const port = process.env.SERVICE_BACKEND_PORT;
+  const port = process.env.BACKEND_PORT;
   const app = await NestFactory.create(AppModule);
 
   app.use(cookieParser());
