@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum VideoStatus {
+  PROCESSING
+  ERROR
+  READY
+  DELETED
+}
+
+enum Visibility {
+  DRAFT
+  PRIVATE
+  UNLISTED
+  PUBLIC
+}
+
+model Video {
+  id          String    @id @default(uuid()) @db.Uuid
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+
+  title       String      @db.VarChar(255)
+  description String?
+  status      VideoStatus @default(PROCESSING)
+  visibility  Visibility  @default(DRAFT)
+
+  author   User   @relation("VideoAuthor", fields: [authorId], references: [id])
+  authorId String
+
+  thumbnail   Image?  @relation(fields: [thumbnailId], references: [id])
+  thumbnailId String? @db.Uuid
+
+  masterUrl String?
+  folder    String?
+
+  @@index([authorId])
+  @@map("videos")
+}
+
+model User {
+  id        String   @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Public info
+  nickname String? @db.VarChar(100)
+  avatar   Image?  @relation(fields: [avatarId], references: [id])
+  avatarId String? @db.Uuid
+
+  // Personal data
+  firstName String? @db.VarChar(100)
+  lastName  String? @db.VarChar(100)
+
+  // Sign in by username/email & password
+  username String? @unique
+  email    String? @unique
+  password String?
+
+  videos Video[] @relation("VideoAuthor")
+  images Image[] @relation("ImageOwner")
+
+  @@map("users")
+}
+
+model Image {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  folder String
+
+  smallUrl    String
+  mediumUrl   String
+  largeUrl    String
+  originalUrl String
+
+  originalWidth  Int
+  originalHeight Int
+
+  ownerId String
+  owner   User   @relation("ImageOwner", fields: [ownerId], references: [id])
+
+  User  User[]
+  Video Video[]
+
+  @@map("images")
+}

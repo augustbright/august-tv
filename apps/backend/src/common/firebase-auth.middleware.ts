@@ -19,6 +19,7 @@ export class FirebaseAuthMiddleware implements NestMiddleware {
         sessionCookie,
         true,
       );
+
       req.user = decodedClaims;
       next();
     } catch (error) {
