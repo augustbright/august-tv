@@ -9,10 +9,17 @@ export class PrismaService
   async onModuleInit() {
     // Connect to the database when the module is initialized
     await this.$connect();
+
+    process.on('SIGTERM', this.shutdown.bind(this));
+    process.on('SIGINT', this.shutdown.bind(this));
   }
 
   async onModuleDestroy() {
     // Disconnect from the database when the module is destroyed (app shuts down)
+    await this.shutdown();
+  }
+
+  private async shutdown() {
     await this.$disconnect();
   }
 }

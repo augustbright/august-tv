@@ -3,7 +3,6 @@ import { Storage, TransferManager } from '@google-cloud/storage';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { TranscodeService } from '../transcode/transcode.service';
-import { UploadedFile } from 'express-fileupload';
 import * as fs from 'fs/promises';
 import { Video } from '@prisma/client';
 import { SocketsGateway } from 'src/sockets/sockets.gateway';
@@ -27,11 +26,11 @@ export class MediaService {
     });
   }
 
-  async upload(file: UploadedFile, config: { author: any }) {
+  async upload(file: Express.Multer.File, user: any) {
     const video = await this.prisma.video.create({
       data: {
-        authorId: config.author.uid,
-        title: file.name,
+        authorId: user.uid,
+        title: file.originalname,
       },
     });
 
@@ -73,9 +72,9 @@ export class MediaService {
     };
   }
 
-  private async processVideo(file: UploadedFile, video: Video) {
+  private async processVideo(file: Express.Multer.File, video: Video) {
     try {
-      const filename = `${randomUUID()}_${file.name}`;
+      const filename = `${randomUUID()}_${file.originalname}`;
       const outputFolder = `${rootOutputFolder}${filename}/`;
 
       async function getManyFiles(folder: string, ending: string) {
@@ -94,7 +93,7 @@ export class MediaService {
         });
       }
 
-      const tempFilePath = file.tempFilePath;
+      const tempFilePath = file.path;
       const transcoded = await this.transcodeService.transcode(tempFilePath, {
         onProgress: (percent) => {
           this.socketsGateway.sendToUser(video.authorId, {
@@ -153,7 +152,7 @@ export class MediaService {
       });
     } finally {
       await fs.rm(rootOutputFolder, { recursive: true });
-      await fs.rm(file.tempFilePath);
+      await fs.rm(file.path);
     }
   }
 }

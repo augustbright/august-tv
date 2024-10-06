@@ -7,6 +7,8 @@ import { SocketsModule } from './sockets/sockets.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { TranscodeModule } from './transcode/transcode.module';
 import { FeedModule } from './feed/feed.module';
+import { ImageModule } from './image/image.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { FeedModule } from './feed/feed.module';
     PrismaModule,
     TranscodeModule,
     FeedModule,
+    ImageModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

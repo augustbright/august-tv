@@ -7,6 +7,7 @@ import {
   Patch,
   UploadedFile,
   UseInterceptors,
+  Req,
 } from '@nestjs/common';
 import { MediaService } from './media.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -20,8 +21,8 @@ export class MediaController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  uploadMedia(@UploadedFile() file: any, @Body() body: any) {
-    return this.mediaService.upload(file, body);
+  uploadMedia(@UploadedFile() file: any, @Req() req: any) {
+    return this.mediaService.upload(file, req.user);
   }
 
   @Patch(':id')

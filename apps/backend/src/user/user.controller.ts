@@ -1,10 +1,22 @@
-import { Controller, Post, Req, Res, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Req,
+  Res,
+  Get,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { getAuth } from 'firebase-admin/auth';
 import { firebaseApp } from '../firebase';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SessionLoginDto } from './dto/sessionLogin.dto';
 import { UserService } from './user.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { randomUUID } from 'crypto';
+import { UPLOAD_PATH } from 'src/common/fs-utils';
 
 @ApiTags('Auth')
 @Controller('user')
@@ -49,5 +61,30 @@ export class UserController {
   async signOut(@Res() res: Response) {
     res.clearCookie('session');
     return res.status(200).end();
+  }
+
+  @Post('updateProfilePicture')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: UPLOAD_PATH,
+        filename: (req, file, cb) => {
+          cb(null, `${randomUUID()}.png`);
+        },
+      }),
+    }),
+  )
+  @ApiResponse({ status: 200, description: 'Profile picture updated.' })
+  @ApiResponse({ status: 400, description: 'Invalid data.' })
+  async updateProfilePicture(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const image = await this.userService.updateProfilePicture(
+      req.user.uid,
+      file,
+    );
+    return res.json(image);
   }
 }
