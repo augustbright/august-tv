@@ -53,4 +53,10 @@ export class UserService {
 
     return image;
   }
+
+  async getUserById(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+  }
 }

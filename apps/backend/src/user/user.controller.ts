@@ -43,24 +43,31 @@ export class UserController {
 
       // Set the session cookie
       res.cookie('session', sessionCookie, options);
-      return res.status(200).end();
+      return null;
     } catch (error) {
       console.error(error);
-      return res.status(401).json({ error: 'UNAUTHORIZED_REQUEST' });
+      return { error: 'UNAUTHORIZED_REQUEST' };
     }
   }
 
   @Get('current')
   @ApiResponse({ status: 200, description: 'Current user or null.' })
-  async getCurrentUser(@Req() req: Request, @Res() res: Response) {
-    return res.json(req.user);
+  async getCurrentUser(@Req() req: Request) {
+    const decoded = req.user;
+    const user = await this.userService.getUserById(decoded.uid);
+    return user
+      ? {
+          data: user,
+          decoded,
+        }
+      : null;
   }
 
   @Post('sign-out')
   @ApiResponse({ status: 200, description: 'Sign out successful.' })
   async signOut(@Res() res: Response) {
     res.clearCookie('session');
-    return res.status(200).end();
+    return null;
   }
 
   @Post('updateProfilePicture')
@@ -79,12 +86,11 @@ export class UserController {
   async updateProfilePicture(
     @UploadedFile() file: Express.Multer.File,
     @Req() req: Request,
-    @Res() res: Response,
   ) {
     const image = await this.userService.updateProfilePicture(
       req.user.uid,
       file,
     );
-    return res.json(image);
+    return image;
   }
 }

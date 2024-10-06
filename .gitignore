@@ -45,3 +45,4 @@ Thumbs.db
 .next
 out
 .env
+packages/dto/generated.ts

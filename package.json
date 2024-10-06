@@ -4,7 +4,11 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "prebuild": "yarn generate",
     "build": "lerna run build --stream",
+    "generate": "yarn generate:db && yarn generate:dtoTypes",
+    "generate:db": "lerna run --stream --scope=@august-tv/db prisma:generate",
+    "generate:dtoTypes": "lerna run --stream --scope=@august-tv/dto start:generate -- ../../../apps/backend -o ../../packages/dto/generated.ts",
     "start:dev": "dotenvx run -f .env.local -- lerna run start:dev --stream"
   },
   "workspaces": [

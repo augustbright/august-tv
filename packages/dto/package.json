@@ -1,5 +1,20 @@
 {
     "name": "@august-tv/dto",
     "version": "1.0.0",
-    "types": "api.d.ts"
+    "types": "generated.ts",
+    "type": "module",
+    "scripts": {
+        "build": "tsc",
+        "prestart:generate": "yarn build",
+        "start:generate": "node dist/generate.mjs"
+    },
+    "dependencies": {
+        "meow": "^13.2.0",
+        "prettier": "^3.3.3",
+        "ts-morph": "^24.0.0"
+    },
+    "devDependencies": {
+        "ts-node": "^10.9.2",
+        "typescript": "^5.6.2"
+    }
 }
