@@ -1,9 +1,9 @@
-import { FetchQueryOptions, useQuery } from "@tanstack/react-query";
+import { UndefinedInitialDataOptions, useQuery } from "@tanstack/react-query";
 import { API, getApiClient } from "@/api";
 import { KEY } from "./keys";
 import { DTO } from "@august-tv/dto";
 
-export const queryCurrentUser = (): FetchQueryOptions<
+export const queryCurrentUser = (): UndefinedInitialDataOptions<
     DTO["user"]["getCurrentUser"]["response"]
 > => ({
     queryKey: KEY.CURRENT_USER,

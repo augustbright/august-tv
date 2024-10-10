@@ -1,0 +1,26 @@
+{
+	"folders": [
+		{
+			"path": "./apps/web",
+		},
+		{
+			"path": "./apps/backend"
+		},
+		{
+			"path": "./packages/db"
+		},
+		{
+			"path": ".",
+			"name": "root"
+		}
+	],
+	"settings": {
+		"editor.formatOnSave": true,
+		"editor.codeActionsOnSave": {
+			"source.fixAll.eslint": "explicit"
+		},
+		"search.exclude": {
+			"**/*.next": true
+		}
+	}
+}

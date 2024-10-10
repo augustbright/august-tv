@@ -6,12 +6,13 @@ import { ws } from "../websocket";
 
 export const useUser = () => {
     const { data: current } = useQueryCurrentUser();
-    const initials = current?.data.nickname
+    const initials = current?.data?.nickname
         .split(" ")
         .map((name: string) => name[0])
         .join("");
 
     const signIn = {
+        showModal: () => {},
         google: useMutateSignInWithGoogle(),
     };
 

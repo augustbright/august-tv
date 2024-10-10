@@ -28,7 +28,7 @@ import { Switch } from "@/components/ui/switch";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TVideoForEditingDto } from "types";
-import { Loader, Save } from "lucide-react";
+import { Loader, Loader2, Save } from "lucide-react";
 import { useMutateUpdateMedia } from "@/mutations/updateVideo";
 import { toast } from "react-toastify";
 import { useAtom } from "jotai";
@@ -197,7 +197,7 @@ export const EditVideoForm = ({ video }: { video: TVideoForEditingDto }) => {
                             disabled={isUpdatingVideo}
                         >
                             {isUpdatingVideo ? (
-                                <Loader className="animate-spin mr-2" />
+                                <Loader2 className="animate-spin mr-2" />
                             ) : (
                                 <Save className="mr-2" />
                             )}

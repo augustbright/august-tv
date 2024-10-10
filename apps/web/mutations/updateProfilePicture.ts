@@ -2,40 +2,27 @@ import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { API, getApiClient } from "@/api";
 import { getQueryClient } from "@/queries/queryClient";
 import { KEY } from "@/queries/keys";
-
-const validatePictureFile = (media: File) => {
-    if (media.size > 5 * 1024 * 1024) {
-        return "File size is too large";
-    }
-
-    if (!media.type.startsWith("image/png")) {
-        return "File type is not supported";
-    }
-
-    return null;
-};
+import { Crop } from "react-image-crop";
 
 export const mutateUpdateProfilePicture = (): UseMutationOptions<
     unknown,
     Error,
-    File
+    {
+        imageId: string;
+        crop: Crop;
+    }
 > => ({
-    mutationFn: async (file) => {
-        const error = validatePictureFile(file);
-        if (error) {
-            throw new Error(error);
-        }
-        const formData = new FormData();
-
-        formData.append("file", file, file.name);
-
+    mutationFn: async ({ imageId, crop }) => {
         const apiClient = await getApiClient();
-        const result = await apiClient.post(
-            API.updateProfilePicture(),
-            formData
-        );
+        const result = await apiClient.post(API.updateProfilePicture(), {
+            imageId,
+            crop,
+        });
         getQueryClient().invalidateQueries({
             queryKey: KEY.CURRENT_USER,
+        });
+        getQueryClient().invalidateQueries({
+            queryKey: KEY.PROFILE_PICTURES,
         });
         return result;
     },

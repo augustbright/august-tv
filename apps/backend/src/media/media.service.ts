@@ -29,8 +29,11 @@ export class MediaService {
   async upload(file: Express.Multer.File, user: any) {
     const video = await this.prisma.video.create({
       data: {
-        authorId: user.uid,
+        author: {
+          connect: { id: user.uid },
+        },
         title: file.originalname,
+        thumbnailSet: null,
       },
     });
 

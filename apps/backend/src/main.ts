@@ -33,5 +33,18 @@ async function bootstrap() {
   } catch (error) {
     console.error('Error starting server', error);
   }
+
+  // Graceful shutdown
+  process.on('SIGINT', async () => {
+    console.log('Received SIGINT, closing app...');
+    await app.close();
+    process.exit(0);
+  });
+
+  process.on('SIGTERM', async () => {
+    console.log('Received SIGTERM, closing app...');
+    await app.close();
+    process.exit(0);
+  });
 }
 bootstrap();

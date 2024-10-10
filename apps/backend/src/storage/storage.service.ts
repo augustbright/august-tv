@@ -29,4 +29,16 @@ export class StorageService {
 
     return storageFiles;
   }
+
+  async downloadFile(file: string, destination: string) {
+    await this.storage.bucket(this.bucketName).file(file).download({
+      destination,
+    });
+
+    return path.basename(file);
+  }
+
+  async deleteFile(path: string) {
+    return this.storage.bucket(this.bucketName).file(path).delete();
+  }
 }

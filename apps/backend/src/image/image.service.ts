@@ -12,81 +12,276 @@ import { StorageService } from 'src/storage/storage.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import type { File } from '@google-cloud/storage';
 
+export type TCrop = { x: number; y: number; width: number; height: number };
+
+const IMAGE_SIZES = [
+  { width: 200, name: 'small' },
+  { width: 500, name: 'medium' },
+  { width: 1000, name: 'large' },
+] as const;
+
+type TImageSize = (typeof IMAGE_SIZES)[number]['name'];
+type TImageSizeWithOriginal = TImageSize | 'original';
+
+type TSizeFileMap = Record<TImageSizeWithOriginal, File>;
+
 @Injectable()
 export class ImageService {
   constructor(
     private readonly storageService: StorageService,
     private readonly prisma: PrismaService,
   ) {}
-  private readonly sizes = [
-    { width: 200, name: 'small' },
-    { width: 500, name: 'medium' },
-    { width: 1000, name: 'large' },
-  ] as const;
 
-  async uploadImage(
-    image: Express.Multer.File,
-    config: {
+  async getImagesSet(setId: string) {
+    return this.prisma.imageSet.findUnique({
+      where: {
+        id: setId,
+      },
+      include: {
+        images: true,
+      },
+    });
+  }
+
+  async upload(
+    filename: string,
+    {
+      crop,
+      ownerId,
+      isProfilePicture,
+      setId,
+    }: {
       ownerId: string;
+      isProfilePicture?: boolean;
+      crop: TCrop;
+      setId: string;
     },
   ) {
     const imageId = randomUUID();
-    try {
-      await ensureUploadPath(imageId);
-      const { width: originalWidth, height: originalHeight } = await sharp(
-        resolveUploadPath(image.filename),
-      ).metadata();
-
-      await this.resizeImage(image.filename, imageId);
-      await moveUploadedFile(
-        image.filename,
+    const { originalHeight, originalWidth, sizeFileMap } =
+      await this.uploadToStorage({
+        filename,
         imageId,
-        `original-${image.filename}`,
-      );
-
-      const storageFiles = await this.storageService.uploadFromFolder(
-        imageId,
-        `images/${config.ownerId}/${imageId}`,
-      );
-
-      type Size =
-        | (typeof ImageService.prototype.sizes)[number]['name']
-        | 'original';
-      const sizeFilesMap = storageFiles.reduce((acc, file) => {
-        const filename = path.basename(file.name);
-        const size = filename.split('-')[0];
-        return { ...acc, [size]: file };
-      }, {}) as Record<Size, File>;
-
-      return this.prisma.image.create({
-        data: {
-          id: imageId,
-          folder: `images/${config.ownerId}/${imageId}`,
-          largeUrl: sizeFilesMap.large.publicUrl(),
-          mediumUrl: sizeFilesMap.medium.publicUrl(),
-          smallUrl: sizeFilesMap.small.publicUrl(),
-          originalUrl: sizeFilesMap.original.publicUrl(),
-          originalWidth,
-          originalHeight,
-          ownerId: config.ownerId,
-        },
+        crop,
+        ownerId,
       });
-    } finally {
-      cleanUp(imageId);
-      cleanUp(image.filename);
-    }
+
+    return this.createInDatabase({
+      imageId,
+      ownerId,
+      originalHeight,
+      originalWidth,
+      sizeFileMap,
+      isProfilePicture,
+      setId,
+    });
   }
 
-  async resizeImage(filename: string, imageId: string): Promise<void> {
-    for (const size of this.sizes) {
+  async changeCrop(imageId: string, crop: TCrop) {
+    const { ownerId, original, small, medium, large } =
+      await this.prisma.image.findUniqueOrThrow({
+        where: { id: imageId },
+        include: {
+          original: true,
+          small: true,
+          medium: true,
+          large: true,
+        },
+      });
+
+    const filename = `${randomUUID()}${path.extname(original.path)}`;
+    await this.storageService.downloadFile(
+      original.path,
+      resolveUploadPath(filename),
+    );
+    const { originalHeight, originalWidth, sizeFileMap } =
+      await this.uploadToStorage({
+        filename,
+        imageId,
+        crop,
+        ownerId,
+      });
+
+    const newImage = await this.updateInDatabase({
+      imageId,
+      originalHeight,
+      originalWidth,
+      sizeFileMap,
+    });
+
+    await this.prisma.file.deleteMany({
+      where: {
+        id: {
+          in: [original.id, small.id, medium.id, large.id],
+        },
+      },
+    });
+
+    this.storageService.deleteFile(original.path);
+    this.storageService.deleteFile(small.path);
+    this.storageService.deleteFile(medium.path);
+    this.storageService.deleteFile(large.path);
+
+    return newImage;
+  }
+
+  async preprocess(
+    filename: string,
+    imageId: string,
+    crop: TCrop,
+  ): Promise<void> {
+    for (const size of IMAGE_SIZES) {
       const resizedImagePath = resolveUploadPath(
         imageId,
         `${size.name}-${filename}`,
       );
 
       await sharp(resolveUploadPath(filename))
+        .extract({
+          width: Math.floor(crop.width),
+          height: Math.floor(crop.height),
+          left: Math.floor(crop.x),
+          top: Math.floor(crop.y),
+        })
         .resize({ width: size.width })
         .toFile(resizedImagePath);
     }
+  }
+
+  async delete(imageId: string) {
+    await this.prisma.image.delete({
+      where: { id: imageId },
+      include: {
+        original: true,
+        medium: true,
+        small: true,
+        large: true,
+      },
+    });
+  }
+
+  private async uploadToStorage({
+    filename,
+    ownerId,
+    imageId,
+    crop,
+  }: {
+    filename: string;
+    ownerId: string;
+    crop: TCrop;
+    imageId: string;
+  }) {
+    try {
+      await ensureUploadPath(imageId);
+      const { width: originalWidth, height: originalHeight } = await sharp(
+        resolveUploadPath(filename),
+      ).metadata();
+
+      await this.preprocess(filename, imageId, crop);
+      await moveUploadedFile(filename, imageId, `original-${filename}`);
+
+      const storageFiles = await this.storageService.uploadFromFolder(
+        imageId,
+        `images/${ownerId}/${imageId}`,
+      );
+
+      const sizeFileMap = storageFiles.reduce((acc, file) => {
+        const filename = path.basename(file.name);
+        const size = filename.split('-')[0];
+        return { ...acc, [size]: file };
+      }, {}) as TSizeFileMap;
+
+      return {
+        originalHeight,
+        originalWidth,
+        sizeFileMap,
+      };
+    } finally {
+      cleanUp(imageId);
+      cleanUp(filename);
+    }
+  }
+
+  private async createInDatabase({
+    imageId,
+    originalHeight,
+    originalWidth,
+    ownerId,
+    sizeFileMap,
+    setId,
+  }: {
+    imageId: string;
+    originalWidth: number;
+    originalHeight: number;
+    ownerId: string;
+    isProfilePicture?: boolean;
+    sizeFileMap: TSizeFileMap;
+    setId: string;
+  }) {
+    const filesConfigs = Object.fromEntries(
+      Object.entries(sizeFileMap).map(([size, file]) => [
+        size,
+        {
+          create: {
+            filename: file.name,
+            path: file.name,
+            publicUrl: file.publicUrl(),
+          },
+        },
+      ]),
+    ) as Record<TImageSizeWithOriginal, unknown>;
+
+    return this.prisma.image.create({
+      data: {
+        id: imageId,
+        originalWidth,
+        originalHeight,
+        owner: {
+          connect: {
+            id: ownerId,
+          },
+        },
+        set: {
+          connect: {
+            id: setId,
+          },
+        },
+        ...filesConfigs,
+      },
+    });
+  }
+
+  private async updateInDatabase({
+    imageId,
+    originalHeight,
+    originalWidth,
+    sizeFileMap,
+  }: {
+    imageId: string;
+    originalWidth: number;
+    originalHeight: number;
+    sizeFileMap: TSizeFileMap;
+  }) {
+    const filesConfigs = Object.fromEntries(
+      Object.entries(sizeFileMap).map(([size, file]) => [
+        size,
+        {
+          create: {
+            filename: path.basename(file.name),
+            path: file.name,
+            publicUrl: file.publicUrl(),
+          },
+        },
+      ]),
+    ) as Record<TImageSizeWithOriginal, unknown>;
+
+    return this.prisma.image.update({
+      where: { id: imageId },
+      data: {
+        originalWidth,
+        originalHeight,
+        ...filesConfigs,
+      },
+    });
   }
 }

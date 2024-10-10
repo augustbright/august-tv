@@ -38,11 +38,14 @@ model Video {
   status      VideoStatus @default(PROCESSING)
   visibility  Visibility  @default(DRAFT)
 
-  author   User   @relation("VideoAuthor", fields: [authorId], references: [id])
+  author   User   @relation("VideoOwner", fields: [authorId], references: [id])
   authorId String
 
-  thumbnail   Image?  @relation(fields: [thumbnailId], references: [id])
-  thumbnailId String? @db.Uuid
+  thumbnail   Image?  @relation("VideoThumbnail", fields: [thumbnailId], references: [id])
+  thumbnailId String? @unique @db.Uuid
+
+  thumbnailSet   ImageSet @relation("VideoThumbnailSet", fields: [thumbnailSetId], references: [id])
+  thumbnailSetId String   @unique @db.Uuid
 
   masterUrl String?
   folder    String?
@@ -57,9 +60,12 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Public info
-  nickname String? @db.VarChar(100)
-  avatar   Image?  @relation(fields: [avatarId], references: [id])
-  avatarId String? @db.Uuid
+  nickname  String? @db.VarChar(100)
+  picture   Image?  @relation("UserPicture", fields: [pictureId], references: [id])
+  pictureId String? @unique @db.Uuid
+
+  pictureSet   ImageSet @relation("UserPictureSet", fields: [pictureSetId], references: [id])
+  pictureSetId String   @unique @db.Uuid
 
   // Personal data
   firstName String? @db.VarChar(100)
@@ -70,7 +76,7 @@ model User {
   email    String? @unique
   password String?
 
-  videos Video[] @relation("VideoAuthor")
+  videos Video[] @relation("VideoOwner")
   images Image[] @relation("ImageOwner")
 
   @@map("users")
@@ -81,21 +87,56 @@ model Image {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  folder String
-
-  smallUrl    String
-  mediumUrl   String
-  largeUrl    String
-  originalUrl String
-
   originalWidth  Int
   originalHeight Int
+
+  set   ImageSet? @relation(fields: [setId], references: [id])
+  setId String? @db.Uuid
+
+  small      File   @relation("SmallImage", fields: [smallId], references: [id])
+  smallId    String @unique @db.Uuid
+  medium     File   @relation("MediumImage", fields: [mediumId], references: [id])
+  mediumId   String @unique @db.Uuid
+  large      File   @relation("LargeImage", fields: [largeId], references: [id])
+  largeId    String @unique @db.Uuid
+  original   File   @relation("OriginalImage", fields: [originalId], references: [id])
+  originalId String @unique @db.Uuid
 
   ownerId String
   owner   User   @relation("ImageOwner", fields: [ownerId], references: [id])
 
-  User  User[]
-  Video Video[]
+  user  User?  @relation("UserPicture")
+  video Video? @relation("VideoThumbnail")
 
   @@map("images")
+}
+
+model File {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  filename  String
+  path      String
+  publicUrl String
+
+  smallImage    Image? @relation("SmallImage")
+  mediumImage   Image? @relation("MediumImage")
+  largeImage    Image? @relation("LargeImage")
+  originalImage Image? @relation("OriginalImage")
+
+  @@map("files")
+}
+
+model ImageSet {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images Image[] @relation
+
+  user  User?  @relation("UserPictureSet")
+  video Video? @relation("VideoThumbnailSet")
+
+  @@map("image_sets")
 }

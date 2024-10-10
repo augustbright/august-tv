@@ -1,9 +1,4 @@
-import {
-    FetchQueryOptions,
-    isServer,
-    QueryClient,
-    QueryKey,
-} from "@tanstack/react-query";
+import { isServer, QueryClient } from "@tanstack/react-query";
 
 function makeQueryClient() {
     return new QueryClient({
@@ -12,6 +7,10 @@ function makeQueryClient() {
                 // With SSR, we usually want to set some default staleTime
                 // above 0 to avoid refetching immediately on the client
                 staleTime: 60 * 1000,
+                retry: isServer
+                    ? 0
+                    : (parseInt(process.env.NEXT_PUBLIC_RETRY_COUNT ?? "0") ??
+                      3),
             },
         },
     });
