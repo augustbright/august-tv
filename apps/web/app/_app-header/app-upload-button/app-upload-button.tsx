@@ -2,41 +2,48 @@
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { AlertCircle, Plus, Upload, Loader2 } from "lucide-react";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 import { useMutateUploadMedia } from "@/mutations/uploadMedia";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Guard } from "@/components/guard";
 import { AppUploadUnauthenticated } from "./app-upload-unauthenticated";
 import { Query } from "@/components/Query";
+import { Icon } from "@/components/icon";
+import { useRouter } from "next/navigation";
 
 export const AppUploadButton = () => {
+    const router = useRouter();
+    const [open, setOpen] = useState(false);
     const uploadMedia = useMutateUploadMedia();
     const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files) {
             return;
         }
         const file = e.target.files[0];
+        router.push("/profile/my-videos");
         const result = await uploadMedia.mutateAsync(file);
-        console.log(result);
+        router.push(`/profile/my-videos/edit/${result.id}`);
+        if (result) {
+            setOpen(false);
+        }
     };
 
     const handleOpenChange = (open: boolean) => {
         if (!open) {
             uploadMedia.reset();
         }
+        setOpen(open);
     };
 
     return (
-        <Dialog onOpenChange={handleOpenChange}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <Button>
                     <Plus className="mr-2 h-4 w-4" />
@@ -60,7 +67,11 @@ export const AppUploadButton = () => {
                             </DialogHeader>
                             <Button asChild>
                                 <label htmlFor="file">
-                                    <Upload className="mr-2 h-4 w-4" />
+                                    <Icon
+                                        icon={Upload}
+                                        loading={uploadMedia.isPending}
+                                        className="mr-2 h-4 w-4"
+                                    />
                                     <span>Choose file</span>
                                 </label>
                             </Button>
@@ -88,6 +99,7 @@ export const AppUploadButton = () => {
                                 name="file"
                                 accept="video/*"
                                 type="file"
+                                disabled={uploadMedia.isPending}
                                 onChange={handleFileChange}
                             />
                         </>

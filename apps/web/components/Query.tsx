@@ -40,7 +40,7 @@ export type TQueryChildrenProps<TData> = {
 const LOADING = {
     ICON: () => <Loader2 className="animate-spin" />,
     ROW: () => (
-        <div className="flex justify-center p-4">
+        <div className="flex justify-center p-6">
             <Loader2 className="animate-spin" />
         </div>
     ),

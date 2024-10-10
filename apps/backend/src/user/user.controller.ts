@@ -17,6 +17,7 @@ import { diskStorage } from 'multer';
 import { randomUUID } from 'crypto';
 import { UPLOAD_PATH } from 'src/common/fs-utils';
 import { TCrop } from 'src/image/image.service';
+import * as path from 'path';
 
 type TCropParams = { width: string; height: string; x: string; y: string };
 
@@ -80,7 +81,7 @@ export class UserController {
       storage: diskStorage({
         destination: UPLOAD_PATH,
         filename: (req, file, cb) => {
-          cb(null, `${randomUUID()}.png`);
+          cb(null, `${randomUUID()}${path.extname(file.originalname)}`);
         },
       }),
     }),

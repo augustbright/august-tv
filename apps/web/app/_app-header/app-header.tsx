@@ -9,7 +9,7 @@ export const AppHeader = () => {
         <header className="sticky top-0 z-50 w-full border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="flex items-center gap-4 px-4 py-2">
                 <Link href="/" className="flex gap-2 items-center">
-                    <Hop className="h-5 text-primary" />
+                    <Hop className="h-5 text-primary text-orange-600" />
                     <h1 className="text-lg font-bold text-primary">
                         August TV
                     </h1>

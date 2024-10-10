@@ -7,8 +7,36 @@ export class FeedService {
   async getLatest() {
     const result = await this.prismaService.video.findMany({
       take: 10,
+      include: {
+        thumbnail: {
+          include: {
+            medium: true,
+          },
+        },
+        author: {
+          select: {
+            id: true,
+            nickname: true,
+            picture: {
+              include: {
+                small: true,
+              },
+            },
+          },
+        },
+      },
       orderBy: {
         createdAt: 'desc',
+      },
+      where: {
+        AND: [
+          {
+            status: 'READY',
+          },
+          {
+            visibility: 'PUBLIC',
+          },
+        ],
       },
     });
 

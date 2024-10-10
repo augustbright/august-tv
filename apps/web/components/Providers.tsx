@@ -3,8 +3,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ToastContainer } from "react-toastify";
 import { getQueryClient } from "@/queries/queryClient";
-import { EditVideoModal } from "../app/_edit_video_modal/edit-video.modal";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ConfirmProvider } from "@/app/confirm";
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
     const queryClient = getQueryClient();
@@ -16,14 +16,15 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
                 enableSystem
                 disableTransitionOnChange
             >
-                <TooltipProvider>{children}</TooltipProvider>
+                <TooltipProvider>
+                    <ConfirmProvider>{children}</ConfirmProvider>
+                </TooltipProvider>
             </ThemeProvider>
             <ToastContainer
                 hideProgressBar
                 position="bottom-left"
                 theme="dark"
             />
-            <EditVideoModal />
         </QueryClientProvider>
     );
 };

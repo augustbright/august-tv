@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import ffmpeg from 'fluent-ffmpeg';
+import * as ffmpeg from 'fluent-ffmpeg';
 import { writeFile } from 'fs/promises';
 import { ensureDir } from 'src/common/fs-utils';
 

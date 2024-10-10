@@ -1,22 +1,26 @@
-'use client';
+"use client";
 
-import { useQueryFeedLatest } from '@/queries/feedLatest';
-import { VideoThumbnail } from './video-thumbnail';
+import { queryFeedLatest } from "@/queries/feedLatest";
+import { FeedThumbnail } from "./feed-thumbnail";
+import { Query } from "@/components/Query";
 
 export const Feed = () => {
-  const { data: feedLatest, isLoading } = useQueryFeedLatest();
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-semibold">Latest Videos</h2>
-      <div className="flex">
-        {feedLatest?.data.map((video) => (
-          <VideoThumbnail key={video.id} video={video} />
-        ))}
-      </div>
-    </div>
-  );
+    return (
+        <div className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold">Latest Videos</h2>
+            <div className="flex flex-wrap">
+                <Query
+                    query={queryFeedLatest()}
+                    loading={Query.LOADING.ROW}
+                    error={Query.ERROR.ALERT}
+                >
+                    {({ data: { data: items } }) =>
+                        items.map((video) => (
+                            <FeedThumbnail key={video.id} video={video} />
+                        ))
+                    }
+                </Query>
+            </div>
+        </div>
+    );
 };

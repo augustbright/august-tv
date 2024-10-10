@@ -53,7 +53,7 @@ export class ImageService {
     }: {
       ownerId: string;
       isProfilePicture?: boolean;
-      crop: TCrop;
+      crop?: TCrop;
       setId: string;
     },
   ) {
@@ -128,7 +128,7 @@ export class ImageService {
   async preprocess(
     filename: string,
     imageId: string,
-    crop: TCrop,
+    crop?: TCrop,
   ): Promise<void> {
     for (const size of IMAGE_SIZES) {
       const resizedImagePath = resolveUploadPath(
@@ -136,15 +136,17 @@ export class ImageService {
         `${size.name}-${filename}`,
       );
 
-      await sharp(resolveUploadPath(filename))
-        .extract({
-          width: Math.floor(crop.width),
-          height: Math.floor(crop.height),
-          left: Math.floor(crop.x),
-          top: Math.floor(crop.y),
-        })
-        .resize({ width: size.width })
-        .toFile(resizedImagePath);
+      let result = sharp(resolveUploadPath(filename));
+      if (crop) {
+        result = result.extract({
+          left: crop.x,
+          top: crop.y,
+          width: crop.width,
+          height: crop.height,
+        });
+      }
+      result = result.resize({ width: size.width });
+      await result.toFile(resizedImagePath);
     }
   }
 
@@ -168,7 +170,7 @@ export class ImageService {
   }: {
     filename: string;
     ownerId: string;
-    crop: TCrop;
+    crop?: TCrop;
     imageId: string;
   }) {
     try {
@@ -223,7 +225,7 @@ export class ImageService {
         size,
         {
           create: {
-            filename: file.name,
+            filename: path.basename(file.name),
             path: file.name,
             publicUrl: file.publicUrl(),
           },

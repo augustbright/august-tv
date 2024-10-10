@@ -1,28 +1,28 @@
 "use client";
 
-import { useQueryMedia } from "@/queries/media";
-import { Loader, Loader2 } from "lucide-react";
+import { Query } from "@/components/Query";
+import { queryMedia } from "@/queries/media";
 import { useRef } from "react";
 import ReactHlsPlayer from "react-hls-player";
 
 export const MediaPlayer = ({ mediaId }: { mediaId: string }) => {
-    const { data: media, isLoading } = useQueryMedia(mediaId);
     const playerRef = useRef<HTMLVideoElement>(null);
-    if (isLoading) {
-        return <Loader2 className="animate-spin" />;
-    }
-
-    if (!media) {
-        return null;
-    }
 
     return (
-        <ReactHlsPlayer
-            className="h-[600px] rounded-lg aspect-video"
-            src={media?.masterUrl || ""}
-            playerRef={playerRef}
-            controls
-            autoPlay
-        />
+        <Query
+            query={queryMedia(mediaId)}
+            loading={Query.LOADING.ROW}
+            error={Query.ERROR.ALERT}
+        >
+            {({ data: media }) => (
+                <ReactHlsPlayer
+                    className="h-[600px] rounded-lg aspect-video"
+                    src={media?.masterUrl || ""}
+                    playerRef={playerRef}
+                    controls
+                    autoPlay
+                />
+            )}
+        </Query>
     );
 };

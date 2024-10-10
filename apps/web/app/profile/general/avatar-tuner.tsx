@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Scan } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import {
     centerCrop,
@@ -79,10 +80,10 @@ export const AvatarTuner = ({
                 minWidth={200}
                 minHeight={200}
             >
-                <img
+                <Image
                     ref={imgRef}
-                    // width={1000}
-                    // height={1000}
+                    width={1000}
+                    height={1000}
                     src={imageSrc}
                     alt="avatar"
                 />
