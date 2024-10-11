@@ -9,6 +9,8 @@ import { TranscodeModule } from './transcode/transcode.module';
 import { FeedModule } from './feed/feed.module';
 import { ImageModule } from './image/image.module';
 import { StorageModule } from './storage/storage.module';
+import { DbFileService } from './db-file/db-file.service';
+import { DbFileModule } from './db-file/db-file.module';
 
 @Module({
   imports: [
@@ -20,8 +22,9 @@ import { StorageModule } from './storage/storage.module';
     FeedModule,
     ImageModule,
     StorageModule,
+    DbFileModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, DbFileService],
 })
 export class AppModule {}

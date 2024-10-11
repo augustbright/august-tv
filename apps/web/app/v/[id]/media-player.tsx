@@ -17,7 +17,7 @@ export const MediaPlayer = ({ mediaId }: { mediaId: string }) => {
             {({ data: media }) => (
                 <ReactHlsPlayer
                     className="h-[600px] rounded-lg aspect-video"
-                    src={media?.masterUrl || ""}
+                    src={media.master?.publicUrl || ""}
                     playerRef={playerRef}
                     controls
                     autoPlay

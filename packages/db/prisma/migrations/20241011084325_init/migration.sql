@@ -17,8 +17,8 @@ CREATE TABLE "videos" (
     "authorId" TEXT NOT NULL,
     "thumbnailId" UUID,
     "thumbnailSetId" UUID NOT NULL,
-    "masterUrl" TEXT,
-    "folder" TEXT,
+    "masterId" UUID NOT NULL,
+    "fileSetId" UUID NOT NULL,
 
     CONSTRAINT "videos_pkey" PRIMARY KEY ("id")
 );
@@ -65,6 +65,7 @@ CREATE TABLE "files" (
     "filename" TEXT NOT NULL,
     "path" TEXT NOT NULL,
     "publicUrl" TEXT NOT NULL,
+    "fileSetId" UUID,
 
     CONSTRAINT "files_pkey" PRIMARY KEY ("id")
 );
@@ -78,11 +79,26 @@ CREATE TABLE "image_sets" (
     CONSTRAINT "image_sets_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "file_sets" (
+    "id" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "file_sets_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "videos_thumbnailId_key" ON "videos"("thumbnailId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "videos_thumbnailSetId_key" ON "videos"("thumbnailSetId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "videos_masterId_key" ON "videos"("masterId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "videos_fileSetId_key" ON "videos"("fileSetId");
 
 -- CreateIndex
 CREATE INDEX "videos_authorId_idx" ON "videos"("authorId");
@@ -121,6 +137,12 @@ ALTER TABLE "videos" ADD CONSTRAINT "videos_thumbnailId_fkey" FOREIGN KEY ("thum
 ALTER TABLE "videos" ADD CONSTRAINT "videos_thumbnailSetId_fkey" FOREIGN KEY ("thumbnailSetId") REFERENCES "image_sets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "videos" ADD CONSTRAINT "videos_masterId_fkey" FOREIGN KEY ("masterId") REFERENCES "files"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "videos" ADD CONSTRAINT "videos_fileSetId_fkey" FOREIGN KEY ("fileSetId") REFERENCES "file_sets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_pictureId_fkey" FOREIGN KEY ("pictureId") REFERENCES "images"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -143,3 +165,6 @@ ALTER TABLE "images" ADD CONSTRAINT "images_originalId_fkey" FOREIGN KEY ("origi
 
 -- AddForeignKey
 ALTER TABLE "images" ADD CONSTRAINT "images_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "files" ADD CONSTRAINT "files_fileSetId_fkey" FOREIGN KEY ("fileSetId") REFERENCES "file_sets"("id") ON DELETE SET NULL ON UPDATE CASCADE;

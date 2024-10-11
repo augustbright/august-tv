@@ -211,10 +211,10 @@ export const EditVideoForm = ({
                         </div>
                     </div>
                     <div className="flex-col items-start flex gap-4">
-                        {video.masterUrl && (
+                        {video.master && (
                             <ReactHLSPlayer
                                 className="w-full rounded-lg aspect-video"
-                                src={video.masterUrl}
+                                src={video.master.publicUrl}
                                 playerRef={playerRef}
                                 controls
                             />

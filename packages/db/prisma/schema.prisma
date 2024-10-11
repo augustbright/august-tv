@@ -41,14 +41,15 @@ model Video {
   author   User   @relation("VideoOwner", fields: [authorId], references: [id])
   authorId String
 
-  thumbnail   Image?  @relation("VideoThumbnail", fields: [thumbnailId], references: [id])
-  thumbnailId String? @unique @db.Uuid
-
-  thumbnailSet   ImageSet @relation("VideoThumbnailSet", fields: [thumbnailSetId], references: [id])
+  thumbnail      Image?   @relation("VideoThumbnail", fields: [thumbnailId], references: [id])
+  thumbnailId    String?  @unique @db.Uuid
+  thumbnailSet   ImageSet @relation("VideoThumbnailSet", fields: [thumbnailSetId], references: [id], onDelete: Cascade)
   thumbnailSetId String   @unique @db.Uuid
 
-  masterUrl String?
-  folder    String?
+  master    File?   @relation("VideoMaster", fields: [masterId], references: [id])
+  masterId  String? @unique @db.Uuid
+  fileSet   FileSet @relation("VideoFilesSet", fields: [fileSetId], references: [id])
+  fileSetId String  @unique @db.Uuid
 
   @@index([authorId])
   @@map("videos")
@@ -64,7 +65,7 @@ model User {
   picture   Image?  @relation("UserPicture", fields: [pictureId], references: [id])
   pictureId String? @unique @db.Uuid
 
-  pictureSet   ImageSet @relation("UserPictureSet", fields: [pictureSetId], references: [id])
+  pictureSet   ImageSet @relation("UserPictureSet", fields: [pictureSetId], references: [id], onDelete: Cascade)
   pictureSetId String   @unique @db.Uuid
 
   // Personal data
@@ -91,7 +92,7 @@ model Image {
   originalHeight Int
 
   set   ImageSet? @relation(fields: [setId], references: [id])
-  setId String? @db.Uuid
+  setId String?   @db.Uuid
 
   small      File   @relation("SmallImage", fields: [smallId], references: [id])
   smallId    String @unique @db.Uuid
@@ -120,10 +121,13 @@ model File {
   path      String
   publicUrl String
 
-  smallImage    Image? @relation("SmallImage")
-  mediumImage   Image? @relation("MediumImage")
-  largeImage    Image? @relation("LargeImage")
-  originalImage Image? @relation("OriginalImage")
+  smallImage    Image?   @relation("SmallImage")
+  mediumImage   Image?   @relation("MediumImage")
+  largeImage    Image?   @relation("LargeImage")
+  originalImage Image?   @relation("OriginalImage")
+  videoMaster   Video?   @relation("VideoMaster")
+  fileSet       FileSet? @relation("FileSet", fields: [fileSetId], references: [id])
+  fileSetId     String?  @db.Uuid
 
   @@map("files")
 }
@@ -139,4 +143,15 @@ model ImageSet {
   video Video? @relation("VideoThumbnailSet")
 
   @@map("image_sets")
+}
+
+model FileSet {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  video Video? @relation("VideoFilesSet")
+  files File[] @relation("FileSet")
+
+  @@map("file_sets")
 }

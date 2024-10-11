@@ -6,9 +6,12 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import * as cookie from 'cookie';
+import { getAuth } from 'firebase-admin/auth';
+import { firebaseApp } from 'src/firebase';
 
-interface TUser {
+export interface TUser {
   uid: string;
   username: string;
 }
@@ -22,64 +25,77 @@ interface TMessage {
 
 @Injectable()
 @WebSocketGateway({
-  path: '/websocket', // Change the path as needed
+  path: '/io',
+  transports: ['websocket', 'polling'],
+  cors: {
+    origin: '*', // Allow all origins for CORS (configure as needed)
+  },
 })
 export class SocketsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
   server: Server;
-  private readonly connections: Map<string, { ws: WebSocket; user: TUser }> =
-    new Map();
+  private logger: Logger = new Logger('SocketsGateway');
+  private readonly connections: Map<string, Set<Socket>> = new Map();
 
-  afterInit() {
-    console.log('WebSocket server initialized');
+  afterInit(server: Server) {
+    this.logger.log('Socket.IO server initialized');
   }
 
-  handleConnection(ws: WebSocket, req) {
-    const { uid, username } = req.query; // Extract user details from query
-    const user: TUser = { uid, username };
-
-    if (!uid || !username) {
-      ws.close(); // Close the connection if no user is present
+  async handleConnection(client: Socket) {
+    this.logger.log(`Client connected: ${client.id}`);
+    let sessionCookie: string;
+    try {
+      const cookiesStr = client.handshake.headers.cookie;
+      sessionCookie = cookie.parse(cookiesStr).session;
+    } catch (error) {
+      this.logger.error(`Error parsing cookies: ${error.message}`);
+      client.disconnect();
       return;
     }
 
-    this.connections.set(user.uid, { ws, user });
-
-    ws.addEventListener('message', (e) => {
-      ws.send(e.data);
-    });
-
-    ws.addEventListener('close', () => {
-      this.handleDisconnect(ws);
-    });
-  }
-
-  handleDisconnect(ws: WebSocket) {
-    // Find the user by the WebSocket and remove the connection
-    const userEntry = Array.from(this.connections.values()).find(
-      (conn) => conn.ws === ws,
+    const { uid } = await getAuth(firebaseApp).verifySessionCookie(
+      sessionCookie,
+      true,
     );
 
-    if (userEntry) {
-      this.connections.delete(userEntry.user.uid);
-      console.log(`Connection closed for user: ${userEntry.user.uid}`);
+    if (!uid) {
+      client.disconnect();
+      return;
     }
+
+    if (!this.connections.has(uid)) {
+      this.connections.set(uid, new Set());
+    }
+    const userConnections = this.connections.get(uid);
+    userConnections.add(client);
+
+    client.on('disconnect', () => {
+      this.logger.log(`Client disconnected: ${client.id}`);
+      userConnections.delete(client);
+    });
   }
 
   sendToUser(uid: string, message: TMessage) {
-    const connection = this.connections.get(uid);
-    if (connection) {
-      connection.ws.send(JSON.stringify(message));
+    const userConnections = this.connections.get(uid);
+    if (userConnections) {
+      userConnections.forEach((client) => {
+        client.send(JSON.stringify(message));
+      });
       return true;
     }
     return false;
   }
 
+  handleDisconnect() {}
+
   getConnections() {
-    return Array.from(this.connections.values()).map((conn) => ({
-      user: conn.user,
-    }));
+    return Object.fromEntries(
+      Array.from(this.connections.entries()).map(([uid, clients]) => [
+        uid,
+        clients.size,
+      ]),
+    );
   }
 }

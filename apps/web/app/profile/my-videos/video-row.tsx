@@ -1,3 +1,5 @@
+// TODO: block row while deleting
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +30,7 @@ export const VideoRow = ({
     return (
         <TableRow
             onClick={() => {
+                if (isDeletingVideo) return;
                 editVideo(video.id);
             }}
         >
@@ -92,7 +95,8 @@ export const VideoRow = ({
                         <DropdownMenuItem>Edit</DropdownMenuItem>
                         <DropdownMenuItem
                             className="text-destructive"
-                            onClick={() => {
+                            onClick={(e) => {
+                                e.stopPropagation();
                                 confirm({
                                     description:
                                         "This video will be deleted permanently.",

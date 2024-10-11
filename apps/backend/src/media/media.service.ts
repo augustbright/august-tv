@@ -4,11 +4,13 @@ import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { TranscodeService } from '../transcode/transcode.service';
 import * as fs from 'fs/promises';
-import { Video } from '@prisma/client';
+import { Prisma, Video } from '@prisma/client';
 import { SocketsGateway } from 'src/sockets/sockets.gateway';
 import { ImageService } from 'src/image/image.service';
 import { resolveUploadPath } from 'src/common/fs-utils';
 import * as path from 'path';
+import { StorageService } from 'src/storage/storage.service';
+import { DbFileService } from 'src/db-file/db-file.service';
 
 const storage = new Storage();
 const bucketName = process.env.GOOGLE_CLOUD_MEDIA_BUCKET_NAME;
@@ -22,11 +24,16 @@ export class MediaService {
     private readonly transcodeService: TranscodeService,
     private readonly socketsGateway: SocketsGateway,
     private readonly imageService: ImageService,
+    private readonly storage: StorageService,
+    private readonly dbFileService: DbFileService,
   ) {}
 
   async getMediaById(id: string) {
     return this.prisma.video.findUnique({
       where: { id },
+      include: {
+        master: true,
+      },
     });
   }
 
@@ -38,6 +45,9 @@ export class MediaService {
         },
         title: file.originalname,
         thumbnailSet: {
+          create: {},
+        },
+        fileSet: {
           create: {},
         },
       },
@@ -94,8 +104,38 @@ export class MediaService {
   // }
 
   async delete(id: string) {
-    // TODO: video deletion
-    throw new Error('Not implemented');
+    const {
+      fileSet: { files },
+      thumbnailSet: { images },
+    } = await this.prisma.video.findUnique({
+      where: { id },
+      include: {
+        fileSet: {
+          include: {
+            files: true,
+          },
+        },
+        thumbnailSet: {
+          include: {
+            images: {
+              include: {
+                large: true,
+                medium: true,
+                small: true,
+                original: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    await Promise.all(files.map((file) => this.dbFileService.delete(file)));
+
+    await Promise.all(
+      images.map((image) => this.imageService.delete(image.id)),
+    );
+
     return this.prisma.video.delete({
       where: { id },
     });
@@ -113,14 +153,30 @@ export class MediaService {
         .filter((file) => file.endsWith(ending));
     }
 
-    async function uploadManyFiles(files: string[]) {
-      return await transferManager.uploadManyFiles(files, {
+    const uploadManyFiles = async (files: string[], fileSetId: string) => {
+      const responses = await transferManager.uploadManyFiles(files, {
         customDestinationBuilder(path) {
           const relPath = path.split(outputFolder).at(-1);
           return `transcoded/${filename}/${relPath}`;
         },
       });
-    }
+      const dbFilesCreateManyInput: Prisma.FileCreateManyInput[] =
+        responses.map(
+          ([storageFile]) =>
+            ({
+              filename: path.basename(storageFile.name),
+              path: storageFile.name,
+              publicUrl: storageFile.publicUrl(),
+              fileSetId,
+            }) satisfies Prisma.FileCreateManyInput,
+        );
+
+      const dbFiles = await this.prisma.file.createManyAndReturn({
+        data: dbFilesCreateManyInput,
+      });
+
+      return dbFiles;
+    };
 
     try {
       const transcoded = await this.transcodeService.transcode(tempFilePath, {
@@ -156,9 +212,12 @@ export class MediaService {
       );
 
       // TODO upload later, after db operations are done
-      await uploadManyFiles(videoVariantFiles);
-      await uploadManyFiles(videoPartsFiles);
-      const [uploadedMasters] = await uploadManyFiles(videoMasterFiles);
+      await uploadManyFiles(videoVariantFiles, video.fileSetId);
+      await uploadManyFiles(videoPartsFiles, video.fileSetId);
+      const [uploadedMaster] = await uploadManyFiles(
+        videoMasterFiles,
+        video.fileSetId,
+      );
 
       const dbThumbnails = await Promise.all(
         thumbnailsFilenames.map((thumbnailFilename) =>
@@ -173,13 +232,16 @@ export class MediaService {
         where: { id: video.id },
         data: {
           status: 'READY',
-          masterUrl: uploadedMasters[0].publicUrl(),
+          master: {
+            connect: {
+              id: uploadedMaster.id,
+            },
+          },
           thumbnail: {
             connect: {
               id: dbThumbnails[0].id,
             },
           },
-          folder: filename,
         },
       });
 

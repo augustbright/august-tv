@@ -11,6 +11,7 @@ import {
 import { StorageService } from 'src/storage/storage.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import type { File } from '@google-cloud/storage';
+import { DbFileService } from 'src/db-file/db-file.service';
 
 export type TCrop = { x: number; y: number; width: number; height: number };
 
@@ -30,6 +31,7 @@ export class ImageService {
   constructor(
     private readonly storageService: StorageService,
     private readonly prisma: PrismaService,
+    private readonly dbFileService: DbFileService,
   ) {}
 
   async getImagesSet(setId: string) {
@@ -151,7 +153,7 @@ export class ImageService {
   }
 
   async delete(imageId: string) {
-    await this.prisma.image.delete({
+    const image = await this.prisma.image.findUnique({
       where: { id: imageId },
       include: {
         original: true,
@@ -160,6 +162,19 @@ export class ImageService {
         large: true,
       },
     });
+
+    const deletedImage = await this.prisma.image.delete({
+      where: { id: imageId },
+    });
+
+    await Promise.all([
+      this.dbFileService.delete(image.original),
+      this.dbFileService.delete(image.medium),
+      this.dbFileService.delete(image.small),
+      this.dbFileService.delete(image.large),
+    ]);
+
+    return deletedImage;
   }
 
   private async uploadToStorage({
