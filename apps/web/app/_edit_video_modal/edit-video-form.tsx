@@ -144,7 +144,7 @@ export const EditVideoForm = ({
                             <FormField
                                 control={form.control}
                                 name="visibility"
-                                render={({ field: { ...field } }) => (
+                                render={({ field }) => (
                                     <FormItem className="flex flex-col rounded-lg border p-4">
                                         <div className="space-y-0.5">
                                             <FormLabel className="text-base">
@@ -158,48 +158,60 @@ export const EditVideoForm = ({
                                                         value="PRIVATE"
                                                         id="private"
                                                         className="mt-1"
+                                                        onClick={() => {
+                                                            form.setValue(
+                                                                "visibility",
+                                                                "PRIVATE"
+                                                            );
+                                                        }}
                                                     />
-                                                    <div>
-                                                        <Label htmlFor="private">
-                                                            Private
-                                                        </Label>
+                                                    <Label htmlFor="private">
+                                                        Private
                                                         <p className="text-sm text-gray-500">
                                                             Only you can view
                                                             the video
                                                         </p>
-                                                    </div>
+                                                    </Label>
                                                 </div>
                                                 <div className="flex items-start space-x-2">
                                                     <RadioGroupItem
                                                         value="PUBLIC"
                                                         id="public"
                                                         className="mt-1"
+                                                        onClick={() => {
+                                                            form.setValue(
+                                                                "visibility",
+                                                                "PUBLIC"
+                                                            );
+                                                        }}
                                                     />
-                                                    <div>
-                                                        <Label htmlFor="public">
-                                                            Public
-                                                        </Label>
+                                                    <Label htmlFor="public">
+                                                        Public
                                                         <p className="text-sm text-gray-500">
                                                             Everyone can view
                                                             the video
                                                         </p>
-                                                    </div>
+                                                    </Label>
                                                 </div>
                                                 <div className="flex items-start space-x-2">
                                                     <RadioGroupItem
                                                         value="UNLISTED"
                                                         id="unlisted"
+                                                        onClick={() => {
+                                                            form.setValue(
+                                                                "visibility",
+                                                                "UNLISTED"
+                                                            );
+                                                        }}
                                                     />
-                                                    <div>
-                                                        <Label htmlFor="unlisted">
-                                                            Unlisted
-                                                        </Label>
+                                                    <Label htmlFor="unlisted">
+                                                        Unlisted
                                                         <p className="text-sm text-gray-500">
                                                             Only people with the
                                                             link can view the
                                                             video
                                                         </p>
-                                                    </div>
+                                                    </Label>
                                                 </div>
                                             </RadioGroup>
                                         </FormControl>

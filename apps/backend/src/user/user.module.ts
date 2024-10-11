@@ -8,5 +8,6 @@ import { ImageModule } from 'src/image/image.module';
   imports: [PrismaModule, ImageModule],
   controllers: [UserController],
   providers: [UserService],
+  exports: [UserService],
 })
 export class UserModule {}

@@ -1,15 +1,44 @@
 import { Injectable } from '@nestjs/common';
 import { getAuth } from 'firebase-admin/auth';
+import { IWithPermissions, TActionType } from 'src/common/IWithPermissions';
 import { firebaseApp } from 'src/firebase';
 import { ImageService, TCrop } from 'src/image/image.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class UserService {
+export class UserService implements IWithPermissions {
   constructor(
     private readonly prisma: PrismaService,
     private readonly imageService: ImageService,
   ) {}
+
+  async getPermissionsForUser(
+    id: string,
+    userId: string | undefined,
+  ): Promise<readonly TActionType[]> {
+    if (userId && (await this.isAdmin(userId))) {
+      return ['READ', 'WRITE', 'DELETE'];
+    }
+    const object = await this.prisma.user.findFirstOrThrow({
+      where: { id },
+    });
+    if (object.id === userId) {
+      return ['READ', 'WRITE', 'DELETE'];
+    }
+
+    return [];
+  }
+
+  async assertPermissionsForUser(
+    objectId: string,
+    userId: string | undefined,
+    action: TActionType,
+  ): Promise<void> {
+    const permissions = await this.getPermissionsForUser(objectId, userId);
+    if (!permissions.includes(action)) {
+      throw new Error('Permission denied');
+    }
+  }
 
   async ensureUser(idToken: string) {
     const decodedIdToken = await getAuth(firebaseApp).verifyIdToken(idToken);
@@ -58,7 +87,7 @@ export class UserService {
     file: Express.Multer.File,
     crop: TCrop,
   ) {
-    const { pictureSetId } = await this.prisma.user.findUnique({
+    const { pictureSetId } = await this.prisma.user.findUniqueOrThrow({
       where: { id: userId },
     });
 
@@ -116,5 +145,19 @@ export class UserService {
     });
 
     return pictureSet;
+  }
+
+  async getRoles(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { roles: true },
+    });
+
+    return user?.roles ?? [];
+  }
+
+  async isAdmin(userId: string) {
+    const roles = await this.getRoles(userId);
+    return roles.some((role) => role.name === 'ADMIN');
   }
 }

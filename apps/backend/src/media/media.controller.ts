@@ -7,17 +7,18 @@ import {
   Patch,
   UploadedFile,
   UseInterceptors,
-  Req,
   Get,
   Delete,
 } from '@nestjs/common';
 import { MediaService } from './media.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UpdateVideoDto } from './dto/update-video.dto';
 import { diskStorage } from 'multer';
 import { UPLOAD_PATH } from 'src/common/fs-utils';
 import { randomUUID } from 'crypto';
 import * as path from 'path';
+import { Guard } from 'src/common/guard';
+import { User } from 'src/user/user.decorator';
+import { DecodedIdToken } from 'firebase-admin/auth';
 
 @Controller('media')
 export class MediaController {
@@ -40,29 +41,44 @@ export class MediaController {
       }),
     }),
   )
-  uploadMedia(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
-    return this.mediaService.upload(file, req.user);
+  @Guard.scope('user')
+  uploadMedia(
+    @UploadedFile() file: Express.Multer.File,
+    @User() user?: DecodedIdToken,
+  ) {
+    return this.mediaService.upload(file, user);
   }
 
   @Patch(':id')
-  patchMedia(@Param('id') id: string, @Body() updateVideoDto: UpdateVideoDto) {
+  @Guard.scope('user')
+  async patchMedia(
+    @Param('id') id: string,
+    @Body() updateVideoDto,
+    @User() user?: DecodedIdToken,
+  ) {
+    await this.mediaService.assertPermissionsForUser(id, user?.uid, 'WRITE');
     return this.mediaService.patch(id, updateVideoDto);
   }
 
   @Get('/my')
-  async getMyMedia(@Req() req: any) {
+  @Guard.scope('user')
+  async getMyMedia(@User() user?: DecodedIdToken) {
     return {
-      data: await this.mediaService.getUserMedia(req.user),
+      data: await this.mediaService.getUserMedia(user),
     };
   }
 
   @Get(':id')
-  async getMediaById(@Param('id') id: string) {
+  @Guard.scope('public')
+  async getMediaById(@Param('id') id: string, @User() user?: DecodedIdToken) {
+    await this.mediaService.assertPermissionsForUser(id, user?.uid, 'READ');
     return this.mediaService.getMediaById(id);
   }
 
   @Delete(':id')
-  async deleteMedia(@Param('id') id: string) {
+  @Guard.scope('user')
+  async deleteMedia(@Param('id') id: string, @User() user?: DecodedIdToken) {
+    await this.mediaService.assertPermissionsForUser(id, user?.uid, 'DELETE');
     return this.mediaService.delete(id);
   }
 }

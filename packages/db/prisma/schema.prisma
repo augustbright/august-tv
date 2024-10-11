@@ -77,6 +77,8 @@ model User {
   email    String? @unique
   password String?
 
+  roles Role[] @relation("UserRole")
+
   videos Video[] @relation("VideoOwner")
   images Image[] @relation("ImageOwner")
 
@@ -154,4 +156,15 @@ model FileSet {
   files File[] @relation("FileSet")
 
   @@map("file_sets")
+}
+
+model Role {
+  id        String   @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name        String
+  description String?
+
+  users User[] @relation("UserRole")
 }

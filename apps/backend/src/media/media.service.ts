@@ -9,24 +9,57 @@ import { SocketsGateway } from 'src/sockets/sockets.gateway';
 import { ImageService } from 'src/image/image.service';
 import { resolveUploadPath } from 'src/common/fs-utils';
 import * as path from 'path';
-import { StorageService } from 'src/storage/storage.service';
 import { DbFileService } from 'src/db-file/db-file.service';
+import { IWithPermissions, TActionType } from 'src/common/IWithPermissions';
+import { UserService } from 'src/user/user.service';
 
 const storage = new Storage();
-const bucketName = process.env.GOOGLE_CLOUD_MEDIA_BUCKET_NAME;
+const bucketName = process.env.GOOGLE_CLOUD_MEDIA_BUCKET_NAME!;
 const transferManager = new TransferManager(storage.bucket(bucketName));
 const rootOutputFolder = 'tmp/transcoded/';
 
 @Injectable()
-export class MediaService {
+export class MediaService implements IWithPermissions {
   constructor(
     private readonly prisma: PrismaService,
     private readonly transcodeService: TranscodeService,
     private readonly socketsGateway: SocketsGateway,
     private readonly imageService: ImageService,
-    private readonly storage: StorageService,
     private readonly dbFileService: DbFileService,
+    private readonly userService: UserService,
   ) {}
+
+  async getPermissionsForUser(
+    id: string,
+    userId: string | undefined,
+  ): Promise<readonly TActionType[]> {
+    if (userId && (await this.userService.isAdmin(userId))) {
+      return ['READ', 'WRITE', 'DELETE'];
+    }
+    const video = await this.prisma.video.findFirstOrThrow({
+      where: { id },
+    });
+    if (video.authorId === userId) {
+      return ['READ', 'WRITE', 'DELETE'];
+    }
+
+    if (video.visibility === 'PUBLIC' && video.status === 'READY') {
+      return ['READ'];
+    }
+
+    return [];
+  }
+
+  async assertPermissionsForUser(
+    objectId: string,
+    userId: string | undefined,
+    action: TActionType,
+  ): Promise<void> {
+    const permissions = await this.getPermissionsForUser(objectId, userId);
+    if (!permissions.includes(action)) {
+      throw new Error('Permission denied');
+    }
+  }
 
   async getMediaById(id: string) {
     return this.prisma.video.findUnique({
@@ -86,28 +119,11 @@ export class MediaService {
     });
   }
 
-  // async getMediaForEditingById(id: string) {
-  //   const video = await this.prisma.video.findUnique({
-  //     where: { id },
-  //   });
-
-  //   const [thumbnails] = await storage.bucket(bucketName).getFiles({
-  //     prefix: `transcoded/${video.folder}/thumbnails/`,
-  //   });
-
-  //   const thumbnailUrls = thumbnails.map((thumbnail) => thumbnail.publicUrl());
-
-  //   return {
-  //     ...video,
-  //     thumbnails: thumbnailUrls,
-  //   };
-  // }
-
   async delete(id: string) {
     const {
       fileSet: { files },
       thumbnailSet: { images },
-    } = await this.prisma.video.findUnique({
+    } = await this.prisma.video.findUniqueOrThrow({
       where: { id },
       include: {
         fileSet: {
@@ -258,7 +274,7 @@ export class MediaService {
       this.socketsGateway.sendToUser(video.authorId, {
         type: 'upload-error',
         video,
-        error: error.message,
+        error: String(error),
       });
     } finally {
       await fs.rm(rootOutputFolder, { recursive: true });

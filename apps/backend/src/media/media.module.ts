@@ -5,8 +5,8 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { SocketsModule } from 'src/sockets/sockets.module';
 import { TranscodeModule } from 'src/transcode/transcode.module';
 import { ImageModule } from 'src/image/image.module';
-import { StorageModule } from 'src/storage/storage.module';
 import { DbFileModule } from 'src/db-file/db-file.module';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
@@ -14,8 +14,8 @@ import { DbFileModule } from 'src/db-file/db-file.module';
     SocketsModule,
     TranscodeModule,
     ImageModule,
-    StorageModule,
     DbFileModule,
+    UserModule,
   ],
   providers: [MediaService],
   controllers: [MediaController],

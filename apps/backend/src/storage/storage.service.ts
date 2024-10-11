@@ -6,7 +6,7 @@ import * as path from 'path';
 @Injectable()
 export class StorageService {
   private readonly storage = new Storage();
-  private readonly bucketName = process.env.GOOGLE_CLOUD_MEDIA_BUCKET_NAME;
+  private readonly bucketName = process.env.GOOGLE_CLOUD_MEDIA_BUCKET_NAME!;
   private readonly transferManager = new TransferManager(
     this.storage.bucket(this.bucketName),
   );
@@ -17,7 +17,7 @@ export class StorageService {
 
     const responses = await this.transferManager.uploadManyFiles(files, {
       customDestinationBuilder(localPath) {
-        const relPath = localPath.split(resolvedPath).at(-1);
+        const relPath = localPath.split(resolvedPath).at(-1)!;
         return path.join(destination, relPath);
       },
     });

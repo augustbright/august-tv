@@ -11,6 +11,8 @@ import { ImageModule } from './image/image.module';
 import { StorageModule } from './storage/storage.module';
 import { DbFileService } from './db-file/db-file.service';
 import { DbFileModule } from './db-file/db-file.module';
+import { GuardCheckService } from './common/guard-check.service';
+import { Reflector } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -25,6 +27,6 @@ import { DbFileModule } from './db-file/db-file.module';
     DbFileModule,
   ],
   controllers: [AppController],
-  providers: [AppService, DbFileService],
+  providers: [AppService, DbFileService, GuardCheckService, Reflector],
 })
 export class AppModule {}

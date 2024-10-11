@@ -3,7 +3,7 @@ import { DecodedIdToken } from 'firebase-admin/auth'; // Import the type for Fir
 declare global {
   namespace Express {
     interface Request {
-      user?: DecodedIdToken; // Add the user property
+      user: DecodedIdToken | null; // Add the user property
     }
   }
 }

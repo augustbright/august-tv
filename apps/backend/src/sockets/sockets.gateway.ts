@@ -34,23 +34,28 @@ interface TMessage {
 export class SocketsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  @WebSocketServer()
-  server: Server;
+  @WebSocketServer() server: Server | undefined;
   private logger: Logger = new Logger('SocketsGateway');
   private readonly connections: Map<string, Set<Socket>> = new Map();
 
-  afterInit(server: Server) {
+  afterInit() {
     this.logger.log('Socket.IO server initialized');
   }
 
   async handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
-    let sessionCookie: string;
+    let sessionCookie: string | undefined;
     try {
-      const cookiesStr = client.handshake.headers.cookie;
+      const cookiesStr = client.handshake.headers.cookie!;
       sessionCookie = cookie.parse(cookiesStr).session;
     } catch (error) {
-      this.logger.error(`Error parsing cookies: ${error.message}`);
+      this.logger.error(`Error parsing cookies: ${error}`);
+      client.disconnect();
+      return;
+    }
+
+    if (!sessionCookie) {
+      this.logger.error('No session cookie found');
       client.disconnect();
       return;
     }
@@ -68,7 +73,7 @@ export class SocketsGateway
     if (!this.connections.has(uid)) {
       this.connections.set(uid, new Set());
     }
-    const userConnections = this.connections.get(uid);
+    const userConnections = this.connections.get(uid)!;
     userConnections.add(client);
 
     client.on('disconnect', () => {

@@ -9,7 +9,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { getAuth } from 'firebase-admin/auth';
+import { DecodedIdToken, getAuth } from 'firebase-admin/auth';
 import { firebaseApp } from '../firebase';
 import { UserService } from './user.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -18,6 +18,8 @@ import { randomUUID } from 'crypto';
 import { UPLOAD_PATH } from 'src/common/fs-utils';
 import { TCrop } from 'src/image/image.service';
 import * as path from 'path';
+import { Guard } from 'src/common/guard';
+import { User } from './user.decorator';
 
 type TCropParams = { width: string; height: string; x: string; y: string };
 
@@ -27,6 +29,7 @@ export class UserController {
   private readonly expiresIn = 1000 * 60 * 60 * 24 * 14;
 
   @Post('sessionLogin')
+  @Guard.scope('public')
   async sessionLogin(@Req() req: Request, @Res() res: Response) {
     const idToken = req.body.idToken.toString();
 
@@ -50,6 +53,7 @@ export class UserController {
   }
 
   @Get('current')
+  @Guard.scope('public')
   async getCurrentUser(@Req() req: Request) {
     const decoded = req.user;
 
@@ -64,6 +68,7 @@ export class UserController {
   }
 
   @Post('sign-out')
+  @Guard.scope('public')
   async signOut(@Res() res: Response) {
     res.clearCookie('session');
     return res.json({ status: 'success' });
@@ -86,31 +91,29 @@ export class UserController {
       }),
     }),
   )
+  @Guard.scope('user')
   async uploadProfilePicture(
     @UploadedFile() file: Express.Multer.File,
     @Body() body: TCropParams,
-    @Req() req: Request,
+    @User({ required: true }) user: DecodedIdToken,
   ) {
-    const image = await this.userService.uploadProfilePicture(
-      req.user.uid,
-      file,
-      {
-        x: parseInt(body.x),
-        y: parseInt(body.y),
-        width: parseInt(body.width),
-        height: parseInt(body.height),
-      },
-    );
+    const image = await this.userService.uploadProfilePicture(user.uid, file, {
+      x: parseInt(body.x),
+      y: parseInt(body.y),
+      width: parseInt(body.width),
+      height: parseInt(body.height),
+    });
     return image;
   }
 
   @Post('updateProfilePicture')
+  @Guard.scope('user')
   async updateProfilePicture(
-    @Req() req: Request,
+    @User({ required: true }) user: DecodedIdToken,
     @Body() body: { imageId: string; crop: TCrop },
   ) {
     const image = await this.userService.updateProfilePicture(
-      req.user.uid,
+      user.uid,
       body.imageId,
       body.crop,
     );
@@ -119,14 +122,16 @@ export class UserController {
   }
 
   @Post('unsetProfilePicture')
-  async unsetProfilePicture(@Req() req: Request) {
-    await this.userService.unsetProfilePicture(req.user.uid);
+  @Guard.scope('user')
+  async unsetProfilePicture(@User({ required: true }) user: DecodedIdToken) {
+    await this.userService.unsetProfilePicture(user.uid);
     return {};
   }
 
   @Get('profilePictures')
-  async getProfilePictures(@Req() req: Request) {
-    const images = await this.userService.getProfilePictures(req.user.uid);
+  @Guard.scope('user')
+  async getProfilePictures(@User({ required: true }) user: DecodedIdToken) {
+    const images = await this.userService.getProfilePictures(user.uid);
     return images;
   }
 }

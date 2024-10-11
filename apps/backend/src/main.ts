@@ -7,7 +7,7 @@ import { FirebaseAuthMiddleware } from './common/firebase-auth.middleware';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const port = process.env.BACKEND_PORT;
+  const port = process.env.BACKEND_PORT!;
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({

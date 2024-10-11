@@ -12,6 +12,7 @@ import { StorageService } from 'src/storage/storage.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import type { File } from '@google-cloud/storage';
 import { DbFileService } from 'src/db-file/db-file.service';
+import { Prisma } from '@prisma/client';
 
 export type TCrop = { x: number; y: number; width: number; height: number };
 
@@ -163,6 +164,10 @@ export class ImageService {
       },
     });
 
+    if (!image) {
+      return null;
+    }
+
     const deletedImage = await this.prisma.image.delete({
       where: { id: imageId },
     });
@@ -209,8 +214,8 @@ export class ImageService {
       }, {}) as TSizeFileMap;
 
       return {
-        originalHeight,
-        originalWidth,
+        originalHeight: originalHeight!,
+        originalWidth: originalWidth!,
         sizeFileMap,
       };
     } finally {
@@ -246,7 +251,7 @@ export class ImageService {
           },
         },
       ]),
-    ) as Record<TImageSizeWithOriginal, unknown>;
+    ) as any;
 
     return this.prisma.image.create({
       data: {
@@ -287,10 +292,10 @@ export class ImageService {
             filename: path.basename(file.name),
             path: file.name,
             publicUrl: file.publicUrl(),
-          },
+          } satisfies Prisma.FileCreateInput,
         },
       ]),
-    ) as Record<TImageSizeWithOriginal, unknown>;
+    );
 
     return this.prisma.image.update({
       where: { id: imageId },
