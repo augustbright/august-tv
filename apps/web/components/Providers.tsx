@@ -1,4 +1,7 @@
 "use client";
+
+// TODO i18n
+
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ToastContainer } from "react-toastify";

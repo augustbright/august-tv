@@ -94,6 +94,7 @@ export class MediaService {
   // }
 
   async delete(id: string) {
+    // TODO: video deletion
     throw new Error('Not implemented');
     return this.prisma.video.delete({
       where: { id },

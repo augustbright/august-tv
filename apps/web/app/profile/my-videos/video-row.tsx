@@ -58,6 +58,7 @@ export const VideoRow = ({
                 )}
             </TableCell>
             <TableCell>
+                {/* TODO: Good status badges */}
                 <Badge
                     variant={
                         video.status === "ERROR" ? "destructive" : "outline"
@@ -70,9 +71,11 @@ export const VideoRow = ({
                 </Badge>
             </TableCell>
             <TableCell className="hidden md:table-cell">
+                {/* TODO: good date formatter (like, "3 days ago", etc)  */}
                 {new Date(video.createdAt).toLocaleDateString()}
             </TableCell>
             <TableCell>
+                {/*TODO: Video actions */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button

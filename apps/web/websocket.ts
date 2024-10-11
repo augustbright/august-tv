@@ -1,3 +1,5 @@
+// TODO: fix websocket connection
+
 import { isServer } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { TMessage } from "types";

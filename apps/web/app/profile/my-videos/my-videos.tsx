@@ -21,6 +21,9 @@ import { Query } from "@/components/Query";
 import { EmptyPlaceholder } from "./empty-placeholder";
 
 export const MyContent = () => {
+    // TODO: filter my videos
+    // TODO pagination
+    // TODO: sorting
     return (
         <Card x-chunk="dashboard-06-chunk-0">
             <CardHeader>

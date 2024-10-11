@@ -18,6 +18,7 @@ export const VideoThumbnail = ({
     height?: number;
     alt: string;
 }) => {
+    // TODO: display video length
     if (thumbnail) {
         return (
             <Image

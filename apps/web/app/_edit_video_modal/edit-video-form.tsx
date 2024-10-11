@@ -1,5 +1,8 @@
 "use client";
 
+// TODO Video categories
+// TODO: handle statuses&visibility: ERROR, PROCESSING, READY, etc
+
 import { Button } from "@/components/ui/button";
 import {
     DialogClose,
@@ -204,6 +207,7 @@ export const EditVideoForm = ({
                                     </FormItem>
                                 )}
                             />
+                            {/* TODO: thumbnail selector for videos */}
                         </div>
                     </div>
                     <div className="flex-col items-start flex gap-4">

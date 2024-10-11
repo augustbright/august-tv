@@ -8,7 +8,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { AlertCircle, Plus, Upload, Loader2 } from "lucide-react";
+import { AlertCircle, Upload, Loader2, CirclePlus } from "lucide-react";
 import { ChangeEvent, useState } from "react";
 import { useMutateUploadMedia } from "@/mutations/uploadMedia";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -46,7 +46,7 @@ export const AppUploadButton = () => {
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <Button>
-                    <Plus className="mr-2 h-4 w-4" />
+                    <CirclePlus className="mr-2 h-5 w-5" />
                     <span>Upload</span>
                 </Button>
             </DialogTrigger>

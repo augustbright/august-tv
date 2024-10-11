@@ -14,6 +14,7 @@ export const AppHeader = () => {
                         August TV
                     </h1>
                 </Link>
+                {/* TODO Search bar */}
                 <div className="flex-1" />
                 <AppUploadButton />
                 <AppUserPanel />
