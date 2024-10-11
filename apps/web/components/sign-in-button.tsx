@@ -26,4 +26,4 @@ export const SignInButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
         );
     }
 );
-SignInButton.displayName = "Button";
+SignInButton.displayName = "SignInButton";

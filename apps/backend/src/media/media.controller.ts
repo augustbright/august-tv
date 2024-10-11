@@ -70,9 +70,9 @@ export class MediaController {
 
   @Get(':id')
   @Guard.scope('public')
-  async getMediaById(@Param('id') id: string, @User() user?: DecodedIdToken) {
+  async getMediaById(@Param('id') id: string, @User() user: DecodedIdToken) {
     await this.mediaService.assertPermissionsForUser(id, user?.uid, 'READ');
-    return this.mediaService.getMediaById(id);
+    return this.mediaService.getMediaById(id, user?.uid);
   }
 
   @Delete(':id')
@@ -80,5 +80,15 @@ export class MediaController {
   async deleteMedia(@Param('id') id: string, @User() user?: DecodedIdToken) {
     await this.mediaService.assertPermissionsForUser(id, user?.uid, 'DELETE');
     return this.mediaService.delete(id);
+  }
+
+  @Post('/rate/:id')
+  @Guard.scope('user')
+  async rateMedia(
+    @Param('id') id: string,
+    @Body() rateDto: { type: 'LIKE' | 'DISLIKE' | null },
+    @User({ required: true }) user: DecodedIdToken,
+  ) {
+    return this.mediaService.rate(id, user.uid, rateDto.type);
   }
 }

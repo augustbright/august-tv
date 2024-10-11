@@ -45,7 +45,7 @@ export const AppUploadButton = () => {
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button>
+                <Button variant="outline">
                     <CirclePlus className="mr-2 h-5 w-5" />
                     <span>Upload</span>
                 </Button>

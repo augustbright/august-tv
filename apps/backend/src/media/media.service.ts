@@ -61,7 +61,7 @@ export class MediaService implements IWithPermissions {
     }
   }
 
-  async getMediaById(id: string) {
+  async getMediaById(id: string, userId: string | undefined) {
     return this.prisma.video.findUniqueOrThrow({
       where: { id },
       include: {
@@ -70,11 +70,17 @@ export class MediaService implements IWithPermissions {
           select: {
             id: true,
             nickname: true,
+            subscribersCount: true,
             picture: {
               include: {
                 small: true,
               },
             },
+          },
+        },
+        rates: {
+          where: {
+            userId: userId ?? 'NO_USER',
           },
         },
       },
@@ -165,6 +171,89 @@ export class MediaService implements IWithPermissions {
 
     return this.prisma.video.delete({
       where: { id },
+    });
+  }
+
+  async rate(id: string, userId: string, type: 'LIKE' | 'DISLIKE' | null) {
+    return this.prisma.$transaction(async (tx) => {
+      const prevRating = await tx.rating.findUnique({
+        where: {
+          userId_videoId: {
+            userId,
+            videoId: id,
+          },
+        },
+      });
+
+      await tx.rating.upsert({
+        where: {
+          userId_videoId: {
+            userId,
+            videoId: id,
+          },
+        },
+        create: {
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+          video: {
+            connect: {
+              id,
+            },
+          },
+          type,
+        },
+        update: {
+          type,
+        },
+      });
+
+      let incrementLikes = 0;
+      let incrementDislikes = 0;
+
+      if (prevRating) {
+        if (prevRating.type === 'LIKE') {
+          if (type === 'LIKE') {
+            incrementLikes = 0;
+          } else if (type === 'DISLIKE') {
+            incrementLikes -= 1;
+            incrementDislikes += 1;
+          } else {
+            incrementLikes -= 1;
+          }
+        } else if (prevRating.type === 'DISLIKE') {
+          if (type === 'DISLIKE') {
+            incrementDislikes = 0;
+          } else if (type === 'LIKE') {
+            incrementDislikes -= 1;
+            incrementLikes += 1;
+          } else {
+            incrementDislikes -= 1;
+          }
+        }
+      } else {
+        if (type === 'LIKE') {
+          incrementLikes += 1;
+        } else if (type === 'DISLIKE') {
+          incrementDislikes += 1;
+        }
+      }
+
+      const { likesCount, dislikesCount } = await tx.video.update({
+        where: { id },
+        data: {
+          likesCount: {
+            increment: incrementLikes,
+          },
+          dislikesCount: {
+            increment: incrementDislikes,
+          },
+        },
+      });
+
+      return { likesCount, dislikesCount, type };
     });
   }
 

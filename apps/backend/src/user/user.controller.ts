@@ -134,4 +134,31 @@ export class UserController {
     const images = await this.userService.getProfilePictures(user.uid);
     return images;
   }
+
+  @Get('mySubscriptions')
+  @Guard.scope('user')
+  async getMySubscriptions(@User({ required: true }) user: DecodedIdToken) {
+    const subscriptions = await this.userService.getUserSubscriptions(user.uid);
+    return subscriptions;
+  }
+
+  @Post('subscribe')
+  @Guard.scope('user')
+  async subscribe(
+    @User({ required: true }) user: DecodedIdToken,
+    @Body() body: { authorId: string },
+  ) {
+    await this.userService.subscribe(user.uid, body.authorId);
+    return {};
+  }
+
+  @Post('unsubscribe')
+  @Guard.scope('user')
+  async unsubscribe(
+    @User({ required: true }) user: DecodedIdToken,
+    @Body() body: { authorId: string },
+  ) {
+    await this.userService.unsubscribe(user.uid, body.authorId);
+    return {};
+  }
 }

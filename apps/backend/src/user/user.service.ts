@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { getAuth } from 'firebase-admin/auth';
 import { IWithPermissions, TActionType } from 'src/common/IWithPermissions';
 import { firebaseApp } from 'src/firebase';
@@ -54,7 +54,7 @@ export class UserService implements IWithPermissions {
         data: {
           id: userRecord.uid,
           email: userRecord.email,
-          nickname: userRecord.displayName,
+          nickname: userRecord.displayName ?? `User ${userRecord.uid}`,
           pictureSet: {
             create: {},
           },
@@ -158,5 +158,75 @@ export class UserService implements IWithPermissions {
   async isAdmin(userId: string) {
     const roles = await this.getRoles(userId);
     return roles.some((role) => role.name === 'ADMIN');
+  }
+
+  async getUserSubscriptions(userId: string) {
+    return this.prisma.user.findFirstOrThrow({
+      where: { id: userId },
+      select: {
+        subscriptions: {
+          select: {
+            id: true,
+            nickname: true,
+            subscribersCount: true,
+            picture: {
+              select: {
+                small: true,
+                medium: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async subscribe(userId: string, targetId: string) {
+    if (userId === targetId) {
+      throw new BadRequestException('Cannot subscribe to yourself');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: {
+          id: userId,
+          AND: [{ id: userId }, { subscriptions: { none: { id: targetId } } }],
+        },
+        data: {
+          subscriptions: {
+            connect: { id: targetId },
+          },
+        },
+      }),
+      this.prisma.user.update({
+        where: { id: targetId },
+        data: {
+          subscribersCount: {
+            increment: 1,
+          },
+        },
+      }),
+    ]);
+  }
+
+  async unsubscribe(userId: string, targetId: string) {
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          subscriptions: {
+            disconnect: { id: targetId },
+          },
+        },
+      }),
+      this.prisma.user.update({
+        where: { id: targetId },
+        data: {
+          subscribersCount: {
+            decrement: 1,
+          },
+        },
+      }),
+    ]);
   }
 }

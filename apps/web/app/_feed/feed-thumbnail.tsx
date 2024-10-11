@@ -1,4 +1,4 @@
-import { Avatar, AvatarImage } from "@/components/ui/Avatar";
+import { AuthorPicture } from "@/components/AuthorPicture";
 import { VideoThumbnail } from "@/components/video-thumbnail";
 import { DTO } from "@august-tv/dto";
 import moment from "moment";
@@ -21,12 +21,7 @@ export const FeedThumbnail = ({
                 height={400}
             />
             <div className="flex gap-2">
-                <Avatar>
-                    <AvatarImage
-                        src={video.author.picture?.small?.publicUrl}
-                        alt={video.author.nickname}
-                    />
-                </Avatar>
+                <AuthorPicture author={video.author} />
                 <div>
                     <h3 className="text-lg font-semibold">{video.title}</h3>
                     <p className="text-sm">{video.author.nickname}</p>

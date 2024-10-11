@@ -27,6 +27,46 @@ enum Visibility {
   PUBLIC
 }
 
+enum Rate {
+  LIKE
+  DISLIKE
+}
+
+model User {
+  id        String   @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Public info
+  nickname  String  @db.VarChar(100)
+  picture   Image?  @relation("UserPicture", fields: [pictureId], references: [id])
+  pictureId String? @unique @db.Uuid
+
+  pictureSet   ImageSet @relation("UserPictureSet", fields: [pictureSetId], references: [id], onDelete: Cascade)
+  pictureSetId String   @unique @db.Uuid
+
+  subscriptions    User[] @relation("Subscriptions")
+  subscribers      User[] @relation("Subscriptions")
+  subscribersCount Int    @default(0)
+
+  // Personal data
+  firstName String? @db.VarChar(100)
+  lastName  String? @db.VarChar(100)
+
+  // Sign in by username/email & password
+  username String? @unique
+  email    String? @unique
+  password String?
+
+  roles Role[] @relation("UserRole")
+
+  videos  Video[]  @relation("VideoOwner")
+  images  Image[]  @relation("ImageOwner")
+  ratings Rating[] @relation("UserRating")
+
+  @@map("users")
+}
+
 model Video {
   id          String    @id @default(uuid()) @db.Uuid
   createdAt   DateTime  @default(now())
@@ -37,6 +77,12 @@ model Video {
   description String?
   status      VideoStatus @default(PROCESSING)
   visibility  Visibility  @default(DRAFT)
+
+  // Reactions & views
+  viewsCount    Int      @default(0)
+  likesCount    Int      @default(0)
+  dislikesCount Int      @default(0)
+  rates         Rating[] @relation("VideoRating")
 
   author   User   @relation("VideoOwner", fields: [authorId], references: [id])
   authorId String
@@ -55,34 +101,21 @@ model Video {
   @@map("videos")
 }
 
-model User {
-  id        String   @id
+model Rating {
+  id        String   @id @default(uuid()) @db.Uuid
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Public info
-  nickname  String  @db.VarChar(100)
-  picture   Image?  @relation("UserPicture", fields: [pictureId], references: [id])
-  pictureId String? @unique @db.Uuid
+  type Rate?
 
-  pictureSet   ImageSet @relation("UserPictureSet", fields: [pictureSetId], references: [id], onDelete: Cascade)
-  pictureSetId String   @unique @db.Uuid
+  user   User   @relation("UserRating", fields: [userId], references: [id])
+  userId String
 
-  // Personal data
-  firstName String? @db.VarChar(100)
-  lastName  String? @db.VarChar(100)
+  video   Video  @relation("VideoRating", fields: [videoId], references: [id])
+  videoId String @db.Uuid
 
-  // Sign in by username/email & password
-  username String? @unique
-  email    String? @unique
-  password String?
-
-  roles Role[] @relation("UserRole")
-
-  videos Video[] @relation("VideoOwner")
-  images Image[] @relation("ImageOwner")
-
-  @@map("users")
+  @@unique([userId, videoId])
+  @@map("ratings")
 }
 
 model Image {
