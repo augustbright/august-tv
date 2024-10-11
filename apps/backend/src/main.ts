@@ -1,5 +1,3 @@
-// TODO: implement Guard
-
 import * as cookieParser from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';

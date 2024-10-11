@@ -7,7 +7,7 @@ import Link from "next/link";
 export const FeedThumbnail = ({
     video,
 }: {
-    video: DTO["feed"]["getLatestFeed"]["response"]["data"][0];
+    video: NonNullable<DTO["feed"]["getLatestFeed"]["response"]["data"][0]>;
 }) => {
     return (
         <Link
@@ -24,7 +24,7 @@ export const FeedThumbnail = ({
                 <Avatar>
                     <AvatarImage
                         src={video.author.picture?.small?.publicUrl}
-                        alt={video.author?.nickname}
+                        alt={video.author.nickname}
                     />
                 </Avatar>
                 <div>

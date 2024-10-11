@@ -18,7 +18,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 export const AppUserPanel = () => {
-    const { initials, signOut } = useUser();
+    const { signOut } = useUser();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const handleSheetOpenChange = (open: boolean) => {
         setIsSheetOpen(open);
@@ -36,7 +36,9 @@ export const AppUserPanel = () => {
                             <AvatarImage
                                 src={current.data.picture?.small.publicUrl}
                             />
-                            <AvatarFallback>{initials}</AvatarFallback>
+                            <AvatarFallback>
+                                {current.data?.nickname[0]}
+                            </AvatarFallback>
                         </Avatar>
                     </SheetTrigger>
                     <SheetContent>
@@ -49,7 +51,9 @@ export const AppUserPanel = () => {
                                                 .publicUrl
                                         }
                                     />
-                                    <AvatarFallback>{initials}</AvatarFallback>
+                                    <AvatarFallback>
+                                        {current.data?.nickname[0]}
+                                    </AvatarFallback>
                                 </Avatar>
                                 <p>{current.data.nickname}</p>
                             </SheetTitle>

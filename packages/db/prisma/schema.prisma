@@ -61,7 +61,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Public info
-  nickname  String? @db.VarChar(100)
+  nickname  String  @db.VarChar(100)
   picture   Image?  @relation("UserPicture", fields: [pictureId], references: [id])
   pictureId String? @unique @db.Uuid
 

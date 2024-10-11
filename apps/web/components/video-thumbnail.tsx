@@ -8,12 +8,14 @@ export const VideoThumbnail = ({
     height = 200,
     alt,
 }: {
-    thumbnail?: DBImage & {
-        small?: DBFile;
-        medium: DBFile;
-        large?: DBFile;
-        original?: DBFile;
-    };
+    thumbnail?:
+        | (DBImage & {
+              small?: DBFile;
+              medium: DBFile;
+              large?: DBFile;
+              original?: DBFile;
+          })
+        | null;
     width?: number;
     height?: number;
     alt: string;

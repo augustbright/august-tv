@@ -55,7 +55,6 @@ export class UserService implements IWithPermissions {
           id: userRecord.uid,
           email: userRecord.email,
           nickname: userRecord.displayName,
-          // TODO: avatar from userRecord.photoURL
           pictureSet: {
             create: {},
           },

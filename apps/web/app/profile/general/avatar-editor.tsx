@@ -89,7 +89,7 @@ export const AvatarEditor = () => {
         mutateAsync: unsetProfilePicture,
         isPending: isRemovingProfilePicture,
     } = useMutateUnsetProfilePicture();
-    const currentPicture = current?.data.picture;
+    const currentPicture = current?.data?.picture;
     const [crop, setCrop] = useState<Crop>({
         height: 0,
         unit: "px",
@@ -312,7 +312,7 @@ export const AvatarEditor = () => {
                         alt="Avatar"
                     />
                     {/* TODO: Avatar Loading state */}
-                    <AvatarFallback delayMs={500} className="animate-pulse">
+                    <AvatarFallback delayMs={500}>
                         <CircleUserRound />
                     </AvatarFallback>
                 </Avatar>

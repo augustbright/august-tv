@@ -62,10 +62,21 @@ export class MediaService implements IWithPermissions {
   }
 
   async getMediaById(id: string) {
-    return this.prisma.video.findUnique({
+    return this.prisma.video.findUniqueOrThrow({
       where: { id },
       include: {
         master: true,
+        author: {
+          select: {
+            id: true,
+            nickname: true,
+            picture: {
+              include: {
+                small: true,
+              },
+            },
+          },
+        },
       },
     });
   }

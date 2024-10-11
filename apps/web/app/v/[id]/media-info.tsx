@@ -1,4 +1,5 @@
 "use client";
+import { AuthorPicture } from "@/components/AuthorPicture";
 import { Query } from "@/components/Query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { queryMedia } from "@/queries/media";
@@ -17,6 +18,14 @@ export const MediaInfo = ({ mediaId }: { mediaId: string }) => {
                         <h1 className="text-lg font-semibold md:text-2xl">
                             {media.title}
                         </h1>
+                        <div className="flex gap-4">
+                            <AuthorPicture author={media.author} />
+                            <div className="flex gap-2">
+                                <p className="text-sm">
+                                    {media.author.nickname}
+                                </p>
+                            </div>
+                        </div>
                         <Card x-chunk="dashboard-01-chunk-0">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium">

@@ -20,9 +20,11 @@ export const Guard = ({
 }: {
     children:
         | React.ReactNode
-        | ((
-              currentUser: DTO["user"]["getCurrentUser"]["response"]
-          ) => React.ReactNode);
+        | ((currentUser: {
+              data: NonNullable<
+                  DTO["user"]["getCurrentUser"]["response"]["data"]
+              >;
+          }) => React.ReactNode);
     fallback: React.ReactNode;
 } & TQueryChildrenProps<DTO["user"]["getCurrentUser"]["response"]>) => {
     return (
@@ -32,7 +34,8 @@ export const Guard = ({
                     return <>{fallback}</>;
                 }
                 return typeof children === "function"
-                    ? children(currentUser)
+                    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      children(currentUser as any)
                     : children;
             }}
         </Query>
