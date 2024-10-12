@@ -232,6 +232,12 @@ export class MediaService implements IWithPermissions {
           } else {
             incrementDislikes -= 1;
           }
+        } else {
+          if (type === 'LIKE') {
+            incrementLikes += 1;
+          } else if (type === 'DISLIKE') {
+            incrementDislikes += 1;
+          }
         }
       } else {
         if (type === 'LIKE') {

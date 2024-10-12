@@ -1,5 +1,3 @@
-// TODO: fix like/dislike button
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -24,7 +22,7 @@ import {
 import { useEffect, useState } from "react";
 
 export const RatePanel = ({ mediaId }: { mediaId: string }) => {
-    const { mutateAsync: rate, isPaused: isRating } = useMutateRate();
+    const { mutateAsync: rate, isPending: isRating } = useMutateRate();
     const queryClient = useQueryClient();
 
     const [likesCount, setLikesCount] = useState(0);
