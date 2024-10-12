@@ -37,7 +37,11 @@ export const MediaInfo = ({ mediaId }: { mediaId: string }) => {
                                         subscribers
                                     </p>
                                 </div>
-                                <SubscribeButton authorId={media.author.id} />
+                                {current?.data?.id !== media.author.id && (
+                                    <SubscribeButton
+                                        authorId={media.author.id}
+                                    />
+                                )}
                             </div>
                             <div className="grow" />
                             {current?.data?.id === media.author.id && (

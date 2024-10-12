@@ -2,6 +2,8 @@ import { Controller, Get } from '@nestjs/common';
 import { FeedService } from './feed.service';
 import { ApiTags } from '@nestjs/swagger';
 import { Guard } from 'src/common/guard';
+import { User } from 'src/user/user.decorator';
+import { DecodedIdToken } from 'firebase-admin/auth';
 
 @ApiTags('Feed')
 @Controller('feed')
@@ -12,6 +14,12 @@ export class FeedController {
   @Get('latest')
   async getLatestFeed() {
     const result = await this.feedService.getLatest();
-    return result; // NestJS automatically handles the response
+    return result;
+  }
+
+  @Guard.scope('user')
+  @Get('subscriptions')
+  async getSubscriptionsFeed(@User({ required: true }) user: DecodedIdToken) {
+    return await this.feedService.getSubscriptionsFeed(user.uid);
   }
 }

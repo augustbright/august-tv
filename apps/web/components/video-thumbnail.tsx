@@ -1,45 +1,51 @@
-import { FileVideo } from "lucide-react";
-import Image from "next/image";
-import type { Image as DBImage, File as DBFile } from "@prisma/client";
+import { AuthorPicture } from "@/components/AuthorPicture";
+import { ThumbnailPicture } from "@/components/thumbnail-picture";
+import moment from "moment";
+import Link from "next/link";
 
 export const VideoThumbnail = ({
-    thumbnail,
-    width = 200,
-    height = 200,
-    alt,
+    video,
 }: {
-    thumbnail?:
-        | (DBImage & {
-              small?: DBFile;
-              medium: DBFile;
-              large?: DBFile;
-              original?: DBFile;
-          })
-        | null;
-    width?: number;
-    height?: number;
-    alt: string;
+    video: {
+        id: string;
+        title: string;
+        createdAt: Date;
+        thumbnail: {
+            medium: {
+                publicUrl: string;
+            };
+        } | null;
+        author: {
+            nickname: string;
+            picture: {
+                small: {
+                    publicUrl: string;
+                };
+            } | null;
+        };
+    };
 }) => {
-    // TODO: display video length
-    if (thumbnail) {
-        return (
-            <Image
-                style={{ width }}
-                src={thumbnail.medium?.publicUrl}
-                width={width}
-                height={height}
-                alt={alt}
-                className="rounded-lg aspect-video"
-            />
-        );
-    }
-
     return (
-        <div
-            style={{ width }}
-            className={`aspect-video flex justify-center items-center dark:bg-slate-900 bg-slate-100 rounded-lg`}
+        <Link
+            href={`/v/${video.id}`}
+            className="display: flex flex-col gap-2 hover:bg-muted/50 p-4 rounded-lg"
         >
-            <FileVideo className="w-4 h-4" />
-        </div>
+            <ThumbnailPicture
+                thumbnail={video.thumbnail}
+                alt={video.title}
+                width={400}
+                height={400}
+            />
+            <div className="flex gap-2">
+                <AuthorPicture author={video.author} />
+                <div>
+                    <h3 className="text-lg font-semibold">{video.title}</h3>
+                    <p className="text-sm">{video.author.nickname}</p>
+                    <p className="text-sm">
+                        {moment(video.createdAt).format("MMMM Do, YYYY")}
+                    </p>
+                </div>
+            </div>
+        </Link>
     );
 };

@@ -9,7 +9,7 @@ export class FeedService {
       take: 10,
       include: {
         thumbnail: {
-          include: {
+          select: {
             medium: true,
           },
         },
@@ -35,6 +35,65 @@ export class FeedService {
           },
           {
             visibility: 'PUBLIC',
+          },
+        ],
+      },
+    });
+
+    return { data: result };
+  }
+
+  async getSubscriptionsFeed(userId: string) {
+    const { subscriptions } = await this.prismaService.user.findFirstOrThrow({
+      where: {
+        id: userId,
+      },
+      select: {
+        subscriptions: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    const subIds = subscriptions.map((sub) => sub.id);
+
+    const result = await this.prismaService.video.findMany({
+      take: 10,
+      include: {
+        thumbnail: {
+          select: {
+            medium: true,
+          },
+        },
+        author: {
+          select: {
+            id: true,
+            nickname: true,
+            picture: {
+              include: {
+                small: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      where: {
+        AND: [
+          {
+            status: 'READY',
+          },
+          {
+            visibility: 'PUBLIC',
+          },
+          {
+            authorId: {
+              in: subIds,
+            },
           },
         ],
       },

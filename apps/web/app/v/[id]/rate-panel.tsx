@@ -11,6 +11,7 @@ import { useMutateRate } from "@/mutations/rate";
 import { queryMedia } from "@/queries/media";
 import { DTO } from "@august-tv/dto";
 import { useQueryClient } from "@tanstack/react-query";
+import anime from "animejs";
 import {
     FlagTriangleRight,
     MoreVertical,
@@ -19,7 +20,7 @@ import {
     ThumbsDown,
     ThumbsUp,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const RatePanel = ({ mediaId }: { mediaId: string }) => {
     const { mutateAsync: rate, isPending: isRating } = useMutateRate();
@@ -29,6 +30,8 @@ export const RatePanel = ({ mediaId }: { mediaId: string }) => {
     const [dislikesCount, setDislikesCount] = useState(0);
     const [isLiked, setIsLiked] = useState(false);
     const [isDisliked, setIsDisliked] = useState(false);
+
+    const likeEffectRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         queryClient.fetchQuery(queryMedia(mediaId)).then((video) => {
@@ -68,6 +71,26 @@ export const RatePanel = ({ mediaId }: { mediaId: string }) => {
 
     const handleClickLike = async () => {
         if (isRating) return;
+        if (!isLiked) {
+            anime({
+                targets: likeEffectRef.current,
+                keyframes: [
+                    {
+                        duration: 0,
+                        scale: 1,
+                        borderWidth: 1,
+                        opacity: 1,
+                    },
+                    {
+                        easing: "easeOutQuart",
+                        duration: 1000,
+                        scale: 6,
+                        borderWidth: 4,
+                        opacity: 0,
+                    },
+                ],
+            });
+        }
         setIsLiked(!isLiked);
         setIsDisliked(false);
         setLikesCount(likesCount + (isLiked ? -1 : 1));
@@ -99,6 +122,10 @@ export const RatePanel = ({ mediaId }: { mediaId: string }) => {
                 <span>Share</span>
             </Button>
             <Button variant="ghost" onClick={handleClickLike}>
+                <div
+                    ref={likeEffectRef}
+                    className="absolute w-5 h-5 opacity-0 pointer-events-none rounded-full bg-transparent border-pink-600 border"
+                />
                 <ThumbsUp
                     fill={isLiked ? "white" : ""}
                     className="w-6 h-6 mr-3"

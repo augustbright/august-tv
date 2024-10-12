@@ -13,7 +13,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Loader, MoreHorizontal, Trash } from "lucide-react";
 import { useEditVideoModal } from "@/app/_edit_video_modal/edit-video.modal";
 import Link from "next/link";
-import { VideoThumbnail } from "@/components/video-thumbnail";
+import { ThumbnailPicture } from "@/components/thumbnail-picture";
 import { useMutateDeleteVideoById } from "@/mutations/deleteVideoById";
 import { useConfirm } from "@/app/confirm";
 import { DTO } from "@august-tv/dto";
@@ -41,7 +41,7 @@ export const VideoRow = ({
                     </p>
                 )}
                 {video.status !== "ERROR" && (
-                    <VideoThumbnail
+                    <ThumbnailPicture
                         thumbnail={video.thumbnail}
                         alt={video.title}
                     />

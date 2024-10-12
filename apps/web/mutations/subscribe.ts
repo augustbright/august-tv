@@ -16,6 +16,12 @@ export const mutateSubscribe = (): UseMutationOptions<
         getQueryClient().invalidateQueries({
             queryKey: KEY.MY_SUBSCRIPTIONS,
         });
+        getQueryClient().invalidateQueries({
+            queryKey: KEY.FEED_SUBSCRIPTIONS,
+        });
+        getQueryClient().invalidateQueries({
+            queryKey: ["video"],
+        });
         return result;
     },
     onError: (error) => {
