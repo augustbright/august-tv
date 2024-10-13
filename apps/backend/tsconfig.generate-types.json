@@ -1,0 +1,16 @@
+{
+    "extends": "./tsconfig.json", // Extend the backend config
+    "exclude": [
+        "node_modules",
+        "test",
+        "dist",
+        "**/*spec.ts",
+        "tmp"
+    ],
+    "compilerOptions": {
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "rootDir": ".",
+        "outDir": "../../packages/dto/types" // Output compiled types in this folder
+    }
+}

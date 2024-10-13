@@ -1,14 +1,16 @@
 import { queryProfilePictures } from "@/queries/profilePictures";
 import Image from "next/image";
-import { DTO } from "@august-tv/dto";
 import { Query } from "@/components/Query";
+import { Image as PrismaImage, File as PrismaFile } from "@prisma/client";
+
+export type TImageFromGallery = PrismaImage & {
+    original: Pick<PrismaFile, "publicUrl">;
+};
 
 export const AvatarGallery = ({
     onSelect,
 }: {
-    onSelect: (
-        picture: DTO["user"]["getProfilePictures"]["response"]["images"][0]
-    ) => void;
+    onSelect: (picture: TImageFromGallery) => void;
 }) => {
     return (
         <div className="flex flex-wrap">

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { useEffect } from "react";
 import { Query, TQueryChildrenProps } from "./Query";
 import { queryCurrentUser } from "@/queries/currentUser";
-import { DTO } from "@august-tv/dto";
+import { TUserEndpointResult } from "@august-tv/dto";
 
 export const RedirectHome = () => {
     useEffect(() => {
@@ -24,21 +24,19 @@ export const Guard = ({
     children:
         | React.ReactNode
         | ((
-              currentUser: NonNullable<
-                  DTO["user"]["getCurrentUser"]["response"]
-              >
+              currentUser: NonNullable<TUserEndpointResult<"getCurrentUser">>
           ) => React.ReactNode);
     fallback: React.ReactNode;
     fallbackNoPermission?: React.ReactNode;
     roles?: string[];
-} & TQueryChildrenProps<DTO["user"]["getCurrentUser"]["response"]>) => {
+} & TQueryChildrenProps<TUserEndpointResult<"getCurrentUser">>) => {
     return (
         <Query query={queryCurrentUser()} loading={loading} {...queryProps}>
             {({ data: currentUser }) => {
                 if (!currentUser?.data) {
                     return <>{fallback}</>;
                 }
-                if (roles && roles.length) {
+                if (roles?.length) {
                     if (
                         !currentUser.roles.some((role) =>
                             roles.includes(role.name)

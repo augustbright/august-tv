@@ -2,7 +2,7 @@ import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { API, getApiClient } from "@/api";
 import { getQueryClient } from "@/queries/queryClient";
 import { KEY } from "@/queries/keys";
-import { DTO } from "@august-tv/dto";
+import { TMediaEndpointResult } from "@august-tv/dto";
 
 const validateMediaFile = (media: File) => {
     if (media.size > 50 * 1024 * 1024) {
@@ -17,7 +17,7 @@ const validateMediaFile = (media: File) => {
 };
 
 export const mutateUploadMedia = (): UseMutationOptions<
-    DTO["media"]["uploadMedia"]["response"],
+    TMediaEndpointResult<"uploadMedia">,
     Error,
     File
 > => ({

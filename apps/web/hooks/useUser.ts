@@ -5,15 +5,14 @@ import { useEffect } from "react";
 import { ws } from "../websocket";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TMessage } from "@august-tv/common/types";
-import { DTO } from "@august-tv/dto";
 import { toast } from "react-toastify";
 import { KEY } from "@/queries/keys";
 import { API, getApiClient } from "@/api";
 import { atom, useAtom } from "jotai";
+import { Job } from "@prisma/client";
+import { TUserEndpointResult } from "@august-tv/dto";
 
-type TJobDto = DTO["user"]["getMyJobs"]["response"][0];
-
-const jobsAtom = atom<TJobDto[]>([]);
+const jobsAtom = atom<Job[]>([]);
 
 export const useUser = () => {
     const { data: current } = useQueryCurrentUser();
@@ -23,7 +22,9 @@ export const useUser = () => {
         queryKey: KEY.MY_JOBS,
         queryFn: async () => {
             const apiClient = await getApiClient();
-            const { data } = await apiClient.get(API.myJobs());
+            const { data } = await apiClient.get<
+                TUserEndpointResult<"getMyJobs">
+            >(API.myJobs());
             setJobs(data);
             return data;
         },

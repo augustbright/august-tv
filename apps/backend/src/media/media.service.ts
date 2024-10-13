@@ -13,6 +13,7 @@ import { DbFileService } from 'src/db-file/db-file.service';
 import { IWithPermissions, TActionType } from 'src/common/IWithPermissions';
 import { UserService } from 'src/user/user.service';
 import { JobsService } from 'src/jobs/jobs.service';
+import { PatchMedia } from './media.dto';
 
 const storage = new Storage();
 const bucketName = process.env.GOOGLE_CLOUD_MEDIA_BUCKET_NAME!;
@@ -122,7 +123,7 @@ export class MediaService implements IWithPermissions {
     };
   }
 
-  async patch(id: string, data: any) {
+  async patch(id: string, data: PatchMedia.Body) {
     return this.prisma.video.update({
       where: { id },
       data: {

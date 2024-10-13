@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useMutateRate } from "@/mutations/rate";
 import { queryMedia } from "@/queries/media";
-import { DTO } from "@august-tv/dto";
+import { TMediaEndpointResult } from "@august-tv/dto";
 import { useQueryClient } from "@tanstack/react-query";
 import anime from "animejs";
 import {
@@ -52,7 +52,7 @@ export const RatePanel = ({ mediaId }: { mediaId: string }) => {
         });
     }, [mediaId, queryClient]);
 
-    const updateFromData = (data: DTO["media"]["rateMedia"]["response"]) => {
+    const updateFromData = (data: TMediaEndpointResult<"rateMedia">) => {
         setLikesCount(data.likesCount);
         setDislikesCount(data.dislikesCount);
         if (data.type === "LIKE") {

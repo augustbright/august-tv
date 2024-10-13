@@ -1,10 +1,10 @@
 import { UndefinedInitialDataOptions, useQuery } from "@tanstack/react-query";
 import { getApiClient, API } from "@/api";
 import { KEY } from "./keys";
-import { DTO } from "@august-tv/dto";
+import { TFeedEndpointResult } from "@august-tv/dto";
 
 export const queryFeedLatest = (): UndefinedInitialDataOptions<
-    DTO["feed"]["getLatestFeed"]["response"]
+    TFeedEndpointResult<"getLatestFeed">
 > => ({
     queryKey: KEY.FEED,
     queryFn: async () => {

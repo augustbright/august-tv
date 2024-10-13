@@ -16,12 +16,12 @@ import Link from "next/link";
 import { ThumbnailPicture } from "@/components/thumbnail-picture";
 import { useMutateDeleteVideoById } from "@/mutations/deleteVideoById";
 import { useConfirm } from "@/app/confirm";
-import { DTO } from "@august-tv/dto";
+import { File, Video } from "@prisma/client";
 
 export const VideoRow = ({
     video,
 }: {
-    video: DTO["media"]["getMyMedia"]["response"]["data"][0];
+    video: Video & { thumbnail: { medium: File } | null };
 }) => {
     const editVideo = useEditVideoModal();
     const confirm = useConfirm();

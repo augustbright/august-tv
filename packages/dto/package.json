@@ -1,12 +1,10 @@
 {
     "name": "@august-tv/dto",
     "version": "1.0.0",
-    "types": "generated.ts",
+    "main": "index.ts",
     "type": "module",
     "scripts": {
-        "build": "tsc",
-        "prestart:generate": "yarn build",
-        "start:generate": "node dist/generate.mjs"
+        "build": "tsc"
     },
     "dependencies": {
         "meow": "^13.2.0",

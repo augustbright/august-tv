@@ -1,10 +1,10 @@
 import { UndefinedInitialDataOptions, useQuery } from "@tanstack/react-query";
 import { getApiClient, API } from "@/api";
 import { KEY } from "./keys";
-import { DTO } from "@august-tv/dto";
+import { TFeedEndpointResult } from "@august-tv/dto";
 
 export const queryFeedSubscriptions = (): UndefinedInitialDataOptions<
-    DTO["feed"]["getSubscriptionsFeed"]["response"]
+    TFeedEndpointResult<"getSubscriptionsFeed">
 > => ({
     queryKey: KEY.FEED_SUBSCRIPTIONS,
     queryFn: async () => {

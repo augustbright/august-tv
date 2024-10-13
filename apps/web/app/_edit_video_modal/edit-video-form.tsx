@@ -31,10 +31,10 @@ import { Loader2, Save } from "lucide-react";
 import { useMutateUpdateMedia } from "@/mutations/updateVideo";
 import { toast } from "react-toastify";
 import Link from "next/link";
-import { DTO } from "@august-tv/dto";
 import { useRouter } from "next/navigation";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Video, File } from "@prisma/client";
 
 const formSchema = z.object({
     title: z
@@ -52,7 +52,10 @@ const formSchema = z.object({
 export const EditVideoForm = ({
     video,
 }: {
-    video: DTO["media"]["getMediaById"]["response"];
+    video: Pick<
+        Video,
+        "id" | "title" | "visibility" | "description" | "status"
+    > & { master: Pick<File, "publicUrl"> | null };
 }) => {
     const router = useRouter();
     const playerRef = useRef<HTMLVideoElement>(null);

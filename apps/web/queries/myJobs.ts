@@ -1,10 +1,10 @@
 import { UndefinedInitialDataOptions, useQuery } from "@tanstack/react-query";
 import { API, getApiClient } from "@/api";
 import { KEY } from "./keys";
-import { DTO } from "@august-tv/dto";
+import { TUserEndpointResult } from "@august-tv/dto";
 
 export const queryMyJobs = (): UndefinedInitialDataOptions<
-    DTO["user"]["getMyJobs"]["response"]
+    TUserEndpointResult<"getMyJobs">
 > => ({
     queryKey: KEY.MY_JOBS,
     queryFn: async () => {

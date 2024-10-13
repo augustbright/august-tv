@@ -26,12 +26,11 @@ import { ChangeEvent, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { checkExhaustiveness } from "@august-tv/common";
 import { useMutateUnsetProfilePicture } from "@/mutations/unsetProfilePicture";
-import { AvatarGallery } from "./avatar-gallery";
+import { AvatarGallery, TImageFromGallery } from "./avatar-gallery";
 import { useQueryProfilePictures } from "@/queries/profilePictures";
 import { AvatarTuner } from "./avatar-tuner";
 import { Crop } from "react-image-crop";
 import { CroppedImage } from "./cropped-image";
-import { DTO } from "@august-tv/dto";
 import { useMutateUpdateProfilePicture } from "@/mutations/updateProfilePicture";
 import { Icon } from "@/components/icon";
 
@@ -62,9 +61,8 @@ export const AvatarEditor = () => {
     const { current } = useUser();
     const [page, setPage] = useState<DialogPage>(DialogPage.HOME);
 
-    const [selectedImageFromGallery, setSelectedImageFromGallery] = useState<
-        DTO["user"]["getProfilePictures"]["response"]["images"][number] | null
-    >(null);
+    const [selectedImageFromGallery, setSelectedImageFromGallery] =
+        useState<TImageFromGallery | null>(null);
     const [localFile, setLocalFile] = useState<File | null>(null);
 
     const localFileUrl = useMemo(
@@ -253,9 +251,7 @@ export const AvatarEditor = () => {
         setPage(DialogPage.TUNE_PICTURE);
     };
 
-    const handleSelectPictureFromGallery = (
-        picture: DTO["user"]["getProfilePictures"]["response"]["images"][number]
-    ) => {
+    const handleSelectPictureFromGallery = (picture: TImageFromGallery) => {
         setLocalFile(null);
         setSelectedImageFromGallery(picture);
         setPage(DialogPage.TUNE_PICTURE);

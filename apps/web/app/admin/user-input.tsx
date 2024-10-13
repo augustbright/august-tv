@@ -7,7 +7,6 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { DTO } from "@august-tv/dto";
 import { Plus, Trash } from "lucide-react";
 import { useState } from "react";
 import { debounce } from "lodash";
@@ -19,11 +18,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Guard } from "@/components/guard";
 import { cn } from "@/lib/utils";
+import { File, User } from "@prisma/client";
 
-export type TUserItem = Pick<
-    DTO["user"]["searchUsers"]["response"]["data"][0],
-    "id" | "nickname" | "email" | "picture"
->;
+export type TUserItem = Pick<User, "id" | "nickname" | "email"> & {
+    picture: { small: Pick<File, "publicUrl"> } | null;
+};
 
 type TSingleUserInputProps = {
     single: true;

@@ -1,11 +1,11 @@
 import { UndefinedInitialDataOptions, useQuery } from "@tanstack/react-query";
 import { getApiClient, API } from "@/api";
 import { KEY, TSearchUsersQueryParams } from "./keys";
-import { DTO } from "@august-tv/dto";
+import { TUserEndpointResult } from "@august-tv/dto";
 
 export const querySearchUsers = (
     params: TSearchUsersQueryParams
-): UndefinedInitialDataOptions<DTO["user"]["searchUsers"]["response"]> => ({
+): UndefinedInitialDataOptions<TUserEndpointResult<"searchUsers">> => ({
     queryKey: KEY.SEARCH_USERS(params),
     queryFn: async () => {
         const apiClient = await getApiClient();

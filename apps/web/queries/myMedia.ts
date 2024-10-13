@@ -1,11 +1,11 @@
 import { UndefinedInitialDataOptions, useQuery } from "@tanstack/react-query";
 import { getApiClient, API } from "@/api";
 import { KEY } from "./keys";
-import { TVideoDto } from "types";
+import { TMediaEndpointResult } from "@august-tv/dto";
 
-export const queryMyMedia = (): UndefinedInitialDataOptions<{
-    data: TVideoDto[];
-}> => ({
+export const queryMyMedia = (): UndefinedInitialDataOptions<
+    TMediaEndpointResult<"getMyMedia">
+> => ({
     queryKey: KEY.MY_MEDIA,
     queryFn: async () => {
         const apiClient = await getApiClient();

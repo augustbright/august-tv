@@ -2,17 +2,17 @@ import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { API, getApiClient } from "@/api";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
-import { DTO } from "@august-tv/dto";
+import { TMediaEndpointResult } from "@august-tv/dto";
 
 export const mutateRate = (): UseMutationOptions<
-    DTO["media"]["rateMedia"]["response"],
+    TMediaEndpointResult<"rateMedia">,
     Error,
     { videoId: string; type: "LIKE" | "DISLIKE" | null }
 > => ({
     mutationFn: async ({ videoId, type }) => {
         const apiClient = await getApiClient();
         const result = await apiClient.post(API.rate(videoId), { type });
-        return result.data as DTO["media"]["rateMedia"]["response"];
+        return result.data;
     },
     onError: (error) => {
         if (error instanceof AxiosError) {
