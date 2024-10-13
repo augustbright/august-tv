@@ -42,6 +42,7 @@ model User {
   id        String   @id
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  cursor    Int      @default(autoincrement())
 
   // Public info
   nickname  String  @db.VarChar(100)
@@ -105,6 +106,8 @@ model Video {
   masterId  String? @unique @db.Uuid
   fileSet   FileSet @relation("VideoFilesSet", fields: [fileSetId], references: [id])
   fileSetId String  @unique @db.Uuid
+
+  imported Imported? @relation("ImportedVideo")
 
   @@index([authorId])
   @@map("videos")
@@ -224,7 +227,9 @@ model Job {
   progress    Int       @default(0)
   stage       String?
   error       String?
-  payload     Json
+
+  type    String
+  payload Json
 
   observers User[] @relation("JobObserver")
 
@@ -246,4 +251,16 @@ model Notification {
   userId String
 
   @@map("notifications")
+}
+
+model Imported {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cursor    Int      @default(autoincrement())
+
+  video  Video  @relation("ImportedVideo", fields: [id], references: [id])
+  source String
+
+  @@map("imported")
 }

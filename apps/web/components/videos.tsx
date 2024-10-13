@@ -10,25 +10,27 @@ export const Videos = ({
     query: ReturnType<typeof queryFeedLatest>;
 }) => {
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            <Query
-                query={query}
-                loading={Query.LOADING.ROW}
-                error={Query.ERROR.ALERT}
-            >
-                {({ data: { data: items } }) => {
-                    if (!items?.length) {
-                        return (
-                            <div className="w-full flex justify-center text-secondary">
-                                No videos found
-                            </div>
-                        );
-                    }
-                    return items.map((video) => (
-                        <VideoThumbnail key={video.id} video={video} />
-                    ));
-                }}
-            </Query>
-        </div>
+        <Query
+            query={query}
+            loading={Query.LOADING.ROW}
+            error={Query.ERROR.ALERT}
+        >
+            {({ data: { data: items } }) => {
+                if (!items?.length) {
+                    return (
+                        <div className="w-full flex justify-center text-secondary">
+                            No videos found
+                        </div>
+                    );
+                }
+                return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                        {items.map((video) => (
+                            <VideoThumbnail key={video.id} video={video} />
+                        ))}
+                    </div>
+                );
+            }}
+        </Query>
     );
 };

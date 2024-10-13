@@ -1,4 +1,4 @@
-import { AdminSidebar } from "./_admin-sidebar";
+import { AdminSidebar } from "./admin-sidebar";
 import { Guard, RedirectHome } from "@/components/guard";
 
 export default function Layout({ children }: { children: React.ReactNode }) {

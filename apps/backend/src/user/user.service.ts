@@ -1,3 +1,4 @@
+import { TCursorQueryParams } from '@august-tv/common/types';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { getAuth } from 'firebase-admin/auth';
 import { IWithPermissions, TActionType } from 'src/common/IWithPermissions';
@@ -228,5 +229,44 @@ export class UserService implements IWithPermissions {
         },
       }),
     ]);
+  }
+
+  async find(
+    params: {
+      query: string;
+    } & TCursorQueryParams,
+  ) {
+    const limit = params.limit ?? 10;
+    const users = await this.prisma.user.findMany({
+      where: {
+        AND: [
+          {
+            OR: [
+              { nickname: { contains: params.query } },
+              { email: { contains: params.query } },
+            ],
+          },
+          ...(params.cursor ? [{ cursor: { gt: params.cursor } }] : []),
+        ],
+      },
+      include: {
+        picture: {
+          select: {
+            small: {
+              select: {
+                publicUrl: true,
+              },
+            },
+          },
+        },
+      },
+      take: limit + 1,
+    });
+
+    return {
+      data: users.slice(0, limit),
+      cursor: users[users.length - 1]?.cursor ?? null,
+      hasMore: users.length > limit,
+    };
   }
 }

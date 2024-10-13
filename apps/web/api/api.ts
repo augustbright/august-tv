@@ -28,4 +28,6 @@ export const API = {
 
     youtube: (route: string) => API.api(`/youtube${route}`),
     youtubeUploadRandom: () => API.youtube("/upload-random"),
+    testJob: () => API.api("/jobs/test"),
+    searchUsers: () => API.user("/search"),
 };

@@ -1,7 +1,6 @@
 import { Prisma, $Enums, Job as PrismaJob } from '@prisma/client';
 import { JobsService } from './jobs.service';
 import { EventEmitter } from 'stream';
-import { UnknownRecord } from 'type-fest';
 
 export type TJobParams = {
   name: string;
@@ -24,7 +23,7 @@ export class Job extends EventEmitter<{
   finished: [];
 }> {
   private lastProgress = 0;
-  public metadata: UnknownRecord = {};
+  public metadata: Record<string, unknown> = {};
   constructor(
     private readonly jobsService: JobsService,
     private readonly job: PrismaJob,

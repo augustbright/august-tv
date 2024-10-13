@@ -23,7 +23,9 @@
 			"source.fixAll.eslint": "explicit"
 		},
 		"search.exclude": {
-			"**/*.next": true
+			"**/*.next": true,
+			"**/tsconfig.tsbuildinfo": true,
+			"**/yarn.lock": true
 		},
 		"cSpell.words": [
 			"audioandvideo",

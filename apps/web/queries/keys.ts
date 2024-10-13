@@ -1,3 +1,9 @@
+export type TSearchUsersQueryParams = {
+    query: string;
+    cursor?: number;
+    limit?: number;
+};
+
 export const KEY = {
     CURRENT_USER: ["current user"],
     MY_JOBS: ["my jobs"],
@@ -7,4 +13,5 @@ export const KEY = {
     FEED: ["feed"],
     FEED_SUBSCRIPTIONS: ["feed subscriptions"],
     VIDEO: (id: string) => ["video", id],
+    SEARCH_USERS: (params: TSearchUsersQueryParams) => ["search users", params],
 } as const;

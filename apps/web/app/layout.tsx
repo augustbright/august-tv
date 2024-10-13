@@ -1,6 +1,7 @@
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import "./global.css";
 import "react-toastify/dist/ReactToastify.css";
+import "animate.css";
 import { Providers } from "../components/Providers";
 import { getQueryClient } from "@/queries/queryClient";
 import { AppHeader } from "./_app-header/app-header";

@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, Job as PrismaJob } from '@prisma/client';
 import { SocketsGateway } from 'src/sockets/sockets.gateway';
 import { Job, TJobParams, TJobUpdateParams } from './Job';
+import { TJobTestParams } from '@august-tv/common/types';
 
 @Injectable()
 export class JobsService {
@@ -149,5 +150,38 @@ export class JobsService {
         },
       },
     });
+  }
+
+  async test(params: TJobTestParams) {
+    const job = await this.create(
+      {
+        name: params.name,
+        description: params.description,
+        payload: params.payload ?? {},
+        stage: params.stage,
+      },
+      {
+        observers: params.observers,
+      },
+    );
+
+    let timePassed = 0;
+    let lastMilestone = 0;
+    const interval = setInterval(() => {
+      timePassed += 500;
+      const percentCompleted = Math.round((timePassed / params.timeout) * 100);
+      job.progress(percentCompleted);
+      const currentMilestone = Math.floor(percentCompleted / 10) * 10;
+      if (currentMilestone > lastMilestone) {
+        lastMilestone = currentMilestone;
+        job.stage(`Milestone ${currentMilestone}%`);
+      }
+    }, 500);
+    setTimeout(() => {
+      clearInterval(interval);
+      job.done();
+    }, params.timeout);
+
+    return job.forClient();
   }
 }

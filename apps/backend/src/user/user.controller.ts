@@ -7,6 +7,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Body,
+  Param,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { DecodedIdToken, getAuth } from 'firebase-admin/auth';
@@ -183,5 +184,19 @@ export class UserController {
     @Body() body: { jobId: string },
   ) {
     return this.jobsService.unobserveJob(body.jobId, user.uid);
+  }
+
+  @Get('/search')
+  @Guard.scope('admin')
+  async searchUsers(
+    @Param('q') query: string,
+    @Param('limit') limit?: number,
+    @Param('cursor') cursor?: number,
+  ) {
+    return this.userService.find({
+      query,
+      cursor,
+      limit,
+    });
   }
 }

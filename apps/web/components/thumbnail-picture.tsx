@@ -33,7 +33,7 @@ export const ThumbnailPicture = ({
     return (
         <div
             style={{ width }}
-            className={`aspect-video flex justify-center items-center dark:bg-slate-900 bg-slate-100 rounded-lg`}
+            className={`aspect-video flex justify-center items-center dark:bg-slate-900 bg-slate-100 rounded-lg max-w-full`}
         >
             <FileVideo className="w-4 h-4" />
         </div>

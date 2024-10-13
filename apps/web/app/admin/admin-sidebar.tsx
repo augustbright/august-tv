@@ -23,6 +23,14 @@ export const AdminSidebar = () => {
             >
                 Youtube
             </Link>
+            <Link
+                href="/admin/test-job"
+                className={cn("text-primary", {
+                    "font-semibold": segment === "test-job",
+                })}
+            >
+                Job tester
+            </Link>
         </nav>
     );
 };

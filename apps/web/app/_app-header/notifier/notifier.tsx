@@ -34,6 +34,11 @@ export const Notifier = () => {
                 <DropdownMenuContent className="w-96">
                     <DropdownMenuLabel>Notifications</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    {!activeJobs.length && (
+                        <div className="flex justify-center p-4 text-secondary">
+                            You don&apos;t have any notifications
+                        </div>
+                    )}
                     <ActiveJobs />
                 </DropdownMenuContent>
             </DropdownMenu>

@@ -1,6 +1,9 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { TImportFromYoutubeParams } from '@august-tv/common/types';
+
+const YOUTUBE_CC_CHANNEL_ID = 'UCTwECeGqMZee77BjdoYtI2Q';
 
 @Injectable()
 export class YoutubeService {
@@ -10,6 +13,43 @@ export class YoutubeService {
   private logger: Logger = new Logger(YoutubeService.name);
 
   constructor(private readonly httpService: HttpService) {}
+
+  async importFromYoutube(params: TImportFromYoutubeParams) {
+    throw new HttpException('Not implemented', HttpStatus.NOT_IMPLEMENTED);
+    // const channelId = params.channelId ?? YOUTUBE_CC_CHANNEL_ID;
+    // const videoId =
+    //   params.videoId ?? (await this.getRandomSmallVideoFromChannel(channelId));
+
+    // const downloadJob = await this.downloadVideo(videoId, {
+    //   observers: [user.uid],
+    // });
+
+    // downloadJob.once('done', async () => {
+    //   const { filePath, originalname } = downloadJob.metadata;
+    //   const { job: processingJob, video } = await this.mediaService.upload(
+    //     {
+    //       path: filePath as string,
+    //       originalname: path.basename(filePath as string),
+    //     },
+    //     body.authorId,
+    //     {
+    //       observers: [user.uid],
+    //     },
+    //   );
+
+    //   processingJob.once('done', async () => {
+    //     await this.prismaService.video.update({
+    //       where: { id: video.id },
+    //       data: {
+    //         visibility: 'PUBLIC',
+    //         title: originalname as string,
+    //       },
+    //     });
+    //   });
+    // });
+
+    // return downloadJob.forClient();
+  }
 
   private async getRandomVideoFromChannel(
     channelId: string,
