@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "@august-tv/backend",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -23,7 +23,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "generateDtoTypes": "openapi-typescript http://localhost:3101/swagger-json --output ../../packages/dto/api.d.ts",
-    "generate:types": "tsc -p tsconfig.generate-types.json"
+    "build:types": "tsc -p tsconfig.generate-types.json"
   },
   "dependencies": {
     "@august-tv/common": "^1.0.0",
