@@ -24,6 +24,7 @@ export class JobsService {
       data: {
         name: params.name,
         description: params.description,
+        type: params.type,
         payload: params.payload,
         observers: {
           connect: observers.map((observer) => ({ id: observer })),
@@ -40,6 +41,19 @@ export class JobsService {
     });
 
     return new Job(this, job);
+  }
+
+  async registerChildJob(parentJobId: string, childJobId: string) {
+    return this.prismaService.job.update({
+      where: { id: childJobId },
+      data: {
+        parentJob: {
+          connect: {
+            id: parentJobId,
+          },
+        },
+      },
+    });
   }
 
   async update(id: string, params: Partial<TJobUpdateParams>) {
@@ -121,20 +135,24 @@ export class JobsService {
     });
   }
 
-  async forClient(id: string) {
-    return this.prismaService.job.findFirstOrThrow({
-      where: { id },
-    });
-  }
-
-  getJobsObservedByUser(userId: string) {
+  async getJobsObservedByUser(userId: string) {
     return this.prismaService.job.findMany({
       where: {
-        observers: {
-          some: {
-            id: userId,
+        AND: [
+          {
+            parentJobId: null,
           },
-        },
+          {
+            observers: {
+              some: {
+                id: userId,
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        childJobs: true,
       },
     });
   }
@@ -157,6 +175,7 @@ export class JobsService {
       {
         name: params.name,
         description: params.description,
+        type: 'test',
         payload: params.payload ?? {},
         stage: params.stage,
       },
@@ -181,7 +200,5 @@ export class JobsService {
       clearInterval(interval);
       job.done();
     }, params.timeout);
-
-    return job.forClient();
   }
 }

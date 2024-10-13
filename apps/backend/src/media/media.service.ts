@@ -290,6 +290,7 @@ export class MediaService implements IWithPermissions {
         name: 'Processing video',
         stage: 'transcoding',
         description: `We are currently processing ${file.originalname}`,
+        type: 'process-video',
         payload: {
           videoId: video.id,
         },

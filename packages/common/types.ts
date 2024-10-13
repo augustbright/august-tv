@@ -46,3 +46,10 @@ export type TImportFromYoutubeParams = {
     publicImmediately?: boolean;
     observers: string[];
 };
+
+export type TJobType =
+    | "import-from-youtube"
+    | "import-one-from-youtube"
+    | "downloading-from-youtube"
+    | "process-video"
+    | "test";

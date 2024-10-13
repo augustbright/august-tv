@@ -233,6 +233,11 @@ model Job {
 
   observers User[] @relation("JobObserver")
 
+  parentJob   Job?    @relation("JobParent", fields: [parentJobId], references: [id])
+  parentJobId String? @db.Uuid
+  childJobs   Job[]   @relation("JobParent")
+
+  @@index([parentJobId])
   @@map("jobs")
 }
 

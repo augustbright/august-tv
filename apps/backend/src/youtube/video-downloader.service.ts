@@ -25,6 +25,7 @@ export class VideoDownloaderService {
         name: 'Transferring a video from YouTube',
         description: `Transferring a video from YouTube with ID: ${videoId}`,
         stage: 'getting video info',
+        type: 'downloading-from-youtube',
         payload: { videoId },
       },
       { observers: params.observers },

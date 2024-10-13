@@ -2,6 +2,13 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { TImportFromYoutubeParams } from '@august-tv/common/types';
+import { JobsService } from 'src/jobs/jobs.service';
+import { times } from 'lodash';
+import { Job } from 'src/jobs/Job';
+import { VideoDownloaderService } from './video-downloader.service';
+import { MediaService } from 'src/media/media.service';
+import * as path from 'path';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 const YOUTUBE_CC_CHANNEL_ID = 'UCTwECeGqMZee77BjdoYtI2Q';
 
@@ -12,43 +19,126 @@ export class YoutubeService {
 
   private logger: Logger = new Logger(YoutubeService.name);
 
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly jobsService: JobsService,
+    private readonly videoDownloaderService: VideoDownloaderService,
+    private readonly mediaService: MediaService,
+    private readonly prismaService: PrismaService,
+  ) {}
 
   async importFromYoutube(params: TImportFromYoutubeParams) {
-    throw new HttpException('Not implemented', HttpStatus.NOT_IMPLEMENTED);
-    // const channelId = params.channelId ?? YOUTUBE_CC_CHANNEL_ID;
-    // const videoId =
-    //   params.videoId ?? (await this.getRandomSmallVideoFromChannel(channelId));
+    const numberOfVideos = params.numberOfVideos ?? 1;
 
-    // const downloadJob = await this.downloadVideo(videoId, {
-    //   observers: [user.uid],
-    // });
+    const job = await this.jobsService.create(
+      {
+        name: `Importing ${numberOfVideos} videos from YouTube`,
+        type: 'import-from-youtube',
+        payload: {},
+      },
+      {
+        observers: params.observers,
+      },
+    );
 
-    // downloadJob.once('done', async () => {
-    //   const { filePath, originalname } = downloadJob.metadata;
-    //   const { job: processingJob, video } = await this.mediaService.upload(
-    //     {
-    //       path: filePath as string,
-    //       originalname: path.basename(filePath as string),
-    //     },
-    //     body.authorId,
-    //     {
-    //       observers: [user.uid],
-    //     },
-    //   );
+    this.performJobImportFromYoutube(params, job);
 
-    //   processingJob.once('done', async () => {
-    //     await this.prismaService.video.update({
-    //       where: { id: video.id },
-    //       data: {
-    //         visibility: 'PUBLIC',
-    //         title: originalname as string,
-    //       },
-    //     });
-    //   });
-    // });
+    return job;
+  }
 
-    // return downloadJob.forClient();
+  private async performJobImportFromYoutube(
+    params: TImportFromYoutubeParams,
+    job: Job,
+  ) {
+    if (params.videoId) {
+      const importOneJob = await this.jobsService.create(
+        {
+          type: 'import-one-from-youtube',
+          name: `Importing video`,
+          payload: {},
+        },
+        {
+          observers: params.observers,
+        },
+      );
+      await job.registerChildJob(importOneJob);
+      this.performJobImportOneVideoFromYoutube(
+        {
+          ...params,
+          videoId: params.videoId,
+        },
+        importOneJob,
+      );
+    } else {
+      times(params.numberOfVideos ?? 1, async (idx) => {
+        const importOneJob = await this.jobsService.create(
+          {
+            type: 'import-one-from-youtube',
+            name: `Importing video ${idx + 1}`,
+            payload: {},
+          },
+          {
+            observers: params.observers,
+          },
+        );
+
+        await job.registerChildJob(importOneJob);
+        this.performJobImportOneVideoFromYoutube(params, importOneJob);
+      });
+    }
+  }
+
+  private async performJobImportOneVideoFromYoutube(
+    params: TImportFromYoutubeParams & { videoId?: string },
+    job: Job,
+  ) {
+    let videoId = params.videoId;
+    if (!videoId) {
+      job.stage('Looking for a video to import');
+      const channelId = params.channelId ?? YOUTUBE_CC_CHANNEL_ID;
+      videoId = await this.getRandomSmallVideoFromChannel(channelId);
+      if (!videoId) {
+        job.error('No video found');
+        return;
+      }
+    }
+
+    job.stage('Downloading video');
+    const downloadJob = await this.videoDownloaderService.downloadVideo(
+      videoId,
+      {
+        observers: params.observers,
+      },
+    );
+    job.registerChildJob(downloadJob);
+
+    downloadJob.once('done', async () => {
+      job.stage('Processing video');
+      const { filePath, originalname } = downloadJob.metadata;
+      const { job: processingJob, video } = await this.mediaService.upload(
+        {
+          path: filePath as string,
+          originalname: path.basename(filePath as string),
+        },
+        params.authorId,
+        {
+          observers: params.observers,
+        },
+      );
+
+      job.registerChildJob(processingJob);
+
+      processingJob.once('done', async () => {
+        await this.prismaService.video.update({
+          where: { id: video.id },
+          data: {
+            ...(params.publicImmediately ? { visibility: 'PUBLIC' } : {}),
+            title: originalname as string,
+          },
+        });
+        job.done();
+      });
+    });
   }
 
   private async getRandomVideoFromChannel(
@@ -71,7 +161,7 @@ export class YoutubeService {
     }
   }
 
-  async getRandomSmallVideoFromChannel(channelId: string) {
+  private async getRandomSmallVideoFromChannel(channelId: string) {
     try {
       // Step 1: Get video IDs from the channel
       const videoIds = await this.getRandomVideoFromChannel(channelId);
@@ -110,12 +200,6 @@ export class YoutubeService {
         HttpStatus.BAD_REQUEST,
       );
     }
-  }
-
-  private isShortVideo(duration: string): boolean {
-    const maxDuration = 10 * 60; // 10 minutes in seconds
-    const videoDuration = this.parseISO8601Duration(duration); // Implement a function to parse ISO 8601 duration
-    return videoDuration < maxDuration;
   }
 
   private parseISO8601Duration(duration: string): number {

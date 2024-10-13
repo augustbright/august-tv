@@ -3,6 +3,7 @@ import meow from "meow";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs/promises";
+import * as ts from "typescript";
 import { format } from "prettier";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -46,8 +47,10 @@ const outputPath = "../../packages/dto/generated.ts";
 await generateDtoFile(path.resolve(outputPath));
 
 async function generateDtoFile(outputPath: string) {
+    console.log(`Using tsconfig: ${path.resolve("./tsconfig.json")}`);
     const project = new Project({
         tsConfigFilePath: "./tsconfig.json", // Update path to your tsconfig.json
+        libFolderPath: "../../node_modules/typescript/lib",
     });
 
     const sourceFiles = project.addSourceFilesAtPaths("**/*.controller.ts");
@@ -88,10 +91,11 @@ async function generateDtoFile(outputPath: string) {
         "DecodedIdToken"
     );
 
-    const formatted = await format(dtoContent, {
-        parser: "typescript",
-        tabWidth: 4,
-    });
+    // const formatted = await format(dtoContent, {
+    //     parser: "typescript",
+    //     tabWidth: 4,
+    // });
+    const formatted = dtoContent;
 
     // Write the generated DTO to the output file
     await fs.writeFile(outputPath, formatted, "utf-8");
