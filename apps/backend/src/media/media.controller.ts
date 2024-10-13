@@ -42,11 +42,15 @@ export class MediaController {
     }),
   )
   @Guard.scope('user')
-  uploadMedia(
+  async uploadMedia(
     @UploadedFile() file: Express.Multer.File,
-    @User() user?: DecodedIdToken,
+    @User({ required: true }) user: DecodedIdToken,
   ) {
-    return this.mediaService.upload(file, user);
+    const { video } = await this.mediaService.upload(file, user?.uid, {
+      observers: [user?.uid],
+    });
+
+    return video;
   }
 
   @Patch(':id')

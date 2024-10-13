@@ -20,12 +20,16 @@ import { TCrop } from 'src/image/image.service';
 import * as path from 'path';
 import { Guard } from 'src/common/guard';
 import { User } from './user.decorator';
+import { JobsService } from 'src/jobs/jobs.service';
 
 type TCropParams = { width: string; height: string; x: string; y: string };
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly jobsService: JobsService,
+  ) {}
   private readonly expiresIn = 1000 * 60 * 60 * 24 * 14;
 
   @Post('sessionLogin')
@@ -57,14 +61,18 @@ export class UserController {
   async getCurrentUser(@Req() req: Request) {
     const decoded = req.user;
 
-    const user = decoded
-      ? await this.userService.getUserById(decoded.uid)
-      : null;
+    if (decoded) {
+      const promiseUser = this.userService.getUserById(decoded.uid);
+      const promiseRoles = this.userService.getRoles(decoded.uid);
 
-    return {
-      data: user,
-      decoded,
-    };
+      return {
+        data: await promiseUser,
+        roles: await promiseRoles,
+        decoded,
+      };
+    } else {
+      return null;
+    }
   }
 
   @Post('sign-out')
@@ -160,5 +168,20 @@ export class UserController {
   ) {
     await this.userService.unsubscribe(user.uid, body.authorId);
     return {};
+  }
+
+  @Get('myJobs')
+  @Guard.scope('user')
+  async getMyJobs(@User({ required: true }) user: DecodedIdToken) {
+    return this.jobsService.getJobsObservedByUser(user.uid);
+  }
+
+  @Post('unobserveJob')
+  @Guard.scope('user')
+  async unobserveJob(
+    @User({ required: true }) user: DecodedIdToken,
+    @Body() body: { jobId: string },
+  ) {
+    return this.jobsService.unobserveJob(body.jobId, user.uid);
   }
 }

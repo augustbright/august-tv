@@ -12,6 +12,13 @@ module.exports = {
         ),
     ],
     theme: {
+        screens: {
+            sm: "680px",
+            md: "792px",
+            lg: "1080px",
+            xl: "1408px",
+            "2xl": "1536px",
+        },
         container: {
             center: true,
             padding: "2rem",

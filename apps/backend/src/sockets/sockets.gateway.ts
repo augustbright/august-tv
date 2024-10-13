@@ -10,17 +10,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as cookie from 'cookie';
 import { getAuth } from 'firebase-admin/auth';
 import { firebaseApp } from 'src/firebase';
+import { TMessage } from '@august-tv/common/types';
 
 export interface TUser {
   uid: string;
   username: string;
-}
-
-interface TMessage {
-  type: string;
-  video?: any;
-  percent?: number;
-  error?: string;
 }
 
 @Injectable()

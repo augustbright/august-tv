@@ -109,7 +109,7 @@ export class UserService implements IWithPermissions {
   }
 
   async getUserById(userId: string) {
-    return this.prisma.user.findUnique({
+    return this.prisma.user.findUniqueOrThrow({
       where: { id: userId },
       include: {
         picture: {

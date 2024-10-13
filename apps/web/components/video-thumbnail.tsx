@@ -28,18 +28,20 @@ export const VideoThumbnail = ({
     return (
         <Link
             href={`/v/${video.id}`}
-            className="display: flex flex-col gap-2 hover:bg-muted/50 p-4 rounded-lg"
+            className="flex flex-col gap-2 hover:bg-muted/50 rounded-lg"
         >
             <ThumbnailPicture
                 thumbnail={video.thumbnail}
                 alt={video.title}
-                width={400}
-                height={400}
+                width={600}
+                height={600}
             />
             <div className="flex gap-2">
                 <AuthorPicture author={video.author} />
                 <div>
-                    <h3 className="text-lg font-semibold">{video.title}</h3>
+                    <h3 className="text-lg font-medium max-h-12 leading-6 overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] ">
+                        {video.title}
+                    </h3>
                     <p className="text-sm">{video.author.nickname}</p>
                     <p className="text-sm">
                         {moment(video.createdAt).format("MMMM Do, YYYY")}

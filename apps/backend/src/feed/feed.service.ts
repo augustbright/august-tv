@@ -26,7 +26,7 @@ export class FeedService {
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        cursor: 'desc',
       },
       where: {
         AND: [
@@ -80,7 +80,7 @@ export class FeedService {
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        cursor: 'desc',
       },
       where: {
         AND: [

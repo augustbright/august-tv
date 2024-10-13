@@ -44,6 +44,7 @@ const LOADING = {
             <Loader2 className="animate-spin" />
         </div>
     ),
+    NONE: () => null,
 } satisfies Record<string, TQueryLoadingChildren>;
 
 const ERROR = {

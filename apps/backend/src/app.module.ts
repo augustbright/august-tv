@@ -13,6 +13,8 @@ import { DbFileService } from './db-file/db-file.service';
 import { DbFileModule } from './db-file/db-file.module';
 import { GuardCheckService } from './common/guard-check.service';
 import { Reflector } from '@nestjs/core';
+import { YoutubeModule } from './youtube/youtube.module';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { Reflector } from '@nestjs/core';
     ImageModule,
     StorageModule,
     DbFileModule,
+    YoutubeModule,
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [AppService, DbFileService, GuardCheckService, Reflector],

@@ -1,11 +1,7 @@
 // TODO: fix websocket connection
 
 import { isServer } from "@tanstack/react-query";
-import { toast } from "react-toastify";
-import { KEY } from "@/queries/keys";
-import { getQueryClient } from "@/queries/queryClient";
 import { io, Socket } from "socket.io-client";
-import { TMessage } from "@august-tv/common/types";
 
 class WS {
     #client: Socket | null = null;
@@ -34,32 +30,6 @@ class WS {
             console.log("echo-protocol Client Closed");
         });
 
-        socket.on("message", (data) => {
-            if (typeof data === "string") {
-                let message: TMessage;
-                try {
-                    message = JSON.parse(data);
-                } catch (error) {
-                    console.error(`Failed to parse message: ${String(error)}`);
-                    return;
-                }
-
-                switch (message.type) {
-                    case "dummy-notification":
-                        toast(message.message);
-                        break;
-                    case "upload-finished":
-                        getQueryClient().invalidateQueries({
-                            queryKey: KEY.MY_MEDIA,
-                        });
-                        getQueryClient().invalidateQueries({
-                            queryKey: KEY.VIDEO(message.video.id),
-                        });
-                        break;
-                }
-            }
-        });
-
         socket.on("connect_error", (error) => {
             if (socket.active) {
                 // temporary failure, the socket will automatically try to reconnect
@@ -71,16 +41,23 @@ class WS {
         });
 
         this.#client = socket;
+
+        return socket;
     }
 
     disconnect() {
         if (isServer) return;
         this.#client?.close();
+        this.#client?.removeAllListeners();
         this.#client = null;
     }
 
     get isConnected() {
         return !!this.#client;
+    }
+
+    get client() {
+        return this.#client;
     }
 }
 

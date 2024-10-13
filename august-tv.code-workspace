@@ -24,6 +24,11 @@
 		},
 		"search.exclude": {
 			"**/*.next": true
-		}
+		},
+		"cSpell.words": [
+			"audioandvideo",
+			"distube",
+			"ytdl"
+		]
 	}
 }

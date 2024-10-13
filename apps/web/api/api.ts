@@ -11,6 +11,8 @@ export const API = {
     sessionLogin: () => API.user("/sessionLogin"),
     signOut: () => API.user("/sign-out"),
     currentUser: () => API.user("/current"),
+    myJobs: () => API.user("/myJobs"),
+    unobserveJob: () => API.user(`/unobserveJob`),
     mySubscriptions: () => API.user("/mySubscriptions"),
     subscribe: () => API.user("/subscribe"),
     unsubscribe: () => API.user("/unsubscribe"),
@@ -23,4 +25,7 @@ export const API = {
     updateMedia: (id: string) => API.media(`/${id}`),
     myMedia: () => API.media("/my"),
     videoForEditing: (id: string) => API.media(`/edit/${id}`),
+
+    youtube: (route: string) => API.api(`/youtube${route}`),
+    youtubeUploadRandom: () => API.youtube("/upload-random"),
 };

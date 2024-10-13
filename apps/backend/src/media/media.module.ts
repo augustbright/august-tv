@@ -7,6 +7,7 @@ import { TranscodeModule } from 'src/transcode/transcode.module';
 import { ImageModule } from 'src/image/image.module';
 import { DbFileModule } from 'src/db-file/db-file.module';
 import { UserModule } from 'src/user/user.module';
+import { JobsModule } from 'src/jobs/jobs.module';
 
 @Module({
   imports: [
@@ -16,8 +17,10 @@ import { UserModule } from 'src/user/user.module';
     ImageModule,
     DbFileModule,
     UserModule,
+    JobsModule,
   ],
   providers: [MediaService],
   controllers: [MediaController],
+  exports: [MediaService],
 })
 export class MediaModule {}
