@@ -38,15 +38,6 @@ export type TJobTestParams = {
     timeout: number;
 };
 
-export type TImportFromYoutubeParams = {
-    authorId: string;
-    channelId?: string;
-    videoId?: string;
-    numberOfVideos?: number;
-    publicImmediately?: boolean;
-    observers: string[];
-};
-
 export type TJobType =
     | "import-from-youtube"
     | "import-one-from-youtube"

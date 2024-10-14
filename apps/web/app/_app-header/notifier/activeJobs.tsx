@@ -22,18 +22,22 @@ export const ActiveJobs = () => {
             <div className="grow">
                 <div className="flex flex-col gap-2 grow">
                     <div className="flex-1 font-bold flex items-center">
-                        <Badge
-                            className={cn(
-                                "text-xs mr-2",
-                                job.status === "DONE"
-                                    ? "bg-green-500"
-                                    : "bg-blue-500"
-                            )}
-                            variant="default"
-                        >
-                            {STATUS_NAMES[job.status]}{" "}
-                            {job.status !== "DONE" && job.progress + "%"}
-                        </Badge>
+                        {(job.status !== "IN_PROGRESS" || job.progress > 1) && (
+                            <Badge
+                                className={cn(
+                                    "text-xs mr-2",
+                                    job.status === "DONE"
+                                        ? "bg-green-500"
+                                        : "bg-blue-500"
+                                )}
+                                variant="default"
+                            >
+                                {job.status !== "IN_PROGRESS" && (
+                                    <span>{STATUS_NAMES[job.status]}</span>
+                                )}
+                                {job.status !== "DONE" && job.progress + "%"}
+                            </Badge>
+                        )}
                         <span>{job.name}</span>
                     </div>
                 </div>

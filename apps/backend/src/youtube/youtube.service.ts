@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { TImportFromYoutubeParams } from '@august-tv/common/types';
 import { JobsService } from 'src/jobs/jobs.service';
 import { times } from 'lodash';
 import { Job } from 'src/jobs/Job';
@@ -9,6 +8,7 @@ import { VideoDownloaderService } from './video-downloader.service';
 import { MediaService } from 'src/media/media.service';
 import * as path from 'path';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PostImportFromYoutube } from './youtube.dto';
 
 const YOUTUBE_CC_CHANNEL_ID = 'UCTwECeGqMZee77BjdoYtI2Q';
 
@@ -27,7 +27,7 @@ export class YoutubeService {
     private readonly prismaService: PrismaService,
   ) {}
 
-  async importFromYoutube(params: TImportFromYoutubeParams) {
+  async importFromYoutube(params: PostImportFromYoutube.Body) {
     const numberOfVideos = params.numberOfVideos ?? 1;
 
     const job = await this.jobsService.create(
@@ -42,12 +42,10 @@ export class YoutubeService {
     );
 
     this.performJobImportFromYoutube(params, job);
-
-    return job;
   }
 
   private async performJobImportFromYoutube(
-    params: TImportFromYoutubeParams,
+    params: PostImportFromYoutube.Body,
     job: Job,
   ) {
     if (params.videoId) {
@@ -69,7 +67,10 @@ export class YoutubeService {
         },
         importOneJob,
       );
+      importOneJob.once('done', () => job.done());
+      importOneJob.once('error', (error) => job.error(error));
     } else {
+      let jobsRemaining = params.numberOfVideos ?? 1;
       times(params.numberOfVideos ?? 1, async (idx) => {
         const importOneJob = await this.jobsService.create(
           {
@@ -84,12 +85,18 @@ export class YoutubeService {
 
         await job.registerChildJob(importOneJob);
         this.performJobImportOneVideoFromYoutube(params, importOneJob);
+        importOneJob.once('finished', () => {
+          jobsRemaining--;
+          if (jobsRemaining === 0) {
+            job.done();
+          }
+        });
       });
     }
   }
 
   private async performJobImportOneVideoFromYoutube(
-    params: TImportFromYoutubeParams & { videoId?: string },
+    params: PostImportFromYoutube.Body & { videoId?: string },
     job: Job,
   ) {
     let videoId = params.videoId;
@@ -134,6 +141,11 @@ export class YoutubeService {
           data: {
             ...(params.publicImmediately ? { visibility: 'PUBLIC' } : {}),
             title: originalname as string,
+            imported: {
+              create: {
+                source: 'youtube',
+              },
+            },
           },
         });
         job.done();
@@ -176,6 +188,8 @@ export class YoutubeService {
         );
         return duration < 10 * 60; // Videos less than 10 minutes
       });
+
+      //TODO: filter out previously imported videos. For this it is necessary to add original video id to the imported model
 
       const randomVideo =
         filteredVideos[Math.floor(Math.random() * filteredVideos.length)];

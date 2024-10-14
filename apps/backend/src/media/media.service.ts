@@ -136,7 +136,16 @@ export class MediaService implements IWithPermissions {
 
   async getUserMedia(user: any) {
     return this.prisma.video.findMany({
-      where: { authorId: user.uid },
+      where: {
+        AND: [
+          { authorId: user.uid },
+          {
+            status: {
+              not: 'DELETED',
+            },
+          },
+        ],
+      },
       include: {
         thumbnail: {
           include: {
@@ -185,8 +194,15 @@ export class MediaService implements IWithPermissions {
       images.map((image) => this.imageService.delete(image.id)),
     );
 
-    return this.prisma.video.delete({
+    this.prisma.imported.delete({
       where: { id },
+    });
+
+    return this.prisma.video.update({
+      where: { id },
+      data: {
+        status: 'DELETED',
+      },
     });
   }
 

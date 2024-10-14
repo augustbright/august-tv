@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 
 import { z } from "zod";
 import { UserInput } from "../user-input";
+import { useUser } from "@/hooks/useUser";
 
 const formSchema = z.object({
     author: z.object(
@@ -36,6 +37,7 @@ const formSchema = z.object({
 });
 
 export const UploadFromYoutube = () => {
+    const { current } = useUser();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {},
@@ -47,7 +49,11 @@ export const UploadFromYoutube = () => {
 
     async function handleSubmit(values: z.infer<typeof formSchema>) {
         try {
-            await startImporting(values.author.id);
+            await startImporting({
+                authorId: values.author.id,
+                observers: [current!.data.id],
+                publicImmediately: true,
+            });
             toast.success("Importing started");
         } catch (error) {
             console.error(error);

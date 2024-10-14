@@ -61,12 +61,14 @@ export class Job extends EventEmitter<{
   async error(error: string) {
     this.update({ error, status: 'FAILED' });
     this.emit('error', error);
+    this.emit('finished');
     this.cleanup();
   }
 
   async done() {
     this.update({ status: 'DONE', progress: 100 });
     this.emit('done');
+    this.emit('finished');
     this.cleanup();
   }
 

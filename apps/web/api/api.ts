@@ -27,7 +27,7 @@ export const API = {
     videoForEditing: (id: string) => API.media(`/edit/${id}`),
 
     youtube: (route: string) => API.api(`/youtube${route}`),
-    youtubeUploadRandom: () => API.youtube("/upload-random"),
+    importFromYoutube: () => API.youtube("/importFromYoutube"),
     testJob: () => API.api("/jobs/test"),
     searchUsers: () => API.user("/search"),
 };

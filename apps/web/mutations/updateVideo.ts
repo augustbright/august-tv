@@ -9,7 +9,7 @@ export const mutateUpdateVideo = (): UseMutationOptions<
     Error,
     {
         id: string;
-        updateVideoDto: Dto["Media"]["PatchMedia"]["Body"];
+        updateVideoDto: Dto["media"]["patchMedia"]["body"];
     }
 > => ({
     mutationFn: async ({ id, updateVideoDto }) => {

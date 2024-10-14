@@ -190,13 +190,13 @@ export class UserController {
   @Guard.scope('admin')
   async searchUsers(
     @Param('q') query: string,
-    @Param('limit') limit?: number,
-    @Param('cursor') cursor?: number,
+    @Param('limit') limit?: string,
+    @Param('cursor') cursor?: string,
   ) {
     return this.userService.find({
       query,
-      cursor,
-      limit,
+      cursor: cursor ? parseInt(cursor) : undefined,
+      limit: limit ? parseInt(limit) : undefined,
     });
   }
 }

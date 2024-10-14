@@ -1,3 +1,5 @@
+//TODO: instant-loading-states
+
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import "./global.css";
 import "react-toastify/dist/ReactToastify.css";

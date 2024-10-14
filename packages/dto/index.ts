@@ -7,6 +7,7 @@ import { SocketsController } from "./types/src/sockets/sockets.controller.js";
 import { YoutubeController } from "./types/src/youtube/youtube.controller.js";
 
 import { PatchMedia } from "./types/src/media/media.dto.js";
+import { PostImportFromYoutube } from "./types/src/youtube/youtube.dto.js";
 
 type TClass = abstract new (...args: any) => any;
 
@@ -37,9 +38,14 @@ export type TYoutubeEndpointResult<E extends keyof YoutubeController> =
     GetEndpointResult<typeof YoutubeController, E>;
 
 export type Dto = {
-    Media: {
-        PatchMedia: {
-            Body: PatchMedia.Body;
+    media: {
+        patchMedia: {
+            body: PatchMedia.Body;
+        };
+    };
+    youtube: {
+        postImportFromYoutube: {
+            body: PostImportFromYoutube.Body;
         };
     };
 };

@@ -2,17 +2,16 @@ import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 import { API, getApiClient } from "@/api";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
+import { Dto } from "@august-tv/dto";
 
 export const mutateUploadRandomFromYoutube = (): UseMutationOptions<
     unknown,
     Error,
-    string
+    Dto["youtube"]["postImportFromYoutube"]["body"]
 > => ({
-    mutationFn: async (authorId) => {
+    mutationFn: async (params) => {
         const apiClient = await getApiClient();
-        const result = await apiClient.post(API.youtubeUploadRandom(), {
-            authorId,
-        });
+        const result = await apiClient.post(API.importFromYoutube(), params);
         return result;
     },
     onError: (error) => {
