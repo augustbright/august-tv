@@ -1,3 +1,5 @@
+// setup prettier for frontend
+// setup eslint for frontend
 {
   "extends": [
     "next/core-web-vitals",

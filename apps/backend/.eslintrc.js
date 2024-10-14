@@ -1,5 +1,4 @@
 // TODO: setup eslint for backend
-// TODO: setup prettier for backend
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
