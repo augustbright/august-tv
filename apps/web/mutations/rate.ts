@@ -1,26 +1,27 @@
-import { useMutation, UseMutationOptions } from "@tanstack/react-query";
-import { API, getApiClient } from "@/api";
-import { toast } from "react-toastify";
-import { AxiosError } from "axios";
-import { TMediaEndpointResult } from "@august-tv/dto";
+import { API, getApiClient } from '@/api';
+import { TMediaEndpointResult } from '@august-tv/dto';
+import { UseMutationOptions, useMutation } from '@tanstack/react-query';
+
+import { AxiosError } from 'axios';
+import { toast } from 'react-toastify';
 
 export const mutateRate = (): UseMutationOptions<
-    TMediaEndpointResult<"rateMedia">,
-    Error,
-    { videoId: string; type: "LIKE" | "DISLIKE" | null }
+  TMediaEndpointResult<'rateMedia'>,
+  Error,
+  { videoId: string; type: 'LIKE' | 'DISLIKE' | null }
 > => ({
-    mutationFn: async ({ videoId, type }) => {
-        const apiClient = await getApiClient();
-        const result = await apiClient.post(API.rate(videoId), { type });
-        return result.data;
-    },
-    onError: (error) => {
-        if (error instanceof AxiosError) {
-            toast.error(error.response?.data?.message);
-            return;
-        }
-        toast.error(`Failed to rate video: ${error.message}`);
-    },
+  mutationFn: async ({ videoId, type }) => {
+    const apiClient = await getApiClient();
+    const result = await apiClient.post(API.rate(videoId), { type });
+    return result.data;
+  },
+  onError: (error) => {
+    if (error instanceof AxiosError) {
+      toast.error(error.response?.data?.message);
+      return;
+    }
+    toast.error(`Failed to rate video: ${error.message}`);
+  }
 });
 
 export const useMutateRate = () => useMutation(mutateRate());

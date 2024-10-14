@@ -1,1 +1,1 @@
-export { Notifier } from "./notifier";
+export { Notifier } from './notifier';

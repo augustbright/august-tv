@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { queryFeedLatest } from "@/queries/feedLatest";
-import { Videos } from "@/components/videos";
+import { Videos } from '@/components/videos';
+import { queryFeedLatest } from '@/queries/feedLatest';
 
 export const Feed = ({
-    query,
+  query
 }: {
-    query: ReturnType<typeof queryFeedLatest>;
+  query: ReturnType<typeof queryFeedLatest>;
 }) => {
-    return (
-        <div className="flex flex-col gap-4">
-            <Videos query={query} />
-        </div>
-    );
+  return (
+    <div className='flex flex-col gap-4'>
+      <Videos query={query} />
+    </div>
+  );
 };

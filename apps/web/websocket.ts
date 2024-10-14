@@ -1,64 +1,64 @@
 // TODO: fix websocket connection
+import { isServer } from '@tanstack/react-query';
 
-import { isServer } from "@tanstack/react-query";
-import { io, Socket } from "socket.io-client";
+import { Socket, io } from 'socket.io-client';
 
 class WS {
-    #client: Socket | null = null;
+  #client: Socket | null = null;
 
-    connect() {
-        if (isServer) return;
+  connect() {
+    if (isServer) return;
 
-        this.disconnect();
+    this.disconnect();
 
-        // const socket = io("localhost:3101", {
-        //     path: process.env.NEXT_PUBLIC_WS_PREFIX,
-        //     transports: ["websocket", "polling"],
-        // });
+    // const socket = io("localhost:3101", {
+    //     path: process.env.NEXT_PUBLIC_WS_PREFIX,
+    //     transports: ["websocket", "polling"],
+    // });
 
-        const socket = io("localhost:3101", {
-            path: "/io",
-            transports: ["websocket", "polling"],
-            withCredentials: true,
-        });
+    const socket = io('localhost:3101', {
+      path: '/io',
+      transports: ['websocket', 'polling'],
+      withCredentials: true
+    });
 
-        socket.on("connect", () => {
-            console.log("WebSocket Client Connected");
-            console.log(socket.id);
-        });
-        socket.on("disconnect", () => {
-            console.log("echo-protocol Client Closed");
-        });
+    socket.on('connect', () => {
+      console.log('WebSocket Client Connected');
+      console.log(socket.id);
+    });
+    socket.on('disconnect', () => {
+      console.log('echo-protocol Client Closed');
+    });
 
-        socket.on("connect_error", (error) => {
-            if (socket.active) {
-                // temporary failure, the socket will automatically try to reconnect
-            } else {
-                // the connection was denied by the server
-                // in that case, `socket.connect()` must be manually called in order to reconnect
-                console.log(`IO connection error: ${error.message}`);
-            }
-        });
+    socket.on('connect_error', (error) => {
+      if (socket.active) {
+        // temporary failure, the socket will automatically try to reconnect
+      } else {
+        // the connection was denied by the server
+        // in that case, `socket.connect()` must be manually called in order to reconnect
+        console.log(`IO connection error: ${error.message}`);
+      }
+    });
 
-        this.#client = socket;
+    this.#client = socket;
 
-        return socket;
-    }
+    return socket;
+  }
 
-    disconnect() {
-        if (isServer) return;
-        this.#client?.close();
-        this.#client?.removeAllListeners();
-        this.#client = null;
-    }
+  disconnect() {
+    if (isServer) return;
+    this.#client?.close();
+    this.#client?.removeAllListeners();
+    this.#client = null;
+  }
 
-    get isConnected() {
-        return !!this.#client;
-    }
+  get isConnected() {
+    return !!this.#client;
+  }
 
-    get client() {
-        return this.#client;
-    }
+  get client() {
+    return this.#client;
+  }
 }
 
 export const ws = new WS();

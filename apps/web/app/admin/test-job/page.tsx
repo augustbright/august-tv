@@ -1,9 +1,9 @@
-import { JobTester } from "./job-tester";
+import { JobTester } from './job-tester';
 
 export default function TestJobPage() {
-    return (
-        <main>
-            <JobTester />
-        </main>
-    );
+  return (
+    <main>
+      <JobTester />
+    </main>
+  );
 }

@@ -1,1 +1,1 @@
-export * from "./app-upload-button";
+export * from './app-upload-button';
