@@ -1,29 +1,29 @@
-'use client';
+"use client";
 
-import { AuthorPicture } from '@/components/AuthorPicture';
-import { Query } from '@/components/Query';
-import { Guard } from '@/components/guard';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { AuthorPicture } from "@/components/AuthorPicture";
+import { Query } from "@/components/Query";
+import { Guard } from "@/components/guard";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { cn } from '@/lib/utils';
-import { querySearchUsers } from '@/queries/searchUsers';
-import { File, User } from '@prisma/client';
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { querySearchUsers } from "@/queries/searchUsers";
+import { File, User } from "@prisma/client";
 
-import { debounce } from 'lodash';
-import { Plus, Trash } from 'lucide-react';
-import { useState } from 'react';
+import { debounce } from "lodash";
+import { Plus, Trash } from "lucide-react";
+import { useState } from "react";
 
-export type TUserItem = Pick<User, 'id' | 'nickname' | 'email'> & {
-  picture: { small: Pick<File, 'publicUrl'> } | null;
+export type TUserItem = Pick<User, "id" | "nickname" | "email"> & {
+  picture: { small: Pick<File, "publicUrl"> } | null;
 };
 
 type TSingleUserInputProps = {
@@ -42,17 +42,17 @@ const onlyDefined = <T,>(value: (T | undefined)[]): T[] =>
   value.filter(Boolean) as T[];
 
 export const UserInput = (
-  props: TSingleUserInputProps | TMultipleUserInputProps
+  props: TSingleUserInputProps | TMultipleUserInputProps,
 ) => {
   const [enableSearch, setEnableSearch] = useState(false);
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const handleChangeInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
     handleSearch(event.target.value);
   };
 
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const handleSearch = debounce(async (query: string) => {
     setQuery(query);
     setEnableSearch(true);
@@ -66,49 +66,49 @@ export const UserInput = (
           : props.value?.some((u) => u.id === me.id);
 
         return (
-          <div className='flex flex-col gap-2'>
-            <div className='flex gap-4 flex-wrap'>
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-4 flex-wrap">
               <Table>
                 <TableBody>
                   {onlyDefined([props.value].flat()).map((user) => (
                     <TableRow
                       key={user.id}
-                      className='flex items-center gap-2 rounded-md p-2'
+                      className="flex items-center gap-2 rounded-md p-2"
                     >
                       <TableCell>
                         <AuthorPicture author={user} />
                       </TableCell>
-                      <TableCell className='w-full'>
-                        <div className='flex gap-2 items-center'>
+                      <TableCell className="w-full">
+                        <div className="flex gap-2 items-center">
                           <span>{user.nickname}</span>
                           {user.id === me.id && (
-                            <div className='text-slate-500'>(You)</div>
+                            <div className="text-slate-500">(You)</div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <Button
-                          variant='ghost'
+                          variant="ghost"
                           onClick={() => {
                             if (props.single) {
                               props.onChange({
                                 target: {
-                                  value: undefined
-                                }
+                                  value: undefined,
+                                },
                               });
                             } else {
                               props.onChange({
                                 target: {
                                   value:
                                     props.value?.filter(
-                                      (u) => u.id !== user.id
-                                    ) || []
-                                }
+                                      (u) => u.id !== user.id,
+                                    ) || [],
+                                },
                               });
                             }
                           }}
                         >
-                          <Trash className='w-4' />
+                          <Trash className="w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -116,25 +116,25 @@ export const UserInput = (
                 </TableBody>
               </Table>
             </div>
-            <div className='flex justify-start gap-2'>
+            <div className="flex justify-start gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant={'outline'}>
-                    <Plus className='mr-2' />
+                  <Button variant={"outline"}>
+                    <Plus className="mr-2" />
                     <span>Add user</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className='w-80'>
+                <DropdownMenuContent className="w-80">
                   <Input
-                    type='search'
-                    placeholder='Search users'
+                    type="search"
+                    placeholder="Search users"
                     value={search}
                     onChange={handleChangeInput}
                     autoFocus
                   />
                   <DropdownMenuSeparator />
                   {!enableSearch && (
-                    <p className='text-slate-500 text-center p-4'>
+                    <p className="text-slate-500 text-center p-4">
                       Start typing to search users
                     </p>
                   )}
@@ -144,15 +144,15 @@ export const UserInput = (
                     query={{
                       ...querySearchUsers({
                         query,
-                        limit: 10
+                        limit: 10,
                       }),
-                      enabled: enableSearch
+                      enabled: enableSearch,
                     }}
                   >
                     {({ data: { data: users } }) =>
                       users.map((user) => {
                         const isSelected = onlyDefined(
-                          [props.value].flat()
+                          [props.value].flat(),
                         ).some((u) => u.id === user.id);
                         return (
                           <DropdownMenuItem
@@ -162,28 +162,28 @@ export const UserInput = (
                               if (props.single) {
                                 props.onChange({
                                   target: {
-                                    value: user
-                                  }
+                                    value: user,
+                                  },
                                 });
                               } else {
                                 props.onChange({
                                   target: {
-                                    value: [...(props.value || []), user]
-                                  }
+                                    value: [...(props.value || []), user],
+                                  },
                                 });
                               }
                             }}
                           >
-                            <div className='flex gap-4'>
-                              <div className='flex items-center'>
+                            <div className="flex gap-4">
+                              <div className="flex items-center">
                                 <Checkbox checked={isSelected} />
                               </div>
                               <AuthorPicture author={user} />
-                              <div className='flex flex-col gao-1'>
-                                <div className='font-semibold'>
+                              <div className="flex flex-col gao-1">
+                                <div className="font-semibold">
                                   {user.nickname}
                                 </div>
-                                <div className='text-sm text-slate-500'>
+                                <div className="text-sm text-slate-500">
                                   {user.email}
                                 </div>
                               </div>
@@ -196,22 +196,22 @@ export const UserInput = (
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button
-                type='button'
-                variant='outline'
-                className={cn(iAmIncluded && 'hidden')}
+                type="button"
+                variant="outline"
+                className={cn(iAmIncluded && "hidden")}
                 onClickCapture={(e) => {
                   e.stopPropagation();
                   if (props.single) {
                     props.onChange({
                       target: {
-                        value: me
-                      }
+                        value: me,
+                      },
                     });
                   } else {
                     props.onChange({
                       target: {
-                        value: [...(props.value || []), me]
-                      }
+                        value: [...(props.value || []), me],
+                      },
                     });
                   }
                 }}
@@ -219,22 +219,22 @@ export const UserInput = (
                 Include me
               </Button>
               <Button
-                type='button'
-                variant='outline'
-                className={cn(!iAmIncluded && 'hidden')}
+                type="button"
+                variant="outline"
+                className={cn(!iAmIncluded && "hidden")}
                 onClickCapture={(e) => {
                   e.stopPropagation();
                   if (props.single) {
                     props.onChange({
                       target: {
-                        value: undefined
-                      }
+                        value: undefined,
+                      },
                     });
                   } else {
                     props.onChange({
                       target: {
-                        value: props.value?.filter((u) => u.id !== me.id) || []
-                      }
+                        value: props.value?.filter((u) => u.id !== me.id) || [],
+                      },
                     });
                   }
                 }}

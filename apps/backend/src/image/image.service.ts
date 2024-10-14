@@ -168,8 +168,12 @@ export class ImageService {
       return null;
     }
 
-    const deletedImage = await this.prisma.image.delete({
+    const deletedImage = await this.prisma.image.update({
       where: { id: imageId },
+      data: {
+        deleted: true,
+        deletedAt: new Date(),
+      },
     });
 
     await Promise.all([

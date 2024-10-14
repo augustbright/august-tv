@@ -12,8 +12,13 @@ export class DbFileService {
 
   async delete(file: File) {
     const deleteFromStoragePromise = this.storageService.deleteFile(file.path);
-    const deletedFile = await this.prisma.file.delete({
+
+    const deletedFile = await this.prisma.file.update({
       where: { id: file.id },
+      data: {
+        deleted: true,
+        deletedAt: new Date(),
+      },
     });
     await deleteFromStoragePromise;
 

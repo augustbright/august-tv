@@ -39,10 +39,12 @@ enum JobStatus {
 }
 
 model User {
-  id        String   @id
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  cursor    Int      @default(autoincrement())
+  id        String    @id
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  cursor    Int       @default(autoincrement())
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
 
   // Public info
   nickname  String  @db.VarChar(100)
@@ -82,6 +84,8 @@ model Video {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   publishedAt DateTime?
+  deletedAt   DateTime?
+  deleted     Boolean   @default(false)
 
   title       String      @db.VarChar(255)
   description String?
@@ -114,9 +118,11 @@ model Video {
 }
 
 model Rating {
-  id        String   @id @default(uuid()) @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(uuid()) @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
 
   type Rate?
 
@@ -131,9 +137,11 @@ model Rating {
 }
 
 model Image {
-  id        String   @id @default(uuid()) @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(uuid()) @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
 
   originalWidth  Int
   originalHeight Int
@@ -160,9 +168,11 @@ model Image {
 }
 
 model File {
-  id        String   @id @default(uuid()) @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(uuid()) @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
 
   filename  String
   path      String
@@ -180,9 +190,11 @@ model File {
 }
 
 model ImageSet {
-  id        String   @id @default(uuid()) @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(uuid()) @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
 
   images Image[] @relation
 
@@ -193,9 +205,11 @@ model ImageSet {
 }
 
 model FileSet {
-  id        String   @id @default(uuid()) @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(uuid()) @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
 
   video Video? @relation("VideoFilesSet")
   files File[] @relation("FileSet")
@@ -204,9 +218,11 @@ model FileSet {
 }
 
 model Role {
-  id        String   @id @default(uuid()) @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(uuid()) @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
 
   name        String
   description String?
@@ -217,9 +233,11 @@ model Role {
 }
 
 model Job {
-  id        String   @id @default(uuid()) @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(uuid()) @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
 
   name        String
   description String?
@@ -242,9 +260,11 @@ model Job {
 }
 
 model Notification {
-  id        String   @id @default(uuid()) @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(uuid()) @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
 
   title       String
   description String?
@@ -259,10 +279,12 @@ model Notification {
 }
 
 model Imported {
-  id        String   @id @default(uuid()) @db.Uuid
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  cursor    Int      @default(autoincrement())
+  id        String    @id @default(uuid()) @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  cursor    Int       @default(autoincrement())
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
 
   video  Video  @relation("ImportedVideo", fields: [id], references: [id])
   source String

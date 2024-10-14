@@ -194,8 +194,12 @@ export class MediaService implements IWithPermissions {
       images.map((image) => this.imageService.delete(image.id)),
     );
 
-    this.prisma.imported.delete({
+    this.prisma.imported.update({
       where: { id },
+      data: {
+        deleted: true,
+        deletedAt: new Date(),
+      },
     });
 
     return this.prisma.video.update({

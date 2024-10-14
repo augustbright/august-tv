@@ -1,4 +1,3 @@
-// TODO: setup eslint for backend
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
