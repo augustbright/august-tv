@@ -99,20 +99,22 @@ export class YoutubeService {
     params: PostImportFromYoutube.Body & { videoId?: string },
     job: Job,
   ) {
-    let videoId = params.videoId;
-    if (!videoId) {
+    let video: any = null;
+    if (!params.videoId) {
       job.stage('Looking for a video to import');
       const channelId = params.channelId ?? YOUTUBE_CC_CHANNEL_ID;
-      videoId = await this.getRandomSmallVideoFromChannel(channelId);
-      if (!videoId) {
-        job.error('No video found');
-        return;
-      }
+      video = await this.getRandomSmallVideoFromChannel(channelId);
+    } else {
+      video = (await this.getVideoDetails([params.videoId])).at(0);
+    }
+    if (!video) {
+      job.error('No video found');
+      return;
     }
 
     job.stage('Downloading video');
     const downloadJob = await this.videoDownloaderService.downloadVideo(
-      videoId,
+      video.id,
       {
         observers: params.observers,
       },
@@ -121,29 +123,32 @@ export class YoutubeService {
 
     downloadJob.once('done', async () => {
       job.stage('Processing video');
-      const { filePath, originalname } = downloadJob.metadata;
-      const { job: processingJob, video } = await this.mediaService.upload(
-        {
-          path: filePath as string,
-          originalname: path.basename(filePath as string),
-        },
-        params.authorId,
-        {
-          observers: params.observers,
-        },
-      );
+      const { filePath } = downloadJob.metadata;
+      const { job: processingJob, video: dbVideo } =
+        await this.mediaService.upload(
+          {
+            path: filePath as string,
+            originalname: path.basename(filePath as string),
+          },
+          params.authorId,
+          {
+            observers: params.observers,
+          },
+        );
 
       job.registerChildJob(processingJob);
 
       processingJob.once('done', async () => {
         await this.prismaService.video.update({
-          where: { id: video.id },
+          where: { id: dbVideo.id },
           data: {
             ...(params.publicImmediately ? { visibility: 'PUBLIC' } : {}),
-            title: originalname as string,
+            title: video.snippet?.title ?? 'Untitled',
+            description: video.snippet?.description ?? '',
             imported: {
               create: {
                 source: 'youtube',
+                originalId: video.id,
               },
             },
           },
@@ -157,7 +162,7 @@ export class YoutubeService {
     channelId: string,
   ): Promise<string[]> {
     try {
-      const url = `${this.API_URL}/search?key=${this.API_KEY}&channelId=${channelId}&part=snippet,id&order=date&maxResults=50`;
+      const url = `${this.API_URL}/search?key=${this.API_KEY}&channelId=${channelId}&part=snippet,id&order=viewCount&maxResults=300`;
 
       const response = await firstValueFrom(this.httpService.get(url));
       const videos = response.data.items.filter((item) => item.id.videoId); // Only include videos
@@ -182,7 +187,7 @@ export class YoutubeService {
       const videoDetails = await this.getVideoDetails(videoIds);
 
       // Step 3: Filter videos based on duration (e.g., less than 10 minutes)
-      const filteredVideos = videoDetails.filter((video) => {
+      let filteredVideos = videoDetails.filter((video) => {
         const duration = this.parseISO8601Duration(
           video.contentDetails.duration,
         );
@@ -190,12 +195,36 @@ export class YoutubeService {
       });
 
       //TODO: filter out previously imported videos. For this it is necessary to add original video id to the imported model
+      const alreadyImported = await this.prismaService.imported.findMany({
+        where: {
+          AND: [
+            {
+              id: {
+                in: filteredVideos.map((video) => video.id),
+              },
+            },
+            {
+              source: 'youtube',
+            },
+            {
+              deleted: false,
+            },
+          ],
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      filteredVideos = filteredVideos.filter(
+        (video) =>
+          !alreadyImported.some((imported) => imported.id === video.id),
+      );
 
       const randomVideo =
         filteredVideos[Math.floor(Math.random() * filteredVideos.length)];
-      const videoId = randomVideo.id;
 
-      return videoId;
+      return randomVideo;
     } catch {
       throw new HttpException('Failed to fetch videos', HttpStatus.BAD_REQUEST);
     }

@@ -286,8 +286,9 @@ model Imported {
   deletedAt DateTime?
   deleted   Boolean   @default(false)
 
-  video  Video  @relation("ImportedVideo", fields: [id], references: [id])
-  source String
+  video      Video  @relation("ImportedVideo", fields: [id], references: [id])
+  source     String
+  originalId String
 
   @@map("imported")
 }

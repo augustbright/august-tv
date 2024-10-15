@@ -389,7 +389,6 @@ export class MediaService implements IWithPermissions {
           ),
         );
 
-        // TODO upload later, after db operations are done
         job.stage('uploading files');
         await uploadManyFiles(videoVariantFiles, video.fileSetId);
         await uploadManyFiles(videoPartsFiles, video.fileSetId);
