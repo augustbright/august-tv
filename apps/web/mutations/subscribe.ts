@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { KEY } from '@/queries/keys';
 import { getQueryClient } from '@/queries/queryClient';
 import { UseMutationOptions, useMutation } from '@tanstack/react-query';
@@ -12,8 +12,7 @@ export const mutateSubscribe = (): UseMutationOptions<
   string
 > => ({
   mutationFn: async (authorId) => {
-    const apiClient = await getApiClient();
-    const result = await apiClient.post(API.subscribe(), { authorId });
+    const result = await api((r) => r.user.subscribe).post({ authorId });
     getQueryClient().invalidateQueries({
       queryKey: KEY.MY_SUBSCRIPTIONS
     });

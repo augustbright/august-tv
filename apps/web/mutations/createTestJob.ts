@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { TJobTestParams } from '@august-tv/common/types';
 import { UseMutationOptions, useMutation } from '@tanstack/react-query';
 
@@ -11,8 +11,7 @@ export const mutateCreateTestJob = (): UseMutationOptions<
   TJobTestParams
 > => ({
   mutationFn: async (params) => {
-    const apiClient = await getApiClient();
-    const result = await apiClient.post(API.testJob(), params);
+    const result = await api((r) => r.jobs.test).post(params);
     return result;
   },
   onError: (error) => {

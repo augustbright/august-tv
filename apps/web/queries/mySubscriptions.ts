@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { TUserEndpointResult } from '@august-tv/dto';
 import { UndefinedInitialDataOptions, useQuery } from '@tanstack/react-query';
 
@@ -9,8 +9,7 @@ export const queryMySubscriptions = (): UndefinedInitialDataOptions<
 > => ({
   queryKey: KEY.MY_SUBSCRIPTIONS,
   queryFn: async () => {
-    const apiClient = await getApiClient();
-    const { data } = await apiClient.get(API.mySubscriptions());
+    const { data } = await api((r) => r.user.mySubscriptions).get();
     return data;
   }
 });

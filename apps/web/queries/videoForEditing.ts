@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { TMediaEndpointResult } from '@august-tv/dto';
 import { UndefinedInitialDataOptions, useQuery } from '@tanstack/react-query';
 
@@ -10,8 +10,7 @@ export const queryVideoForEditing = (
   queryKey: KEY.VIDEO(id as string),
   enabled: !!id,
   queryFn: async () => {
-    const apiClient = await getApiClient();
-    const { data } = await apiClient.get(API.videoForEditing(id as string));
+    const { data } = await api((r) => r.media.edit.$(id!)).get();
     return data;
   }
 });

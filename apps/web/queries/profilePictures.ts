@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { TUserEndpointResult } from '@august-tv/dto';
 import { UndefinedInitialDataOptions, useQuery } from '@tanstack/react-query';
 
@@ -9,8 +9,7 @@ export const queryProfilePictures = (): UndefinedInitialDataOptions<
 > => ({
   queryKey: KEY.PROFILE_PICTURES,
   queryFn: async () => {
-    const apiClient = await getApiClient();
-    const { data } = await apiClient.get(API.profilePictures());
+    const { data } = await api((r) => r.user.profilePictures).get();
     return data;
   }
 });

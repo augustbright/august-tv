@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { TFeedEndpointResult } from '@august-tv/dto';
 import { UndefinedInitialDataOptions, useQuery } from '@tanstack/react-query';
 
@@ -9,8 +9,7 @@ export const queryFeedLatest = (): UndefinedInitialDataOptions<
 > => ({
   queryKey: KEY.FEED,
   queryFn: async () => {
-    const apiClient = await getApiClient();
-    const { data } = await apiClient.get(API.feedLatest());
+    const { data } = await api((r) => r.feed.latest).get();
     return data;
   }
 });

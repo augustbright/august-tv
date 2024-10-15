@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { KEY } from '@/queries/keys';
 import { getQueryClient } from '@/queries/queryClient';
 import { TMediaEndpointResult } from '@august-tv/dto';
@@ -30,12 +30,11 @@ export const mutateUploadMedia = (): UseMutationOptions<
 
     formData.append('file', file, file.name);
 
-    const apiClient = await getApiClient();
-    const result = await apiClient.post(API.uploadMedia(), formData);
+    const result = await api((r) => r.media.upload).post(formData);
     getQueryClient().invalidateQueries({
       queryKey: KEY.MY_MEDIA
     });
-    return result.data;
+    return result.data as TMediaEndpointResult<'uploadMedia'>;
   }
 });
 

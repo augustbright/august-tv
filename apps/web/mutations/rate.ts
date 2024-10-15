@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { TMediaEndpointResult } from '@august-tv/dto';
 import { UseMutationOptions, useMutation } from '@tanstack/react-query';
 
@@ -11,9 +11,8 @@ export const mutateRate = (): UseMutationOptions<
   { videoId: string; type: 'LIKE' | 'DISLIKE' | null }
 > => ({
   mutationFn: async ({ videoId, type }) => {
-    const apiClient = await getApiClient();
-    const result = await apiClient.post(API.rate(videoId), { type });
-    return result.data;
+    const result = await api((r) => r.media.rate.$(videoId)).post({ type });
+    return result.data as TMediaEndpointResult<'rateMedia'>;
   },
   onError: (error) => {
     if (error instanceof AxiosError) {

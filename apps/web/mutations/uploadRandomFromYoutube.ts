@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { Dto } from '@august-tv/dto';
 import { UseMutationOptions, useMutation } from '@tanstack/react-query';
 
@@ -11,8 +11,7 @@ export const mutateUploadRandomFromYoutube = (): UseMutationOptions<
   Dto['youtube']['postImportFromYoutube']['body']
 > => ({
   mutationFn: async (params) => {
-    const apiClient = await getApiClient();
-    const result = await apiClient.post(API.importFromYoutube(), params);
+    const result = await api((r) => r.youtube.importFromYoutube).post(params);
     return result;
   },
   onError: (error) => {

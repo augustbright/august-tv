@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { KEY } from '@/queries/keys';
 import { getQueryClient } from '@/queries/queryClient';
 import { UseMutationOptions, useMutation } from '@tanstack/react-query';
@@ -11,8 +11,7 @@ export const mutateDeleteVideoById = (): UseMutationOptions<
   string
 > => ({
   mutationFn: async (id) => {
-    const apiClient = await getApiClient();
-    const result = await apiClient.delete(API.mediaById(id));
+    const result = await api((r) => r.media.$(id)).delete();
     getQueryClient().invalidateQueries({
       queryKey: KEY.MY_MEDIA
     });

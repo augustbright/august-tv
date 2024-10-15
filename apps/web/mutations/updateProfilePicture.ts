@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { KEY } from '@/queries/keys';
 import { getQueryClient } from '@/queries/queryClient';
 import { UseMutationOptions, useMutation } from '@tanstack/react-query';
@@ -14,8 +14,7 @@ export const mutateUpdateProfilePicture = (): UseMutationOptions<
   }
 > => ({
   mutationFn: async ({ imageId, crop }) => {
-    const apiClient = await getApiClient();
-    const result = await apiClient.post(API.updateProfilePicture(), {
+    const result = api((r) => r.user.updateProfilePicture).post({
       imageId,
       crop
     });

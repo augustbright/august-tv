@@ -2,12 +2,11 @@ import { KEY } from '@/queries/keys';
 import { getQueryClient } from '@/queries/queryClient';
 import { UseMutationOptions, useMutation } from '@tanstack/react-query';
 
-import { API, getApiClient } from '../api';
+import { api } from '../api';
 
 export const mutateSignOut = (): UseMutationOptions => ({
   mutationFn: async () => {
-    const apiClient = await getApiClient();
-    await apiClient.post(API.signOut());
+    await api((r) => r.user['sign-out']).post(undefined);
 
     getQueryClient().invalidateQueries({
       queryKey: KEY.CURRENT_USER

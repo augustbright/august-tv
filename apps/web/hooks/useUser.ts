@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { useMutateSignInWithGoogle } from '@/mutations/signInWithGoogle';
 import { useMutateSignOut } from '@/mutations/signOut';
 import { useQueryCurrentUser } from '@/queries/currentUser';
@@ -23,10 +23,9 @@ export const useUser = () => {
   const { refetch: refetchMyJobs } = useQuery({
     queryKey: KEY.MY_JOBS,
     queryFn: async () => {
-      const apiClient = await getApiClient();
-      const { data } = await apiClient.get<TUserEndpointResult<'getMyJobs'>>(
-        API.myJobs()
-      );
+      const { data } = await api((r) => r.user.myJobs).get<
+        TUserEndpointResult<'getMyJobs'>
+      >();
       setJobs(data);
       return data;
     }

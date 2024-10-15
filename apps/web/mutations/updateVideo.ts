@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { KEY } from '@/queries/keys';
 import { getQueryClient } from '@/queries/queryClient';
 import { Dto } from '@august-tv/dto';
@@ -13,8 +13,7 @@ export const mutateUpdateVideo = (): UseMutationOptions<
   }
 > => ({
   mutationFn: async ({ id, updateVideoDto }) => {
-    const apiClient = await getApiClient();
-    const result = await apiClient.patch(API.updateMedia(id), updateVideoDto);
+    const result = await api((r) => r.media.$(id)).patch(updateVideoDto);
     getQueryClient().invalidateQueries({
       queryKey: KEY.MY_MEDIA
     });

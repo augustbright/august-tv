@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { TUserEndpointResult } from '@august-tv/dto';
 import { UndefinedInitialDataOptions, useQuery } from '@tanstack/react-query';
 
@@ -9,13 +9,10 @@ export const querySearchUsers = (
 ): UndefinedInitialDataOptions<TUserEndpointResult<'searchUsers'>> => ({
   queryKey: KEY.SEARCH_USERS(params),
   queryFn: async () => {
-    const apiClient = await getApiClient();
-    const { data } = await apiClient.get(API.searchUsers(), {
-      params: {
-        q: params.query,
-        limit: params.limit,
-        cursor: params.cursor
-      }
+    const { data } = await api((r) => r.user.search).get({
+      q: params.query,
+      limit: params.limit,
+      cursor: params.cursor
     });
     return data;
   }

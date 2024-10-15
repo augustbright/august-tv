@@ -7,6 +7,10 @@
     "unused-imports"
   ],
   "rules": {
-    "unused-imports/no-unused-imports": "error"
+    "unused-imports/no-unused-imports": "error",
+    "curly": [
+      "error",
+      "multi-line"
+    ]
   }
 }

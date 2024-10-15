@@ -1,4 +1,4 @@
-import { API, getApiClient } from '@/api';
+import { api } from '@/api';
 import { KEY } from '@/queries/keys';
 import { getQueryClient } from '@/queries/queryClient';
 import { UseMutationOptions, useMutation } from '@tanstack/react-query';
@@ -38,8 +38,7 @@ export const mutateUploadProfilePicture = (): UseMutationOptions<
     formData.append('x', crop.x.toString());
     formData.append('y', crop.y.toString());
 
-    const apiClient = await getApiClient();
-    const result = await apiClient.post(API.uploadProfilePicture(), formData);
+    const result = await api((r) => r.user.uploadProfilePicture).post(formData);
     getQueryClient().invalidateQueries({
       queryKey: KEY.CURRENT_USER
     });

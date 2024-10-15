@@ -8,7 +8,7 @@ import {
   signInWithPopup
 } from 'firebase/auth';
 
-import { API, getApiClient } from '../api';
+import { api } from '../api';
 import { auth } from '../firebase';
 
 const googleProvider = new GoogleAuthProvider();
@@ -20,8 +20,8 @@ export const mutateSignInWithGoogle =
     mutationFn: async () => {
       const userCredential = await signInWithPopup(auth, googleProvider);
       const idToken = await userCredential.user.getIdToken();
-      const apiClient = await getApiClient();
-      await apiClient.post(API.sessionLogin(), { idToken });
+
+      await api((r) => r.user.sessionLogin).post({ idToken });
 
       getQueryClient().invalidateQueries({
         queryKey: KEY.CURRENT_USER
