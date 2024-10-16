@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { Storage, TransferManager } from '@google-cloud/storage';
 import { getManyFiles, resolveUploadPath } from 'src/common/fs-utils';
 import * as path from 'path';
+import { env } from 'src/assert-env';
 
 @Injectable()
 export class StorageService {
   private readonly storage = new Storage();
-  private readonly bucketName = process.env.GOOGLE_CLOUD_MEDIA_BUCKET_NAME!;
+  private readonly bucketName = env.GOOGLE_CLOUD_MEDIA_BUCKET_NAME;
   private readonly transferManager = new TransferManager(
     this.storage.bucket(this.bucketName),
   );

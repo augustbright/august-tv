@@ -15,6 +15,7 @@ import { GuardCheckService } from './common/guard-check.service';
 import { Reflector } from '@nestjs/core';
 import { YoutubeModule } from './youtube/youtube.module';
 import { JobsModule } from './jobs/jobs.module';
+import { KafkaModule } from './kafka/kafka.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { JobsModule } from './jobs/jobs.module';
     DbFileModule,
     YoutubeModule,
     JobsModule,
+    KafkaModule,
   ],
   controllers: [AppController],
   providers: [AppService, DbFileService, GuardCheckService, Reflector],

@@ -14,9 +14,10 @@ import { IWithPermissions, TActionType } from 'src/common/IWithPermissions';
 import { UserService } from 'src/user/user.service';
 import { JobsService } from 'src/jobs/jobs.service';
 import { PatchMedia } from './media.dto';
+import { env } from 'process';
 
 const storage = new Storage();
-const bucketName = process.env.GOOGLE_CLOUD_MEDIA_BUCKET_NAME!;
+const bucketName = env.GOOGLE_CLOUD_MEDIA_BUCKET_NAME!;
 const transferManager = new TransferManager(storage.bucket(bucketName));
 const rootOutputFolder = 'tmp/transcoded/';
 

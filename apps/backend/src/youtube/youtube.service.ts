@@ -9,13 +9,14 @@ import { MediaService } from 'src/media/media.service';
 import * as path from 'path';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostImportFromYoutube } from './youtube.dto';
+import { env } from 'src/assert-env';
 
 const YOUTUBE_CC_CHANNEL_ID = 'UCTwECeGqMZee77BjdoYtI2Q';
 
 @Injectable()
 export class YoutubeService {
-  private readonly API_URL = process.env.YOUTUBE_API_URL!;
-  private readonly API_KEY = process.env.YOUTUBE_API_KEY!;
+  private readonly API_URL = env.YOUTUBE_API_URL;
+  private readonly API_KEY = env.YOUTUBE_API_KEY;
 
   private logger: Logger = new Logger(YoutubeService.name);
 

@@ -4,9 +4,11 @@ import { AppModule } from './app.module';
 import { FirebaseAuthMiddleware } from './common/firebase-auth.middleware';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { env } from './assert-env';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
-  const port = process.env.BACKEND_PORT!;
+  const port = env.BACKEND_PORT;
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
@@ -35,14 +37,6 @@ async function bootstrap() {
     }),
   );
 
-  try {
-    console.log(`Starting server on port ${port}`);
-    await app.listen(port);
-    console.log(`Server started on port ${port}`);
-  } catch (error) {
-    console.error('Error starting server', error);
-  }
-
   // Graceful shutdown
   process.on('SIGINT', async () => {
     console.log('Received SIGINT, closing app...');
@@ -55,5 +49,29 @@ async function bootstrap() {
     await app.close();
     process.exit(0);
   });
+
+  try {
+    console.log(`Starting server on port ${port}`);
+    await app.listen(port);
+    console.log(`Server started on port ${port}`);
+  } catch (error) {
+    console.error('Error starting server', error);
+    return process.exit(1);
+  }
+
+  const kafkaMicroservice = app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        brokers: [env.KAFKA_BROKER],
+      },
+      consumer: {
+        groupId: 'api-service-consumer',
+      },
+    },
+  });
+
+  await kafkaMicroservice.listen();
+  console.log('Kafka microservice started');
 }
 bootstrap();

@@ -130,7 +130,9 @@ export const makeAwesomeApiProcessor = <T extends ApiSchema>(api: Api<T>) => {
         params,
         selector,
         onSuccess
-      }: TAwesomeQueryOptionsWithSelector<unknown>): UndefinedInitialDataOptions => ({
+      }: Partial<
+        TAwesomeQueryOptionsWithSelector<unknown>
+      > = {}): UndefinedInitialDataOptions => ({
         queryKey: [path, params],
         queryFn: async () => {
           const result = await tools.get<T>(params);

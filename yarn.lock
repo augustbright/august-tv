@@ -1596,6 +1596,14 @@
   resolved "https://registry.yarnpkg.com/@nestjs/mapped-types/-/mapped-types-2.0.5.tgz#485d6b44e19779c98d04e52bd1d2bcc7001df0ea"
   integrity sha512-bSJv4pd6EY99NX9CjBIyn4TVDoSit82DUZlL4I3bqNfy5Gt+gXTa86i3I/i0iIV9P4hntcGM5GyO+FhZAhxtyg==
 
+"@nestjs/microservices@^10.4.5":
+  version "10.4.5"
+  resolved "https://registry.yarnpkg.com/@nestjs/microservices/-/microservices-10.4.5.tgz#a7e90f138a1f744b95e6cc1405f8da82c2e61f2a"
+  integrity sha512-H2mJAkvx8KJnMf7OShfJBrAdCj7lPP8z84unaIyXmbXB7KRIVD9aV+p81Hk9NnjElr4qsj+pmeUrAHK7+pG9CA==
+  dependencies:
+    iterare "1.2.1"
+    tslib "2.7.0"
+
 "@nestjs/platform-express@^10.0.0":
   version "10.4.4"
   resolved "https://registry.yarnpkg.com/@nestjs/platform-express/-/platform-express-10.4.4.tgz#582d375272207f8d1528f77ff470ba815d9d9846"
@@ -7883,6 +7891,11 @@ jws@^4.0.0:
   dependencies:
     jwa "^2.0.0"
     safe-buffer "^5.0.1"
+
+kafkajs@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/kafkajs/-/kafkajs-2.2.4.tgz#59e6e16459d87fdf8b64be73970ed5aa42370a5b"
+  integrity sha512-j/YeapB1vfPT2iOIUn/vxdyKEuhuY2PxMBvf5JWux6iSaukAccrMtXEY/Lb7OvavDhOWME589bpLrEdnVHjfjA==
 
 keyv@^4.5.3:
   version "4.5.4"

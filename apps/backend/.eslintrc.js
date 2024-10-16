@@ -23,5 +23,13 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'unused-imports/no-unused-imports': 'error',
     '@typescript-eslint/no-namespace': 'off',
+    'no-restricted-syntax': [
+      'error',
+      {
+        selector:
+          "MemberExpression[object.name='process'][property.name='env']",
+        message: 'use env from "assertEnv" instead',
+      },
+    ],
   },
 };
