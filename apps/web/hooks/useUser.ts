@@ -1,7 +1,6 @@
 import { api } from '@/api';
 import { useMutateSignInWithGoogle } from '@/mutations/signInWithGoogle';
 import { useMutateSignOut } from '@/mutations/signOut';
-import { useQueryCurrentUser } from '@/queries/currentUser';
 import { KEY } from '@/queries/keys';
 import { TMessage } from '@august-tv/common/types';
 import { TUserEndpointResult } from '@august-tv/dto';
@@ -17,7 +16,7 @@ import { ws } from '../websocket';
 const jobsAtom = atom<Job[]>([]);
 
 export const useUser = () => {
-  const { data: current } = useQueryCurrentUser();
+  const { data: current } = useQuery(api((r) => r.user.current).get.query());
   const queryClient = useQueryClient();
   const [rawJobs, setJobs] = useAtom(jobsAtom);
   const { refetch: refetchMyJobs } = useQuery({

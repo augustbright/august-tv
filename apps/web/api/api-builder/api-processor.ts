@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { getQueryClient } from '@/queries/queryClient';
 import {
   UndefinedInitialDataOptions,
   UseMutationOptions
@@ -110,6 +111,17 @@ export const makeAwesomeApiProcessor = <T extends ApiSchema>(api: Api<T>) => {
       ): Promise<R> {
         const client = await getApiClient();
         return client.request({ ...config, url: path });
+      },
+
+      async invalidate() {
+        getQueryClient().invalidateQueries({
+          predicate(query) {
+            return (
+              typeof query.queryKey[0] === 'string' &&
+              query.queryKey[0].toString().startsWith(path)
+            );
+          }
+        });
       }
     };
 
@@ -122,26 +134,6 @@ export const makeAwesomeApiProcessor = <T extends ApiSchema>(api: Api<T>) => {
         queryKey: [path, params],
         queryFn: async () => {
           const result = await tools.get<T>(params);
-          if (selector) {
-            const selected = await selector(result.data);
-            if (onSuccess) await onSuccess(result.data);
-            return selected;
-          }
-          if (onSuccess) await onSuccess(result.data);
-          return result.data;
-        }
-      })
-    });
-
-    Object.defineProperty(tools.options, 'query', {
-      value: ({
-        params,
-        selector,
-        onSuccess
-      }: TAwesomeQueryOptionsWithSelector<unknown>): UndefinedInitialDataOptions => ({
-        queryKey: [path, params],
-        queryFn: async () => {
-          const result = await tools.options<T>(params);
           if (selector) {
             const selected = await selector(result.data);
             if (onSuccess) await onSuccess(result.data);
