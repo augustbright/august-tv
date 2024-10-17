@@ -10,7 +10,7 @@
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "prestart:dev": "yarn build:dependencies",
-    "build:dependencies": "lerna run build --scope=@august-tv/common --scope=@august-tv/db",
+    "build:dependencies": "lerna run build --scope=@august-tv/common --scope=@august-tv/db --scope=@august-tv/server",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/august-tv-backend/main",
@@ -29,6 +29,7 @@
   "dependencies": {
     "@august-tv/common": "^1.0.0",
     "@august-tv/db": "^1.0.0",
+    "@august-tv/server": "^1.0.0",
     "@distube/ytdl-core": "^4.14.4",
     "@dotenvx/dotenvx": "^1.14.2",
     "@nestjs/axios": "^3.0.3",

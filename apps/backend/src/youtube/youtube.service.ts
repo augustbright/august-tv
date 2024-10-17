@@ -9,7 +9,7 @@ import { MediaService } from 'src/media/media.service';
 import * as path from 'path';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostImportFromYoutube } from './youtube.dto';
-import { env } from 'src/assert-env';
+import { env } from '@august-tv/server';
 
 const YOUTUBE_CC_CHANNEL_ID = 'UCTwECeGqMZee77BjdoYtI2Q';
 

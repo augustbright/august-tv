@@ -8,6 +8,7 @@ import { SocketsModule } from 'src/sockets/sockets.module';
 import { MediaModule } from 'src/media/media.module';
 import { JobsModule } from 'src/jobs/jobs.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
+import { KafkaModule } from 'src/kafka/kafka.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PrismaModule } from 'src/prisma/prisma.module';
     MediaModule,
     JobsModule,
     PrismaModule,
+    KafkaModule,
   ],
   controllers: [YoutubeController],
   providers: [YoutubeService, VideoDownloaderService],

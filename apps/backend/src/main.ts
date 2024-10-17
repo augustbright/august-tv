@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import { FirebaseAuthMiddleware } from './common/firebase-auth.middleware';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
-import { env } from './assert-env';
+import { env, gracefulShutdown } from '@august-tv/server';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
@@ -27,7 +27,7 @@ async function bootstrap() {
   app.use(new FirebaseAuthMiddleware().use);
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, document); // '/api' will serve the Swagger UI
+  SwaggerModule.setup('swagger', app, document);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -37,18 +37,7 @@ async function bootstrap() {
     }),
   );
 
-  // Graceful shutdown
-  process.on('SIGINT', async () => {
-    console.log('Received SIGINT, closing app...');
-    await app.close();
-    process.exit(0);
-  });
-
-  process.on('SIGTERM', async () => {
-    console.log('Received SIGTERM, closing app...');
-    await app.close();
-    process.exit(0);
-  });
+  gracefulShutdown(app);
 
   try {
     console.log(`Starting server on port ${port}`);

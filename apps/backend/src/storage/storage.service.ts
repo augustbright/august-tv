@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Storage, TransferManager } from '@google-cloud/storage';
 import { getManyFiles, resolveUploadPath } from 'src/common/fs-utils';
 import * as path from 'path';
-import { env } from 'src/assert-env';
+import { env } from '@august-tv/server';
 
 @Injectable()
 export class StorageService {
