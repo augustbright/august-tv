@@ -44,3 +44,5 @@ export type TJobType =
     | "downloading-from-youtube"
     | "process-video"
     | "test";
+
+export type TJobAction = "created" | "updated" | "done" | "failed";

@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { Guard } from './common/guard';
+import { Guard } from '@august-tv/server/utils';
 
 @Controller()
 export class AppController {

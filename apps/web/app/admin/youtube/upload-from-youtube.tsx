@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useUser } from "@/hooks/useUser";
-import { useMutateUploadRandomFromYoutube } from "@/mutations/uploadRandomFromYoutube";
-import { zodResolver } from "@hookform/resolvers/zod";
+  FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useUser } from '@/hooks/useUser';
+import { useMutateUploadRandomFromYoutube } from '@/mutations/uploadRandomFromYoutube';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
-import { number, z } from "zod";
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
+import { number, z } from 'zod';
 
-import { UserInput } from "../user-input";
-import { Input } from "@/components/ui/input";
+import { UserInput } from '../user-input';
 
 const formSchema = z.object({
   author: z.object(
@@ -30,23 +30,23 @@ const formSchema = z.object({
       picture: z
         .object({
           small: z.object({
-            publicUrl: z.string(),
-          }),
+            publicUrl: z.string()
+          })
         })
-        .nullable(),
+        .nullable()
     },
     {
-      required_error: "Author is required",
-    },
+      required_error: 'Author is required'
+    }
   ),
   publicImmediately: z.boolean().optional().default(true),
   numberOfVideos: number()
     .int()
     .positive()
-    .lte(10, "Maximum 10 videos")
+    .lte(10, 'Maximum 10 videos')
     .default(1),
   channelId: z.string().optional(),
-  videoId: z.string().optional(),
+  videoId: z.string().optional()
 });
 
 export const UploadFromYoutube = () => {
@@ -54,7 +54,7 @@ export const UploadFromYoutube = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {},
-    mode: "onSubmit",
+    mode: 'onSubmit'
   });
 
   const { mutateAsync: startImporting, isPending } =
@@ -69,33 +69,37 @@ export const UploadFromYoutube = () => {
         authorId: values.author.id,
         publicImmediately: values.publicImmediately,
 
-        observers: [current!.data.id],
+        observers: [current!.data.id]
       });
-      toast.success("Importing started");
+      toast.success('Importing started');
     } catch (error) {
       console.error(error);
-      toast.error("Failed to start importing");
+      toast.error('Failed to start importing');
     }
   }
   return (
-    <Card className="flex flex-col gap-4">
+    <Card className='flex flex-col gap-4'>
       <CardHeader>
         <CardTitle>Import from Youtube</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form
-            className="flex flex-col gap-4"
+            className='flex flex-col gap-4'
             onSubmit={form.handleSubmit(handleSubmit)}
           >
             <FormField
               control={form.control}
-              name="videoId"
+              name='videoId'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Video ID (optional)</FormLabel>
                   <FormControl>
-                    <Input {...field} type="text" placeholder="Video ID" />
+                    <Input
+                      {...field}
+                      type='text'
+                      placeholder='Video ID'
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -104,12 +108,16 @@ export const UploadFromYoutube = () => {
 
             <FormField
               control={form.control}
-              name="channelId"
+              name='channelId'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Channel ID (optional)</FormLabel>
                   <FormControl>
-                    <Input {...field} type="text" placeholder="Channel ID" />
+                    <Input
+                      {...field}
+                      type='text'
+                      placeholder='Channel ID'
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,7 +126,7 @@ export const UploadFromYoutube = () => {
 
             <FormField
               control={form.control}
-              name="author"
+              name='author'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Author</FormLabel>
@@ -133,8 +141,11 @@ export const UploadFromYoutube = () => {
                 </FormItem>
               )}
             />
-            <div className="flex justify-start">
-              <Button disabled={isPending} type="submit">
+            <div className='flex justify-start'>
+              <Button
+                disabled={isPending}
+                type='submit'
+              >
                 Start Importing
               </Button>
             </div>

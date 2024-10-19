@@ -5,7 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { ModulesContainer, Reflector } from '@nestjs/core';
-import { GUARD_TAG } from './guard';
+import { GUARD_TAG } from '@august-tv/server/utils';
 
 @Injectable()
 export class GuardCheckService implements OnModuleInit {

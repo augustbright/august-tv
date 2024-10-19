@@ -9,7 +9,7 @@
     "generate": "yarn generate:db && yarn generate:dtoTypes",
     "generate:db": "lerna run --stream --scope=@august-tv/db prisma:generate",
     "generate:dtoTypes": "lerna run --stream --scope=@august-tv/backend build:types",
-    "start:dev": "dotenvx run -f .env.local -- lerna run start:dev --stream",
+    "start:dev": "lerna run start:dev --stream",
     "lint": "lerna run lint --stream",
     "lint:ts": "lerna run lint:ts --stream"
   },

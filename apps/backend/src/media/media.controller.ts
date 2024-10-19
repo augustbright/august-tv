@@ -10,20 +10,24 @@ import {
   Get,
   Delete,
 } from '@nestjs/common';
+import { MediaUploadService } from '@august-tv/server/modules';
 import { MediaService } from './media.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { UPLOAD_PATH } from 'src/common/fs-utils';
+import { UPLOAD_PATH } from '@august-tv/server/fs-utils';
 import { randomUUID } from 'crypto';
 import * as path from 'path';
-import { Guard } from 'src/common/guard';
+import { Guard } from '@august-tv/server/utils';
 import { User } from 'src/user/user.decorator';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { PatchMedia } from './media.dto';
 
 @Controller('media')
 export class MediaController {
-  constructor(private readonly mediaService: MediaService) {}
+  constructor(
+    private readonly mediaService: MediaService,
+    private readonly mediaUploadService: MediaUploadService,
+  ) {}
 
   @Post('upload')
   @UseInterceptors(
@@ -47,7 +51,7 @@ export class MediaController {
     @UploadedFile() file: Express.Multer.File,
     @User({ required: true }) user: DecodedIdToken,
   ) {
-    const { video } = await this.mediaService.upload(file, user?.uid, {
+    const { video } = await this.mediaUploadService.upload(file, user?.uid, {
       observers: [user?.uid],
     });
 

@@ -3,8 +3,9 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { getAuth } from 'firebase-admin/auth';
 import { IWithPermissions, TActionType } from 'src/common/IWithPermissions';
 import { firebaseApp } from 'src/firebase';
-import { ImageService, TCrop } from 'src/image/image.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '@august-tv/server/modules';
+import { ImageService } from '@august-tv/server/modules';
+import { ImageCropDto } from '@august-tv/server/dto';
 
 @Injectable()
 export class UserService implements IWithPermissions {
@@ -85,7 +86,7 @@ export class UserService implements IWithPermissions {
   async uploadProfilePicture(
     userId: string,
     file: Express.Multer.File,
-    crop: TCrop,
+    crop: ImageCropDto,
   ) {
     const { pictureSetId } = await this.prisma.user.findUniqueOrThrow({
       where: { id: userId },
@@ -102,7 +103,11 @@ export class UserService implements IWithPermissions {
     return newImage;
   }
 
-  async updateProfilePicture(userId: string, imageId: string, crop: TCrop) {
+  async updateProfilePicture(
+    userId: string,
+    imageId: string,
+    crop: ImageCropDto,
+  ) {
     const newImage = await this.imageService.changeCrop(imageId, crop);
     await this.setProfilePicture(userId, newImage.id);
 

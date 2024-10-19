@@ -88,7 +88,7 @@ export const useUser = () => {
     if (!current && ws.isConnected) {
       ws.disconnect();
     }
-  }, [current, queryClient]);
+  }, [current, queryClient, refetchMyJobs, setJobs]);
 
   const signOut = useMutateSignOut();
 

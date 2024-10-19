@@ -1,15 +1,21 @@
-import * as cookieParser from 'cookie-parser';
+// TODO use keycloak for authentication
+
+import { env } from '@august-tv/env';
+import cookieParser from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { FirebaseAuthMiddleware } from './common/firebase-auth.middleware';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
-import { env, gracefulShutdown } from '@august-tv/server';
+import { gracefulShutdown, createServerLogger } from '@august-tv/server';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
-  const port = env.BACKEND_PORT;
-  const app = await NestFactory.create(AppModule);
+  const port = env.REST_PORT;
+  const logger = createServerLogger('rest');
+  const app = await NestFactory.create(AppModule, {
+    logger,
+  });
 
   app.enableCors({
     origin: 'http://localhost:8080',
@@ -40,11 +46,11 @@ async function bootstrap() {
   gracefulShutdown(app);
 
   try {
-    console.log(`Starting server on port ${port}`);
+    logger.log(`Starting server on port ${port}`);
     await app.listen(port);
-    console.log(`Server started on port ${port}`);
+    logger.log(`Server started`);
   } catch (error) {
-    console.error('Error starting server', error);
+    logger.error('Error starting server', error);
     return process.exit(1);
   }
 
@@ -55,7 +61,7 @@ async function bootstrap() {
         brokers: [env.KAFKA_BROKER],
       },
       consumer: {
-        groupId: 'api-service-consumer',
+        groupId: 'rest',
       },
     },
   });

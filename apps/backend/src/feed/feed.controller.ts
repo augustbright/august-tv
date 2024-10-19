@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { FeedService } from './feed.service';
 import { ApiTags } from '@nestjs/swagger';
-import { Guard } from 'src/common/guard';
+import { Guard } from '@august-tv/server/utils';
 import { User } from 'src/user/user.decorator';
 import { DecodedIdToken } from 'firebase-admin/auth';
 

@@ -16,12 +16,12 @@ import { UserService } from './user.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { randomUUID } from 'crypto';
-import { UPLOAD_PATH } from 'src/common/fs-utils';
-import { TCrop } from 'src/image/image.service';
+import { UPLOAD_PATH } from '@august-tv/server/fs-utils';
 import * as path from 'path';
-import { Guard } from 'src/common/guard';
+import { Guard } from '@august-tv/server/utils';
 import { User } from './user.decorator';
-import { JobsService } from 'src/jobs/jobs.service';
+import { JobsService } from '@august-tv/server/modules';
+import { ImageCropDto } from '@august-tv/server/dto';
 
 type TCropParams = { width: string; height: string; x: string; y: string };
 
@@ -119,7 +119,7 @@ export class UserController {
   @Guard.scope('user')
   async updateProfilePicture(
     @User({ required: true }) user: DecodedIdToken,
-    @Body() body: { imageId: string; crop: TCrop },
+    @Body() body: { imageId: string; crop: ImageCropDto },
   ) {
     const image = await this.userService.updateProfilePicture(
       user.uid,

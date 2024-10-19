@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { JobsService } from './jobs.service';
-import { Guard } from 'src/common/guard';
+import { JobsService } from '@august-tv/server/modules';
+import { Guard } from '@august-tv/server/utils';
 import { TJobTestParams } from '@august-tv/common/types';
 
 @Controller('jobs')

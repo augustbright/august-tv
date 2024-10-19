@@ -1,20 +1,7 @@
 {
 	"folders": [
 		{
-			"name": "root",
 			"path": "."
-		},
-		{
-			"name": "web",
-			"path": "apps/web"
-		},
-		{
-			"name": "backend",
-			"path": "apps/backend"
-		},
-		{
-			"name": "db",
-			"path": "packages/db"
 		}
 	],
 	"settings": {

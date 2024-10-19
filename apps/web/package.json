@@ -5,7 +5,7 @@
     "start:dev": "next dev -p 8080",
     "build": "next build",
     "prestart:dev": "yarn build:dependencies",
-    "build:dependencies": "lerna run build --scope=@august-tv/common && lerna run build:types --scope=@august-tv/backend",
+    "build:dependencies": "lerna run build --scope=@august-tv/common && lerna run build:types --scope=@august-tv/backend --scope=@august-tv/env",
     "start": "next start",
     "lint": "yarn lint:pretty && yarn lint:next && yarn lint:es && yarn lint:ts",
     "lint:pretty": "prettier \"{api,app,components,hooks,lib,mutations,queries}/**/*.ts{,x}\" \"./*.ts{,x}\" --write",
@@ -17,6 +17,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@august-tv/env": "^1.0.0",
     "@august-tv/common": "^1.0.0",
     "@august-tv/dto": "^1.0.0",
     "@hookform/resolvers": "^3.9.0",

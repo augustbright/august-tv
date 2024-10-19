@@ -1,12 +1,15 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 //@ts-check
+const { rawEnv } = require('@august-tv/env');
 
 module.exports = {
-    images: {
-        remotePatterns: [
-            {
-                protocol: "https",
-                hostname: "storage.googleapis.com",
-            },
-        ],
-    },
+  env: rawEnv,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com'
+      }
+    ]
+  }
 };

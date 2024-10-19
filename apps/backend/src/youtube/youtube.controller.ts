@@ -1,26 +1,18 @@
-import { Body, Controller, Inject, Post } from '@nestjs/common';
-import { Guard } from 'src/common/guard';
-import { YoutubeService } from './youtube.service';
-import { PostImportFromYoutube } from './youtube.dto';
-import { ClientKafka } from '@nestjs/microservices';
+import { Body, Controller, Post } from '@nestjs/common';
+import { Guard } from '@august-tv/server/utils';
+import { KafkaEmitterService } from '@august-tv/server/modules';
+import { YoutubeImportRequestDto } from '@august-tv/server/dto';
 
 @Controller('youtube')
 export class YoutubeController {
-  constructor(
-    private readonly youtubeService: YoutubeService,
-    @Inject('KAFKA_SERVICE')
-    private readonly kafkaService: ClientKafka,
-  ) {}
-
-  @Guard.scope('public')
-  async onModuleInit() {
-    await this.kafkaService.connect();
-  }
+  constructor(private readonly KafkaEmitterService: KafkaEmitterService) {}
 
   @Post('/importFromYoutube')
   @Guard.scope('admin')
-  async importFromYoutube(@Body() body: PostImportFromYoutube.Body) {
-    this.kafkaService.emit('youtube-import-requested', JSON.stringify(body));
-    // return this.youtubeService.importFromYoutube(body);
+  async importFromYoutube(@Body() body: YoutubeImportRequestDto) {
+    this.KafkaEmitterService.emit(
+      KafkaEmitterService.topics.YouTubeImportRequested,
+      body,
+    );
   }
 }

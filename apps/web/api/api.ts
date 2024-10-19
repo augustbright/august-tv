@@ -2,6 +2,7 @@ import { buildApi } from './api-builder/api-builder';
 import { makeAwesomeApiProcessor } from './api-builder/api-processor';
 
 const _api = buildApi({
+  health: true,
   feed: {
     latest: true,
     subscriptions: true
