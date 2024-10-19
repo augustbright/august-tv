@@ -19,6 +19,38 @@
 			"distube",
 			"ytdl"
 		],
-		"jestrunner.changeDirectoryToWorkspaceRoot": true
+		"jestrunner.changeDirectoryToWorkspaceRoot": true,
+		"npm.autoDetect": "on",
+		"npm.packageManager": "yarn",
+		"npm-scripts.showStartNotification": false
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"type": "node",
+				"request": "launch",
+				"name": "Rest",
+				"runtimeExecutable": "yarn",
+				"runtimeArgs": [
+					"start:dev"
+				],
+				"console": "integratedTerminal",
+				"internalConsoleOptions": "neverOpen",
+				"cwd": "${workspaceFolder}/apps/backend"
+			},
+			{
+				"type": "node",
+				"request": "launch",
+				"name": "Web",
+				"runtimeExecutable": "yarn",
+				"runtimeArgs": [
+					"start:dev"
+				],
+				"console": "integratedTerminal",
+				"internalConsoleOptions": "neverOpen",
+				"cwd": "${workspaceFolder}/apps/web"
+			},
+		]
 	}
 }

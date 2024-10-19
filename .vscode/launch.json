@@ -1,0 +1,44 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Rest",
+            "runtimeExecutable": "yarn",
+            "runtimeArgs": [
+                "start:dev"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "cwd": "${workspaceFolder}/apps/backend"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Youtube Importer",
+            "runtimeExecutable": "yarn",
+            "runtimeArgs": [
+                "start:dev"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "cwd": "${workspaceFolder}/apps/youtube-importer"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Web",
+            "runtimeExecutable": "yarn",
+            "runtimeArgs": [
+                "start:dev"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "cwd": "${workspaceFolder}/apps/web"
+        }
+    ]
+}

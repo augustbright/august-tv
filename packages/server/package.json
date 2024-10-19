@@ -12,8 +12,9 @@
     "./utils": "./dist/utils/index.js"
   },
   "scripts": {
+    "build": "yarn clean && tsc",
     "clean": "rimraf ./dist",
-    "build": "yarn clean && tsc"
+    "generate:types": "tsc -p tsconfig.generate-dto-types.json"
   },
   "license": "MIT",
   "dependencies": {

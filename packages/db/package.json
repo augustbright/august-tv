@@ -2,6 +2,7 @@
     "name": "@august-tv/db",
     "version": "1.0.0",
     "scripts": {
+        "build": "prisma generate",
         "prisma:generate": "prisma generate",
         "prisma:studio": "prisma studio"
     },
