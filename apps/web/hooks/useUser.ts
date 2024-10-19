@@ -3,7 +3,7 @@ import { useMutateSignInWithGoogle } from '@/mutations/signInWithGoogle';
 import { useMutateSignOut } from '@/mutations/signOut';
 import { KEY } from '@/queries/keys';
 import { TMessage } from '@august-tv/common/types';
-import { TUserEndpointResult } from '@august-tv/dto';
+import { TUserEndpointResult } from '@august-tv/generated-types';
 import { Job } from '@prisma/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -16,7 +16,11 @@ import { ws } from '../websocket';
 const jobsAtom = atom<Job[]>([]);
 
 export const useUser = () => {
-  const { data: current } = useQuery(api((r) => r.user.current).get.query());
+  const { data: current } = useQuery(
+    api((r) => r.user.current).get.query<
+      TUserEndpointResult<'getCurrentUser'>
+    >()
+  );
   const queryClient = useQueryClient();
   const [rawJobs, setJobs] = useAtom(jobsAtom);
   const { refetch: refetchMyJobs } = useQuery({

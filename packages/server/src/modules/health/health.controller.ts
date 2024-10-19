@@ -13,13 +13,13 @@ import { PrismaHealthIndicator } from "./prisma.health-indicator";
 @Controller("health")
 export class HealthController {
     constructor(
-        private health: HealthCheckService,
-        private http: HttpHealthIndicator,
-        private prisma: PrismaHealthIndicator,
-        private memory: MemoryHealthIndicator,
-        private disk: DiskHealthIndicator,
+        private readonly health: HealthCheckService,
+        private readonly http: HttpHealthIndicator,
+        private readonly prisma: PrismaHealthIndicator,
+        private readonly memory: MemoryHealthIndicator,
+        private readonly disk: DiskHealthIndicator,
         @Inject("HEALTH_INDICATORS")
-        private healthIndicators: HealthCheckFn[]
+        private readonly healthIndicators: HealthCheckFn[]
     ) {}
 
     @Get()

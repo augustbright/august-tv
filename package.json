@@ -6,19 +6,18 @@
   "scripts": {
     "build": "yarn workspaces run build",
     "build:packages": "yarn workspace @august-tv/common build && yarn workspace @august-tv/server build && yarn workspace @august-tv/db build && yarn workspace @august-tv/generated-types build && yarn workspace @august-tv/env build",
+    "lint": "lerna run lint --stream",
+    "lint:ts": "lerna run lint:ts --stream",
     "generate-types": "yarn generate:db && yarn generate:dtoTypes",
     "generate:db": "lerna run --stream --scope=@august-tv/db prisma:generate",
     "generate:dtoTypes": "lerna run --stream --scope=@august-tv/backend build:types",
-    "start:dev": "lerna run start:dev --stream",
-    "lint": "lerna run lint --stream",
-    "lint:ts": "lerna run lint:ts --stream"
+    "start:dev": "lerna run start:dev --stream"
   },
   "workspaces": [
     "packages/*",
     "apps/*"
   ],
   "devDependencies": {
-    "@august-tv/dto": "^1.0.0",
     "@types/node": "^22.7.4",
     "lerna": "^8.1.8",
     "ts-node": "^10.9.2",

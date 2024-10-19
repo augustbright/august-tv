@@ -1,7 +1,7 @@
 import { api } from '@/api';
 import { KEY } from '@/queries/keys';
 import { getQueryClient } from '@/queries/queryClient';
-import { TMediaEndpointResult } from '@august-tv/dto';
+import { TMediaEndpointResult } from '@august-tv/generated-types';
 import { UseMutationOptions, useMutation } from '@tanstack/react-query';
 
 const validateMediaFile = (media: File) => {

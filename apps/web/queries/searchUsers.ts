@@ -1,5 +1,5 @@
 import { api } from '@/api';
-import { TUserEndpointResult } from '@august-tv/dto';
+import { TUserEndpointResult } from '@august-tv/generated-types';
 import { UndefinedInitialDataOptions, useQuery } from '@tanstack/react-query';
 
 import { KEY, TSearchUsersQueryParams } from './keys';

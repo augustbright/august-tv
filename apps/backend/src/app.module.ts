@@ -1,4 +1,3 @@
-import { env } from '@august-tv/env';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -22,11 +21,6 @@ import { HealthModule } from '@august-tv/server/modules';
     JobsModule,
     HealthModule.forRoot({
       healthIndicators: [
-        ({ http }) =>
-          http.pingCheck(
-            'youtube-importer',
-            `http://${env.YOUTUBE_IMPORTER_HOST}:${env.YOUTUBE_IMPORTER_PORT}/health`,
-          ),
         ({ memory }) => memory.checkHeap('memory', 150 * 1024 * 1024),
         ({ prisma }) => prisma.isHealthy('postgres'),
       ],

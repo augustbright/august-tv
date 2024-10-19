@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useMutateRate } from '@/mutations/rate';
 import { queryMedia } from '@/queries/media';
-import { TMediaEndpointResult } from '@august-tv/dto';
+import { TMediaEndpointResult } from '@august-tv/generated-types';
 import { useQueryClient } from '@tanstack/react-query';
 
 import anime from 'animejs';

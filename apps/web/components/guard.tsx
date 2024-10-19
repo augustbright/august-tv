@@ -1,7 +1,7 @@
 'use client';
 
 import { queryCurrentUser } from '@/queries/currentUser';
-import { TUserEndpointResult } from '@august-tv/dto';
+import { TUserEndpointResult } from '@august-tv/generated-types';
 
 import { redirect } from 'next/navigation';
 import { useEffect } from 'react';

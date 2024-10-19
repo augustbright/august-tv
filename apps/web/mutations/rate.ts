@@ -1,5 +1,5 @@
 import { api } from '@/api';
-import { TMediaEndpointResult } from '@august-tv/dto';
+import { TMediaEndpointResult } from '@august-tv/generated-types';
 import { UseMutationOptions, useMutation } from '@tanstack/react-query';
 
 import { AxiosError } from 'axios';

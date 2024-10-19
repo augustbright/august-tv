@@ -1,5 +1,5 @@
 import { api } from '@/api';
-import { TMediaEndpointResult } from '@august-tv/dto';
+import { TMediaEndpointResult } from '@august-tv/generated-types';
 import { UndefinedInitialDataOptions, useQuery } from '@tanstack/react-query';
 
 import { KEY } from './keys';
