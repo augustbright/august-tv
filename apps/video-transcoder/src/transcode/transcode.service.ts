@@ -154,7 +154,10 @@ export class TranscodeService {
       });
 
       // Resize thumbnails to multiple sizes
-      const thumbnailFilesPaths = await fs.readdir(thumbnailOutputDir);
+      const thumbnailFilenames = await fs.readdir(thumbnailOutputDir);
+      const thumbnailFilesPaths = thumbnailFilenames.map((filename) =>
+        path.join(thumbnailOutputDir, filename),
+      );
       await Promise.all(
         thumbnailFilesPaths.map((thumbnailPath) => {
           this.imageService.createMultipleSizes({

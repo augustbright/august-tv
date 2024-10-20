@@ -46,9 +46,10 @@ export class UploadingService {
     dir: string;
     authorId: string;
   }) {
-    const filesPaths = await fs.readdir(dir, {
+    const filesnames = await fs.readdir(dir, {
       recursive: true,
     });
+    const filesPaths = filesnames.map((filename) => path.join(dir, filename));
 
     const folderName = generateString(10);
 
