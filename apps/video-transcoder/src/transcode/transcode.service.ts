@@ -1,11 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import ffmpeg from 'fluent-ffmpeg';
-import { writeFile } from 'fs/promises';
 import { ImageService, JobsService } from '@august-tv/server/modules';
 import { ensureUploadPath } from '@august-tv/server/fs-utils';
 import { randomUUID } from 'crypto';
 import path from 'path';
 import fs from 'fs/promises';
+import { generateString } from '@august-tv/common';
+
+const videosStorageDir = 'videos';
 
 const resolutions = [
   // {
@@ -39,6 +41,7 @@ const thumbnailsCount = 4;
 type TParams = {
   jobId: string;
   inputPath: string;
+  authorId: string;
 };
 
 @Injectable()
@@ -158,33 +161,41 @@ export class TranscodeService {
       const thumbnailFilesPaths = thumbnailFilenames.map((filename) =>
         path.join(thumbnailOutputDir, filename),
       );
-      await Promise.all(
-        thumbnailFilesPaths.map((thumbnailPath) => {
+      const [{ originalHeight, originalWidth }] = await Promise.all(
+        thumbnailFilesPaths.map((thumbnailPath) =>
           this.imageService.createMultipleSizes({
             originalPath: thumbnailPath,
-          });
-        }),
+          }),
+        ),
       );
 
       await transcodedFiles;
 
+      const folderName = generateString(10);
       const masterOutputPath = path.join(videoOutputDir, 'master.m3u8');
+      const storageDir = [videosStorageDir, params.authorId, folderName].join(
+        '/',
+      );
       const streamFilesContent = resolutions.map((resolution) => {
         return [
           `#EXT-X-STREAM-INF:BANDWIDTH=${resolution.bandwidth},RESOLUTION=${resolution.size}`,
-          `transcoded/${uuid}/${videoFolderName}/${resolution.resolution}_variant.m3u8`,
+          `${storageDir}/${videoFolderName}/${resolution.resolution}_variant.m3u8`,
         ].join('\n');
       });
       const streamFiles = streamFilesContent.join('\n');
       const masterPlaylistContent = `#EXTM3U\n${streamFiles}`;
-      await writeFile(masterOutputPath, masterPlaylistContent);
+      await fs.writeFile(masterOutputPath, masterPlaylistContent);
 
       processingJob.done();
       job.done();
 
       await fs.rename(params.inputPath, path.join(dir, 'original.mp4'));
 
-      return { dir };
+      return {
+        dir,
+        storageDir,
+        thumbnailOriginalSize: { height: originalHeight, width: originalWidth },
+      };
     } catch (error) {
       this.logger.error('Failed to transcode video', error);
       processingJob.error('Failed to process video');

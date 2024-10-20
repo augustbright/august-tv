@@ -20,6 +20,7 @@ export class TranscodeController {
       .transcode({
         inputPath: payload.path,
         jobId: payload.jobId,
+        authorId: payload.authorId,
       })
       .then((result) => {
         this.kafkaEmitterService.emit(
@@ -28,7 +29,12 @@ export class TranscodeController {
             authorId: payload.authorId,
             jobId: payload.jobId,
             originalName: payload.originalName,
+            videoDescription: payload.videoDescription,
+            videoTitle: payload.videoTitle,
             dir: result.dir,
+            storageDir: result.storageDir,
+            thumbnailOriginalSize: result.thumbnailOriginalSize,
+            publicImmediately: payload.publicImmediately,
           },
         );
       })

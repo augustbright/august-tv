@@ -1,24 +1,10 @@
-// TODO: Implement media transcode microservice
 import { env } from '@august-tv/env';
 
-import { Injectable } from '@nestjs/common';
-import { Storage, TransferManager } from '@google-cloud/storage';
-import { randomUUID } from 'crypto';
+import { Injectable, Logger } from '@nestjs/common';
+import { Storage } from '@google-cloud/storage';
 import * as fs from 'fs/promises';
-import { Prisma, PrismaClient, Video } from '@prisma/client';
 import * as path from 'path';
-import {
-  ImageService,
-  JobsService,
-  PrismaService,
-} from '@august-tv/server/modules';
-import { getManyFiles } from '@august-tv/server/fs-utils';
-import { generateString } from '@august-tv/common';
-import { Prisma } from '@prisma/client';
-
-const storage = new Storage();
-const bucketName = env.GOOGLE_CLOUD_MEDIA_BUCKET_NAME;
-const transferManager = new TransferManager(storage.bucket(bucketName));
+import { JobsService, PrismaService } from '@august-tv/server/modules';
 
 export type TTempFile = {
   originalName: string;
@@ -29,78 +15,256 @@ export type TTempFile = {
 export class UploadingService {
   private readonly storage = new Storage();
   private readonly bucketName = env.GOOGLE_CLOUD_MEDIA_BUCKET_NAME;
-  private readonly transferManager = new TransferManager(
-    this.storage.bucket(this.bucketName),
-  );
+  private readonly logger = new Logger(UploadingService.name);
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly imageService: ImageService,
     private readonly jobsService: JobsService,
   ) {}
 
   async uploadTranscodedVideo({
+    jobId,
     dir,
+    storageDir,
     authorId,
+    thumbnailOriginalSize,
+    videoTitle,
+    videoDescription,
+    uploadImmediately,
   }: {
+    jobId: string;
     dir: string;
+    storageDir: string;
     authorId: string;
+    thumbnailOriginalSize: {
+      width: number;
+      height: number;
+    };
+    videoTitle: string;
+    videoDescription: string;
+    uploadImmediately: boolean;
   }) {
-    const filesnames = await fs.readdir(dir, {
-      recursive: true,
-    });
-    const filesPaths = filesnames.map((filename) => path.join(dir, filename));
-
-    const folderName = generateString(10);
-
-    // upload files to storage
-    let uploadedCount = 0;
-
-    const responses = await Promise.all(
-      filesPaths.map(async (filePath) => {
-        const relPath = filePath.split(dir).at(-1)!;
-        const destination = path.join(authorId, folderName, relPath);
-        const [response] = await this.storage
-          .bucket(this.bucketName)
-          .upload(filePath, {
-            destination,
-          });
-
-        uploadedCount++;
-
-        return response;
-      }),
+    const job = await this.jobsService.getById(jobId);
+    const uploadingJob = await this.jobsService.create(
+      {
+        name: 'Uploading video',
+        payload: {},
+        type: 'uploading-video',
+      },
+      {
+        observers: job.observers,
+      },
     );
 
-    responses.reduce((acc, response) => {}, {
-      thumbnails: [],
-      videoFiles: [],
-    });
+    try {
+      const files = await fs.readdir(dir, {
+        recursive: true,
+        withFileTypes: true,
+      });
+      const filesPaths = files
+        .filter((file) => file.isFile())
+        .map((file) => path.join(file.parentPath, file.name));
 
-    // create files in db
-    // const dbFiles = await Promise.all(
-    //   responses.map((response) =>
-    //     this.prisma.file.create({
-    //       data: {
-    //         filename: path.basename(response.name),
-    //         path: response.name,
-    //         publicUrl: response.publicUrl(),
-    //       },
-    //     }),
-    //   ),
-    // );
+      // upload files to storage
+      const totalCount = filesPaths.length;
+      let uploadedCount = 0;
 
-    // const dbFiles = await this.prisma.file.createMany({
-    //   data: responses.map(
-    //     (response) =>
-    //       ({
-    //         filename: path.basename(response.name),
-    //         path: response.name,
-    //         publicUrl: response.publicUrl(),
-    //       }) as Prisma.FileCreateManyInput,
-    //   ),
-    // });
+      const responses = await Promise.all(
+        filesPaths.map(async (filePath) => {
+          const relPath = filePath.split(dir).at(-1)!;
+          const destination = path.join(storageDir, relPath);
+          const [response] = await this.storage
+            .bucket(this.bucketName)
+            .upload(filePath, {
+              destination,
+            });
 
-    // delete files from disk
+          uploadedCount++;
+          const percent = Math.round((uploadedCount / totalCount) * 100);
+          uploadingJob.progress(percent);
+
+          return response;
+        }),
+      );
+
+      type TCreateFileConfig = {
+        filename: string;
+        path: string;
+        publicUrl: string;
+      };
+
+      const structured: {
+        thumbnails: {
+          small: TCreateFileConfig;
+          medium: TCreateFileConfig;
+          large: TCreateFileConfig;
+          original: TCreateFileConfig;
+        }[];
+        videoFiles: TCreateFileConfig[];
+        master: TCreateFileConfig;
+      } = responses.reduce(
+        (acc, response) => {
+          const segments = response.name.split('/');
+          segments.shift();
+          segments.shift();
+          segments.shift();
+
+          let segment = segments.shift();
+          if (segment === 'video') {
+            segment = segments.shift();
+            if (segment.startsWith('master')) {
+              return {
+                ...acc,
+                master: {
+                  filename: segment,
+                  path: response.name,
+                  publicUrl: response.publicUrl(),
+                },
+              };
+            } else {
+              return {
+                ...acc,
+                videoFiles: [
+                  ...acc.videoFiles,
+                  {
+                    filename: segment,
+                    path: response.name,
+                    publicUrl: response.publicUrl(),
+                  },
+                ],
+              };
+            }
+          } else if (segment === 'thumbnails') {
+            segment = segments.shift();
+            const thumbnailIdx = Number(segment.split('_').at(-1)) - 1;
+            const thumbnail = acc.thumbnails[thumbnailIdx] ?? {};
+            segment = segments.shift();
+            const extension = path.extname(segment);
+            const size = path.basename(segment, extension);
+            thumbnail[size] = {
+              filename: segment,
+              path: response.name,
+              publicUrl: response.publicUrl(),
+            };
+            acc.thumbnails[thumbnailIdx] = thumbnail;
+            return acc;
+          } else if (segment.startsWith('original')) {
+          } else {
+            // error
+          }
+          return acc;
+        },
+        {
+          thumbnails: [],
+          videoFiles: [],
+          master: {
+            filename: '',
+            path: '',
+            publicUrl: '',
+          },
+        },
+      );
+
+      const dbFileSet = await this.prisma.fileSet.create({
+        data: {
+          files: {
+            createMany: {
+              data: structured.videoFiles,
+            },
+          },
+        },
+      });
+
+      const dbMaster = await this.prisma.file.create({
+        data: {
+          ...structured.master,
+          fileSet: {
+            connect: {
+              id: dbFileSet.id,
+            },
+          },
+        },
+      });
+
+      const dbThumbnailSet = await this.prisma.imageSet.create({
+        data: {},
+      });
+
+      const dbThumbnails = await Promise.all(
+        structured.thumbnails.map(async (thumbnail) =>
+          this.prisma.image.create({
+            data: {
+              original: {
+                create: thumbnail.original,
+              },
+              large: {
+                create: thumbnail.large,
+              },
+              medium: {
+                create: thumbnail.medium,
+              },
+              small: {
+                create: thumbnail.small,
+              },
+              originalHeight: thumbnailOriginalSize.height,
+              originalWidth: thumbnailOriginalSize.width,
+              owner: {
+                connect: {
+                  id: authorId,
+                },
+              },
+              set: {
+                connect: {
+                  id: dbThumbnailSet.id,
+                },
+              },
+            },
+          }),
+        ),
+      );
+
+      const video = await this.prisma.video.create({
+        data: {
+          title: videoTitle,
+          description: videoDescription,
+          status: 'READY',
+          visibility: uploadImmediately ? 'PUBLIC' : 'DRAFT',
+          author: {
+            connect: {
+              id: authorId,
+            },
+          },
+          thumbnailSet: {
+            connect: {
+              id: dbThumbnailSet.id,
+            },
+          },
+          thumbnail: {
+            connect: {
+              id: dbThumbnails[0].id,
+            },
+          },
+          fileSet: {
+            connect: {
+              id: dbFileSet.id,
+            },
+          },
+          master: {
+            connect: {
+              id: dbMaster.id,
+            },
+          },
+        },
+      });
+
+      uploadingJob.done();
+      job.done();
+
+      return { video };
+    } catch (error) {
+      uploadingJob.error(error.message);
+      job.error(error.message);
+      this.logger.error(error);
+    }
   }
 }

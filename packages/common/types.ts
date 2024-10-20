@@ -43,6 +43,7 @@ export type TJobType =
     | "import-one-from-youtube"
     | "downloading-from-youtube"
     | "process-video"
+    | "uploading-video"
     | "test";
 
 export type TJobAction = "created" | "updated" | "done" | "failed";

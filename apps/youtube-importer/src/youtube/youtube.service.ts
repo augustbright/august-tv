@@ -155,6 +155,9 @@ export class YoutubeService {
             jobId: job.id,
             originalName: path.basename(filePath as string),
             path: filePath as string,
+            videoTitle: video.snippet.title,
+            videoDescription: video.snippet.description,
+            publicImmediately: !!params.publicImmediately,
           },
         );
       });

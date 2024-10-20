@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { randomUUID } from "crypto";
 import sharp from "sharp";
 import * as path from "path";
+import fs from "fs/promises";
 import {
     cleanUp,
     ensureDir,
@@ -158,7 +159,8 @@ export class ImageService {
         const originalDir = path.dirname(originalPath);
         const name = path.basename(originalPath);
         const extension = path.extname(name);
-        const resizedDir = path.join(originalDir, name);
+        const folderName = path.basename(name, extension);
+        const resizedDir = path.join(originalDir, folderName);
         await ensureDir(resizedDir);
 
         await Promise.all(
@@ -170,6 +172,20 @@ export class ImageService {
                     .toFile(filePath);
             })
         );
+
+        const { width: originalWidth, height: originalHeight } =
+            await sharp(originalPath).metadata();
+
+        await fs.rename(
+            originalPath,
+            path.join(resizedDir, `original${extension}`)
+        );
+
+        return {
+            originalHeight: originalHeight!,
+            originalWidth: originalWidth!,
+            resizedDir,
+        };
     }
 
     async delete(imageId: string) {

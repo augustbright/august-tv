@@ -50,7 +50,7 @@
             ],
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
-            "cwd": "${workspaceFolder}/apps/storage-uploading"
+            "cwd": "${workspaceFolder}/apps/storage-uploading",
         },
         {
             "type": "node",
