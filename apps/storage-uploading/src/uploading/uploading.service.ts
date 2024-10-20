@@ -23,7 +23,7 @@ export class UploadingService {
   ) {}
 
   async uploadTranscodedVideo({
-    jobId,
+    observers,
     dir,
     storageDir,
     authorId,
@@ -32,7 +32,7 @@ export class UploadingService {
     videoDescription,
     uploadImmediately,
   }: {
-    jobId: string;
+    observers: string[];
     dir: string;
     storageDir: string;
     authorId: string;
@@ -44,227 +44,216 @@ export class UploadingService {
     videoDescription: string;
     uploadImmediately: boolean;
   }) {
-    const job = await this.jobsService.getById(jobId);
-    const uploadingJob = await this.jobsService.create(
+    return this.jobsService.wrap(
       {
         name: 'Uploading video',
         payload: {},
         type: 'uploading-video',
+        observers,
       },
-      {
-        observers: job.observers,
-      },
-    );
+      async (job) => {
+        const files = await fs.readdir(dir, {
+          recursive: true,
+          withFileTypes: true,
+        });
+        const filesPaths = files
+          .filter((file) => file.isFile())
+          .map((file) => path.join(file.parentPath, file.name));
 
-    try {
-      const files = await fs.readdir(dir, {
-        recursive: true,
-        withFileTypes: true,
-      });
-      const filesPaths = files
-        .filter((file) => file.isFile())
-        .map((file) => path.join(file.parentPath, file.name));
+        // upload files to storage
+        const totalCount = filesPaths.length;
+        let uploadedCount = 0;
 
-      // upload files to storage
-      const totalCount = filesPaths.length;
-      let uploadedCount = 0;
+        const responses = await Promise.all(
+          filesPaths.map(async (filePath) => {
+            const relPath = filePath.split(dir).at(-1)!;
+            const destination = path.join(storageDir, relPath);
+            const [response] = await this.storage
+              .bucket(this.bucketName)
+              .upload(filePath, {
+                destination,
+              });
 
-      const responses = await Promise.all(
-        filesPaths.map(async (filePath) => {
-          const relPath = filePath.split(dir).at(-1)!;
-          const destination = path.join(storageDir, relPath);
-          const [response] = await this.storage
-            .bucket(this.bucketName)
-            .upload(filePath, {
-              destination,
-            });
+            uploadedCount++;
+            const percent = Math.round((uploadedCount / totalCount) * 100);
+            job.progress(percent);
 
-          uploadedCount++;
-          const percent = Math.round((uploadedCount / totalCount) * 100);
-          uploadingJob.progress(percent);
+            return response;
+          }),
+        );
 
-          return response;
-        }),
-      );
+        type TCreateFileConfig = {
+          filename: string;
+          path: string;
+          publicUrl: string;
+        };
 
-      type TCreateFileConfig = {
-        filename: string;
-        path: string;
-        publicUrl: string;
-      };
+        const structured: {
+          thumbnails: {
+            small: TCreateFileConfig;
+            medium: TCreateFileConfig;
+            large: TCreateFileConfig;
+            original: TCreateFileConfig;
+          }[];
+          videoFiles: TCreateFileConfig[];
+          master: TCreateFileConfig;
+        } = responses.reduce(
+          (acc, response) => {
+            const segments = response.name.split('/');
+            segments.shift();
+            segments.shift();
+            segments.shift();
 
-      const structured: {
-        thumbnails: {
-          small: TCreateFileConfig;
-          medium: TCreateFileConfig;
-          large: TCreateFileConfig;
-          original: TCreateFileConfig;
-        }[];
-        videoFiles: TCreateFileConfig[];
-        master: TCreateFileConfig;
-      } = responses.reduce(
-        (acc, response) => {
-          const segments = response.name.split('/');
-          segments.shift();
-          segments.shift();
-          segments.shift();
-
-          let segment = segments.shift();
-          if (segment === 'video') {
-            segment = segments.shift();
-            if (segment.startsWith('master')) {
-              return {
-                ...acc,
-                master: {
-                  filename: segment,
-                  path: response.name,
-                  publicUrl: response.publicUrl(),
-                },
-              };
-            } else {
-              return {
-                ...acc,
-                videoFiles: [
-                  ...acc.videoFiles,
-                  {
+            let segment = segments.shift();
+            if (segment === 'video') {
+              segment = segments.shift();
+              if (segment.startsWith('master')) {
+                return {
+                  ...acc,
+                  master: {
                     filename: segment,
                     path: response.name,
                     publicUrl: response.publicUrl(),
                   },
-                ],
+                };
+              } else {
+                return {
+                  ...acc,
+                  videoFiles: [
+                    ...acc.videoFiles,
+                    {
+                      filename: segment,
+                      path: response.name,
+                      publicUrl: response.publicUrl(),
+                    },
+                  ],
+                };
+              }
+            } else if (segment === 'thumbnails') {
+              segment = segments.shift();
+              const thumbnailIdx = Number(segment.split('_').at(-1)) - 1;
+              const thumbnail = acc.thumbnails[thumbnailIdx] ?? {};
+              segment = segments.shift();
+              const extension = path.extname(segment);
+              const size = path.basename(segment, extension);
+              thumbnail[size] = {
+                filename: segment,
+                path: response.name,
+                publicUrl: response.publicUrl(),
               };
+              acc.thumbnails[thumbnailIdx] = thumbnail;
+              return acc;
+            } else if (segment.startsWith('original')) {
+            } else {
+              // error
             }
-          } else if (segment === 'thumbnails') {
-            segment = segments.shift();
-            const thumbnailIdx = Number(segment.split('_').at(-1)) - 1;
-            const thumbnail = acc.thumbnails[thumbnailIdx] ?? {};
-            segment = segments.shift();
-            const extension = path.extname(segment);
-            const size = path.basename(segment, extension);
-            thumbnail[size] = {
-              filename: segment,
-              path: response.name,
-              publicUrl: response.publicUrl(),
-            };
-            acc.thumbnails[thumbnailIdx] = thumbnail;
             return acc;
-          } else if (segment.startsWith('original')) {
-          } else {
-            // error
-          }
-          return acc;
-        },
-        {
-          thumbnails: [],
-          videoFiles: [],
-          master: {
-            filename: '',
-            path: '',
-            publicUrl: '',
           },
-        },
-      );
-
-      const dbFileSet = await this.prisma.fileSet.create({
-        data: {
-          files: {
-            createMany: {
-              data: structured.videoFiles,
+          {
+            thumbnails: [],
+            videoFiles: [],
+            master: {
+              filename: '',
+              path: '',
+              publicUrl: '',
             },
           },
-        },
-      });
+        );
 
-      const dbMaster = await this.prisma.file.create({
-        data: {
-          ...structured.master,
-          fileSet: {
-            connect: {
-              id: dbFileSet.id,
+        const dbFileSet = await this.prisma.fileSet.create({
+          data: {
+            files: {
+              createMany: {
+                data: structured.videoFiles,
+              },
             },
           },
-        },
-      });
+        });
 
-      const dbThumbnailSet = await this.prisma.imageSet.create({
-        data: {},
-      });
+        const dbMaster = await this.prisma.file.create({
+          data: {
+            ...structured.master,
+            fileSet: {
+              connect: {
+                id: dbFileSet.id,
+              },
+            },
+          },
+        });
 
-      const dbThumbnails = await Promise.all(
-        structured.thumbnails.map(async (thumbnail) =>
-          this.prisma.image.create({
-            data: {
-              original: {
-                create: thumbnail.original,
-              },
-              large: {
-                create: thumbnail.large,
-              },
-              medium: {
-                create: thumbnail.medium,
-              },
-              small: {
-                create: thumbnail.small,
-              },
-              originalHeight: thumbnailOriginalSize.height,
-              originalWidth: thumbnailOriginalSize.width,
-              owner: {
-                connect: {
-                  id: authorId,
+        const dbThumbnailSet = await this.prisma.imageSet.create({
+          data: {},
+        });
+
+        const dbThumbnails = await Promise.all(
+          structured.thumbnails.map(async (thumbnail) =>
+            this.prisma.image.create({
+              data: {
+                original: {
+                  create: thumbnail.original,
+                },
+                large: {
+                  create: thumbnail.large,
+                },
+                medium: {
+                  create: thumbnail.medium,
+                },
+                small: {
+                  create: thumbnail.small,
+                },
+                originalHeight: thumbnailOriginalSize.height,
+                originalWidth: thumbnailOriginalSize.width,
+                owner: {
+                  connect: {
+                    id: authorId,
+                  },
+                },
+                set: {
+                  connect: {
+                    id: dbThumbnailSet.id,
+                  },
                 },
               },
-              set: {
-                connect: {
-                  id: dbThumbnailSet.id,
-                },
+            }),
+          ),
+        );
+
+        const video = await this.prisma.video.create({
+          data: {
+            title: videoTitle,
+            description: videoDescription,
+            status: 'READY',
+            visibility: uploadImmediately ? 'PUBLIC' : 'DRAFT',
+            author: {
+              connect: {
+                id: authorId,
               },
             },
-          }),
-        ),
-      );
+            thumbnailSet: {
+              connect: {
+                id: dbThumbnailSet.id,
+              },
+            },
+            thumbnail: {
+              connect: {
+                id: dbThumbnails[0].id,
+              },
+            },
+            fileSet: {
+              connect: {
+                id: dbFileSet.id,
+              },
+            },
+            master: {
+              connect: {
+                id: dbMaster.id,
+              },
+            },
+          },
+        });
 
-      const video = await this.prisma.video.create({
-        data: {
-          title: videoTitle,
-          description: videoDescription,
-          status: 'READY',
-          visibility: uploadImmediately ? 'PUBLIC' : 'DRAFT',
-          author: {
-            connect: {
-              id: authorId,
-            },
-          },
-          thumbnailSet: {
-            connect: {
-              id: dbThumbnailSet.id,
-            },
-          },
-          thumbnail: {
-            connect: {
-              id: dbThumbnails[0].id,
-            },
-          },
-          fileSet: {
-            connect: {
-              id: dbFileSet.id,
-            },
-          },
-          master: {
-            connect: {
-              id: dbMaster.id,
-            },
-          },
-        },
-      });
-
-      uploadingJob.done();
-      job.done();
-
-      return { video };
-    } catch (error) {
-      uploadingJob.error(error.message);
-      job.error(error.message);
-      this.logger.error(error);
-    }
+        return { video };
+      },
+    );
   }
 }

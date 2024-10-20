@@ -10,6 +10,7 @@ export type TJobParams = {
     stage?: string;
     type: TJobType;
     payload: Prisma.JsonObject;
+    observers: string[];
 };
 
 export type TJobUpdateParams = {
@@ -57,45 +58,6 @@ export class Job extends EventEmitter<{
 
     async progress(progress: number) {
         this.update({ progress });
-    }
-
-    async error(error: string) {
-        this.update({ error, status: "FAILED" });
-        this.emit("fail", error);
-        this.emit("finished");
-        this.cleanup();
-    }
-
-    async done() {
-        this.update({ status: "DONE", progress: 100 });
-        this.emit("done");
-        this.emit("finished");
-        this.cleanup();
-    }
-
-    get isChild() {
-        return !!this.parentJob;
-    }
-
-    async registerChildJob(job: Job): Promise<Job> {
-        if (this.job.status !== "IN_PROGRESS") {
-            this.logger.error(
-                `Cannot register child job for job ${this.job.id} with status ${this.job.status}`
-            );
-            return this;
-        }
-
-        if (this.isChild) {
-            return (await this.parentJob?.registerChildJob(job)) ?? this;
-        } else {
-            this.jobsService.registerChildJob(this.job.id, job.job.id);
-            job.parentJob = this;
-            return this;
-        }
-    }
-
-    get id() {
-        return this.job.id;
     }
 
     private cleanup() {

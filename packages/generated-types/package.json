@@ -5,7 +5,8 @@
     "type": "module",
     "scripts": {
         "build": "yarn clean && yarn workspace @august-tv/backend generate:types && yarn workspace @august-tv/server run generate:types",
-        "clean": "rimraf ./dto && rimraf ./rest"
+        "clean": "rimraf ./dto && rimraf ./rest",
+        "lint:ts": "tsc --noEmit"
     },
     "devDependencies": {
         "rimraf": "^6.0.1"

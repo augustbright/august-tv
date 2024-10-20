@@ -1,5 +1,11 @@
 import { env } from '@august-tv/env';
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { times } from 'lodash';
@@ -8,7 +14,6 @@ import * as path from 'path';
 import { YoutubeImportRequestDto } from '@august-tv/server/dto';
 import {
   JobsService,
-  Job,
   PrismaService,
   KafkaEmitterService,
 } from '@august-tv/server/modules';
@@ -38,136 +43,61 @@ export class YoutubeService {
 
     console.log('Importing from YouTube');
     this.logger.log(`Importing ${numberOfVideos} videos from YouTube`);
-    const job = await this.jobsService.create(
+    await this.jobsService.wrap(
       {
         name: `Importing ${numberOfVideos} videos from YouTube`,
         type: 'import-from-youtube',
         payload: {},
+        observers: params.observers,
       },
+      async (job) => {
+        if (params.videoId) {
+          await this.importOneVideoFromYoutube({
+            ...params,
+            videoId: params.videoId,
+          });
+        } else {
+          const jobsRemaining = params.numberOfVideos ?? 1;
+
+          job.stage(
+            `${params.numberOfVideos - jobsRemaining}/${params.numberOfVideos} videos imported`,
+          );
+
+          await times(params.numberOfVideos ?? 1, async () => {
+            await this.importOneVideoFromYoutube(params);
+          });
+        }
+      },
+    );
+  }
+
+  private async importOneVideoFromYoutube(
+    params: YoutubeImportRequestDto & { videoId?: string },
+  ) {
+    let video: any = null;
+    if (!params.videoId) {
+      const channelId = params.channelId ?? YOUTUBE_CC_CHANNEL_ID;
+      video = await this.getRandomSmallVideoFromChannel(channelId);
+    } else {
+      video = (await this.getVideoDetails([params.videoId])).at(0);
+    }
+    if (!video) throw new NotFoundException('Video not found');
+
+    const { filePath } = await this.videoDownloaderService.downloadVideo(
+      video.id,
       {
         observers: params.observers,
       },
     );
-
-    this.performJobImportFromYoutube(params, job);
-  }
-
-  private async performJobImportFromYoutube(
-    params: YoutubeImportRequestDto,
-    job: Job,
-  ) {
-    try {
-      if (params.videoId) {
-        const importOneJob = await this.jobsService.create(
-          {
-            type: 'import-one-from-youtube',
-            name: `Importing video`,
-            payload: {},
-          },
-          {
-            observers: params.observers,
-          },
-        );
-        await job.registerChildJob(importOneJob);
-        this.performJobImportOneVideoFromYoutube(
-          {
-            ...params,
-            videoId: params.videoId,
-          },
-          importOneJob,
-        );
-        importOneJob.once('done', () => job.done());
-        importOneJob.once('fail', (error) => job.error(error));
-      } else {
-        let jobsRemaining = params.numberOfVideos ?? 1;
-
-        job.stage(
-          `${params.numberOfVideos - jobsRemaining}/${params.numberOfVideos} videos imported`,
-        );
-
-        times(params.numberOfVideos ?? 1, async (idx) => {
-          const importOneJob = await this.jobsService.create(
-            {
-              type: 'import-one-from-youtube',
-              name: `Importing video ${idx + 1}`,
-              payload: {},
-            },
-            {
-              observers: params.observers,
-            },
-          );
-
-          await job.registerChildJob(importOneJob);
-          this.performJobImportOneVideoFromYoutube(params, importOneJob);
-          importOneJob.once('finished', () => {
-            jobsRemaining--;
-
-            job.stage(
-              `${params.numberOfVideos - jobsRemaining}/${params.numberOfVideos} videos imported`,
-            );
-
-            if (jobsRemaining === 0) {
-              job.done();
-            }
-          });
-        });
-      }
-    } catch (error) {
-      this.logger.error('Failed to import videos', error);
-      job.error('Failed to import videos');
-    }
-  }
-
-  // TODO: Job processors should return some special class, JobGuarantee, that will ensure that the job is done
-  private async performJobImportOneVideoFromYoutube(
-    params: YoutubeImportRequestDto & { videoId?: string },
-    job: Job,
-  ) {
-    try {
-      let video: any = null;
-      if (!params.videoId) {
-        job.stage('Looking for a video to import');
-        const channelId = params.channelId ?? YOUTUBE_CC_CHANNEL_ID;
-        video = await this.getRandomSmallVideoFromChannel(channelId);
-      } else {
-        video = (await this.getVideoDetails([params.videoId])).at(0);
-      }
-      if (!video) {
-        job.error('No video found');
-        return;
-      }
-
-      job.stage('Downloading video');
-      const downloadJob = await this.videoDownloaderService.downloadVideo(
-        video.id,
-        {
-          observers: params.observers,
-        },
-      );
-      job.registerChildJob(downloadJob);
-
-      downloadJob.once('done', async () => {
-        const { filePath } = downloadJob.metadata;
-        this.kafkaEmitterService.emit(
-          KafkaTopics.YoutubeVideoForImportDownloaded,
-          {
-            authorId: params.authorId,
-            jobId: job.id,
-            originalName: path.basename(filePath as string),
-            path: filePath as string,
-            videoTitle: video.snippet.title,
-            videoDescription: video.snippet.description,
-            publicImmediately: !!params.publicImmediately,
-          },
-        );
-      });
-      downloadJob.once('fail', (error) => {
-        job.error(error);
-      });
-    } catch (error) {
-      this.logger.error('Failed to import video', error);
-      job.error('Failed to import video');
-    }
+    this.kafkaEmitterService.emit(KafkaTopics.YoutubeVideoForImportDownloaded, {
+      authorId: params.authorId,
+      observers: params.observers,
+      originalName: path.basename(filePath as string),
+      path: filePath as string,
+      videoTitle: video.snippet.title,
+      videoDescription: video.snippet.description,
+      publicImmediately: !!params.publicImmediately,
+    });
   }
 
   private async getRandomVideoFromChannel(

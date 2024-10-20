@@ -7,7 +7,7 @@
     "build:packages": "yarn workspaces foreach --from './packages/*' -W -t run build",
     "build": "yarn workspaces foreach --all -t run build",
     "lint": "lerna run lint --stream",
-    "lint:ts": "lerna run lint:ts --stream",
+    "lint:ts": "yarn workspaces foreach --all run lint:ts",
     "generate-types": "yarn generate:db && yarn generate:dtoTypes",
     "generate:db": "lerna run --stream --scope=@august-tv/db prisma:generate",
     "generate:dtoTypes": "lerna run --stream --scope=@august-tv/backend build:types",

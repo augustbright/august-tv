@@ -19,7 +19,7 @@ export class TranscodeController {
     this.transcodeService
       .transcode({
         inputPath: payload.path,
-        jobId: payload.jobId,
+        observers: payload.observers,
         authorId: payload.authorId,
       })
       .then((result) => {
@@ -27,7 +27,7 @@ export class TranscodeController {
           KafkaTopics.YoutubeVideoForImportTranscoded,
           {
             authorId: payload.authorId,
-            jobId: payload.jobId,
+            observers: payload.observers,
             originalName: payload.originalName,
             videoDescription: payload.videoDescription,
             videoTitle: payload.videoTitle,

@@ -13,12 +13,12 @@ export enum KafkaTopics {
 export type KafkaPayloads = {
     [KafkaTopics.YouTubeImportRequested]: YoutubeImportRequestDto;
     [KafkaTopics.JobsStatusUpdated]: {
+        observers: string[];
         action: TJobAction;
         job: Job;
-        observers: string[];
     };
     [KafkaTopics.YoutubeVideoForImportDownloaded]: {
-        jobId: string;
+        observers: string[];
         path: string;
         originalName: string;
         authorId: string;
@@ -27,7 +27,7 @@ export type KafkaPayloads = {
         publicImmediately: boolean;
     };
     [KafkaTopics.YoutubeVideoForImportTranscoded]: {
-        jobId: string;
+        observers: string[];
         dir: string;
         storageDir: string;
         thumbnailOriginalSize: { width: number; height: number };
@@ -38,6 +38,7 @@ export type KafkaPayloads = {
         publicImmediately: boolean;
     };
     [KafkaTopics.YoutubeVideoForImportUploaded]: {
+        observers: string[];
         video: Video;
     };
 };

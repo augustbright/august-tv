@@ -18,7 +18,7 @@ export class UploadingController {
   ) {
     this.uploadingService
       .uploadTranscodedVideo({
-        jobId: payload.jobId,
+        observers: payload.observers,
         authorId: payload.authorId,
         dir: payload.dir,
         storageDir: payload.storageDir,
@@ -31,6 +31,7 @@ export class UploadingController {
         this.kafkaEmitterService.emit(
           KafkaTopics.YoutubeVideoForImportUploaded,
           {
+            observers: payload.observers,
             video: result.video,
           },
         );

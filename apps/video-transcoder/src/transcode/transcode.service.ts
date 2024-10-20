@@ -39,7 +39,7 @@ const resolutions = [
 const thumbnailsCount = 4;
 
 type TParams = {
-  jobId: string;
+  observers: string[];
   inputPath: string;
   authorId: string;
 };
@@ -53,153 +53,146 @@ export class TranscodeService {
   ) {}
 
   async transcode(params: TParams) {
-    const job = await this.jobsService.getById(params.jobId);
-    const processingJob = await this.jobsService.create(
+    return this.jobsService.wrap(
       {
         name: 'Processing video',
         type: 'process-video',
         stage: 'Transcoding',
         payload: {},
+        observers: params.observers,
       },
-      { observers: job.observers },
-    );
-    await job.registerChildJob(processingJob);
+      async (job) => {
+        job.stage('Processing video');
+        const percents = Array(resolutions.length).fill(0);
+        const uuid = randomUUID();
 
-    try {
-      job.stage('Processing video');
-      const percents = Array(resolutions.length).fill(0);
-      const uuid = randomUUID();
+        const videoFolderName = 'video';
+        const thumbnailsFolderName = 'thumbnails';
 
-      const videoFolderName = 'video';
-      const thumbnailsFolderName = 'thumbnails';
+        const dir = await ensureUploadPath(uuid);
+        const videoOutputDir = await ensureUploadPath(uuid, videoFolderName);
+        const thumbnailOutputDir = await ensureUploadPath(
+          uuid,
+          thumbnailsFolderName,
+        );
 
-      const dir = await ensureUploadPath(uuid);
-      const videoOutputDir = await ensureUploadPath(uuid, videoFolderName);
-      const thumbnailOutputDir = await ensureUploadPath(
-        uuid,
-        thumbnailsFolderName,
-      );
+        // Transcode video to different resolutions
+        const transcodedFiles = Promise.all(
+          resolutions.map((resolution, index) => {
+            return new Promise<string>((resolve, reject) => {
+              const outputPath = path.join(
+                videoOutputDir,
+                `${resolution.resolution}_variant.m3u8`,
+              );
+              const segmentOutputPattern = path.join(
+                videoOutputDir,
+                `${resolution.resolution}_segment_%03d.ts`,
+              );
 
-      // Transcode video to different resolutions
-      const transcodedFiles = Promise.all(
-        resolutions.map((resolution, index) => {
-          return new Promise<string>((resolve, reject) => {
-            const outputPath = path.join(
-              videoOutputDir,
-              `${resolution.resolution}_variant.m3u8`,
-            );
-            const segmentOutputPattern = path.join(
-              videoOutputDir,
-              `${resolution.resolution}_segment_%03d.ts`,
-            );
+              const outputOptions = [
+                `-vf scale=${resolution.size}`,
+                `-c:v libx264`,
+                `-b:v ${resolution.bitrate}`,
+                `-c:a aac`,
+                `-strict -2`,
+                `-hls_time 10`,
+                `-hls_playlist_type vod`,
+                `-hls_segment_filename ${segmentOutputPattern}`,
+                `-f hls`,
+              ];
 
-            const outputOptions = [
-              `-vf scale=${resolution.size}`,
-              `-c:v libx264`,
-              `-b:v ${resolution.bitrate}`,
-              `-c:a aac`,
-              `-strict -2`,
-              `-hls_time 10`,
-              `-hls_playlist_type vod`,
-              `-hls_segment_filename ${segmentOutputPattern}`,
-              `-f hls`,
-            ];
+              this.logger.log(
+                [
+                  `🎬 Transcoding video to ${resolution.resolution}.`,
+                  `Transcoding options:`,
+                  outputOptions.join('\n'),
+                ].join('\n'),
+              );
 
-            this.logger.log(
-              [
-                `🎬 Transcoding video to ${resolution.resolution}.`,
-                `Transcoding options:`,
-                outputOptions.join('\n'),
-              ].join('\n'),
-            );
+              ffmpeg(params.inputPath)
+                .outputOptions(outputOptions)
+                .output(outputPath)
+                .on('end', () => {
+                  this.logger.log(
+                    `✅ Transcoding completed for ${resolution.resolution}`,
+                  );
+                  resolve(outputPath);
+                })
+                .on('error', (err: Error) => {
+                  this.logger.error(
+                    `❌ Failed to transcode video to ${resolution.resolution}`,
+                    err,
+                  );
+                  reject(err);
+                })
+                .on('progress', (progress) => {
+                  if (!progress.percent) return;
 
-            ffmpeg(params.inputPath)
-              .outputOptions(outputOptions)
-              .output(outputPath)
-              .on('end', () => {
-                this.logger.log(
-                  `✅ Transcoding completed for ${resolution.resolution}`,
-                );
-                resolve(outputPath);
-              })
-              .on('error', (err: Error) => {
-                this.logger.error(
-                  `❌ Failed to transcode video to ${resolution.resolution}`,
-                  err,
-                );
-                reject(err);
-              })
-              .on('progress', (progress) => {
-                if (!progress.percent) return;
-
-                percents[index] = Math.round(progress.percent);
-                const total = percents.reduce((a, b) => a + b, 0);
-                const average = total / percents.length;
-                processingJob.progress(average);
-                console.log(`Processing: ${average}%`);
-              })
-              .run();
-          });
-        }),
-      );
-
-      // Generate thumbnails
-      await new Promise((resolve, reject) => {
-        ffmpeg(params.inputPath)
-          .on('end', () => resolve(null))
-          .on('error', (err: Error) => reject(err))
-          .screenshots({
-            count: thumbnailsCount,
-            folder: thumbnailOutputDir,
-            filename: `thumbnail.png`,
-            size: '1280x720',
-          });
-      });
-
-      // Resize thumbnails to multiple sizes
-      const thumbnailFilenames = await fs.readdir(thumbnailOutputDir);
-      const thumbnailFilesPaths = thumbnailFilenames.map((filename) =>
-        path.join(thumbnailOutputDir, filename),
-      );
-      const [{ originalHeight, originalWidth }] = await Promise.all(
-        thumbnailFilesPaths.map((thumbnailPath) =>
-          this.imageService.createMultipleSizes({
-            originalPath: thumbnailPath,
+                  percents[index] = Math.round(progress.percent);
+                  const total = percents.reduce((a, b) => a + b, 0);
+                  const average = total / percents.length;
+                  job.progress(average);
+                  console.log(`Processing: ${average}%`);
+                })
+                .run();
+            });
           }),
-        ),
-      );
+        );
 
-      await transcodedFiles;
+        // Generate thumbnails
+        await new Promise((resolve, reject) => {
+          ffmpeg(params.inputPath)
+            .on('end', () => resolve(null))
+            .on('error', (err: Error) => reject(err))
+            .screenshots({
+              count: thumbnailsCount,
+              folder: thumbnailOutputDir,
+              filename: `thumbnail.png`,
+              size: '1280x720',
+            });
+        });
 
-      const folderName = generateString(10);
-      const masterOutputPath = path.join(videoOutputDir, 'master.m3u8');
-      const storageDir = [videosStorageDir, params.authorId, folderName].join(
-        '/',
-      );
-      const streamFilesContent = resolutions.map((resolution) => {
-        return [
-          `#EXT-X-STREAM-INF:BANDWIDTH=${resolution.bandwidth},RESOLUTION=${resolution.size}`,
-          `${storageDir}/${videoFolderName}/${resolution.resolution}_variant.m3u8`,
-        ].join('\n');
-      });
-      const streamFiles = streamFilesContent.join('\n');
-      const masterPlaylistContent = `#EXTM3U\n${streamFiles}`;
-      await fs.writeFile(masterOutputPath, masterPlaylistContent);
+        // Resize thumbnails to multiple sizes
+        const thumbnailFilenames = await fs.readdir(thumbnailOutputDir);
+        const thumbnailFilesPaths = thumbnailFilenames.map((filename) =>
+          path.join(thumbnailOutputDir, filename),
+        );
+        const [{ originalHeight, originalWidth }] = await Promise.all(
+          thumbnailFilesPaths.map((thumbnailPath) =>
+            this.imageService.createMultipleSizes({
+              originalPath: thumbnailPath,
+            }),
+          ),
+        );
 
-      processingJob.done();
-      job.done();
+        await transcodedFiles;
 
-      await fs.rename(params.inputPath, path.join(dir, 'original.mp4'));
+        const folderName = generateString(10);
+        const masterOutputPath = path.join(videoOutputDir, 'master.m3u8');
+        const storageDir = [videosStorageDir, params.authorId, folderName].join(
+          '/',
+        );
+        const streamFilesContent = resolutions.map((resolution) => {
+          return [
+            `#EXT-X-STREAM-INF:BANDWIDTH=${resolution.bandwidth},RESOLUTION=${resolution.size}`,
+            `${storageDir}/${videoFolderName}/${resolution.resolution}_variant.m3u8`,
+          ].join('\n');
+        });
+        const streamFiles = streamFilesContent.join('\n');
+        const masterPlaylistContent = `#EXTM3U\n${streamFiles}`;
+        await fs.writeFile(masterOutputPath, masterPlaylistContent);
 
-      return {
-        dir,
-        storageDir,
-        thumbnailOriginalSize: { height: originalHeight, width: originalWidth },
-      };
-    } catch (error) {
-      this.logger.error('Failed to transcode video', error);
-      processingJob.error('Failed to process video');
-      job.error('Failed to process video');
-    }
+        await fs.rename(params.inputPath, path.join(dir, 'original.mp4'));
+
+        return {
+          dir,
+          storageDir,
+          thumbnailOriginalSize: {
+            height: originalHeight,
+            width: originalWidth,
+          },
+        };
+      },
+    );
   }
 }

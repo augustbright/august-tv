@@ -28,15 +28,8 @@ export class JobsService {
         private readonly kafkaEmitterService: KafkaEmitterService
     ) {}
 
-    async create(
-        params: TJobParams,
-        {
-            observers,
-        }: {
-            observers: string[];
-        }
-    ) {
-        const job = await this.prismaService.job.create({
+    private async create(params: TJobParams) {
+        const dbJob = await this.prismaService.job.create({
             data: {
                 name: params.name,
                 description: params.description,
@@ -44,50 +37,43 @@ export class JobsService {
                 payload: params.payload,
                 stage: params.stage,
                 observers: {
-                    connect: observers.map((observer) => ({ id: observer })),
+                    connect: params.observers.map((observer) => ({
+                        id: observer,
+                    })),
                 },
             },
         });
 
         setImmediate(() => {
             try {
-                this.notifyObservers(job, "created", observers);
+                this.notifyObservers(dbJob, "created", params.observers);
             } catch (error) {
                 console.error(error);
             }
         });
 
-        return new Job(this, job, observers);
+        return {
+            dbJob,
+            jobInstance: new Job(this, dbJob, params.observers),
+        };
     }
 
-    async getById(id: string) {
-        const job = await this.prismaService.job.findUniqueOrThrow({
-            where: { id },
-            include: {
-                observers: {
-                    select: {
-                        id: true,
-                    },
-                },
-            },
-        });
-
-        const observers = job.observers.map((o) => o.id);
-
-        return new Job(this, job, observers);
-    }
-
-    async registerChildJob(parentJobId: string, childJobId: string) {
-        return this.prismaService.job.update({
-            where: { id: childJobId },
-            data: {
-                parentJob: {
-                    connect: {
-                        id: parentJobId,
-                    },
-                },
-            },
-        });
+    async wrap<R>(params: TJobParams, callback: (job: Job) => Promise<R>) {
+        const { jobInstance, dbJob } = await this.create(params);
+        try {
+            const result = await callback(jobInstance);
+            this.update(dbJob.id, {
+                status: "DONE",
+                progress: 100,
+            });
+            return result;
+        } catch (error) {
+            this.update(dbJob.id, {
+                status: "FAILED",
+                error: String(error),
+            });
+            throw error;
+        }
     }
 
     async update(id: string, params: Partial<TJobUpdateParams>) {
@@ -158,18 +144,6 @@ export class JobsService {
         return job;
     }
 
-    // private async notifyObservers(
-    //     job: PrismaJob,
-    //     action: TJobAction,
-    //     observers: string[]
-    // ) {
-    //     this.kafkaEmitterService.emit(KafkaTopics.JobsStatusUpdated, {
-    //         action,
-    //         job,
-    //         observers,
-    //     });
-    // }
-
     async getJobsObservedByUser(userId: string) {
         return this.prismaService.job.findMany({
             where: {
@@ -206,18 +180,14 @@ export class JobsService {
     }
 
     async test(params: TJobTestParams) {
-        const job = await this.create(
-            {
-                name: params.name,
-                description: params.description,
-                type: "test",
-                payload: params.payload ?? {},
-                stage: params.stage,
-            },
-            {
-                observers: params.observers,
-            }
-        );
+        const { dbJob, jobInstance } = await this.create({
+            name: params.name,
+            description: params.description,
+            type: "test",
+            payload: params.payload ?? {},
+            stage: params.stage,
+            observers: params.observers,
+        });
 
         let timePassed = 0;
         let lastMilestone = 0;
@@ -226,16 +196,19 @@ export class JobsService {
             const percentCompleted = Math.round(
                 (timePassed / params.timeout) * 100
             );
-            job.progress(percentCompleted);
+            jobInstance.progress(percentCompleted);
             const currentMilestone = Math.floor(percentCompleted / 10) * 10;
             if (currentMilestone > lastMilestone) {
                 lastMilestone = currentMilestone;
-                job.stage(`Milestone ${currentMilestone}%`);
+                jobInstance.stage(`Milestone ${currentMilestone}%`);
             }
         }, 500);
         setTimeout(() => {
             clearInterval(interval);
-            job.done();
+            this.update(dbJob.id, {
+                status: "DONE",
+                progress: 100,
+            });
         }, params.timeout);
     }
 }

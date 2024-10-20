@@ -8,7 +8,8 @@
   },
   "scripts": {
     "clean": "rimraf ./dist",
-    "build": "yarn clean && tsc"
+    "build": "yarn clean && tsc",
+    "lint:ts": "tsc --noEmit"
   },
   "license": "MIT",
   "dependencies": {

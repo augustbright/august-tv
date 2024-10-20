@@ -14,7 +14,8 @@
   "scripts": {
     "build": "yarn clean && tsc",
     "clean": "rimraf ./dist",
-    "generate:types": "tsc -p tsconfig.generate-dto-types.json"
+    "generate:types": "tsc -p tsconfig.generate-dto-types.json",
+    "lint:ts": "tsc --noEmit"
   },
   "license": "MIT",
   "dependencies": {
