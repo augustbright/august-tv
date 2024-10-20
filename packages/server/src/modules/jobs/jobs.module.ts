@@ -4,10 +4,7 @@ import { KafkaEmitterModule } from "../kafka-emitter/kafka-emitter.module";
 import { PrismaModule } from "../prisma/prisma.module";
 
 @Module({
-    imports: [
-        PrismaModule,
-        KafkaEmitterModule.forRoot({ clientId: "jobs", groupId: "jobs" }),
-    ],
+    imports: [PrismaModule, KafkaEmitterModule.forRoot({ clientId: "jobs" })],
     providers: [JobsService],
     exports: [JobsService],
 })

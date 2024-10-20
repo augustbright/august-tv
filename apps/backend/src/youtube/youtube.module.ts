@@ -6,7 +6,6 @@ import { KafkaEmitterModule } from '@august-tv/server/modules';
   imports: [
     KafkaEmitterModule.forRoot({
       clientId: 'rest-youtube-importer',
-      groupId: 'rest-youtube-importer',
     }),
   ],
   controllers: [YoutubeController],

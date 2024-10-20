@@ -5,13 +5,7 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
 
 @Module({})
 export class KafkaEmitterModule {
-    static forRoot({
-        clientId,
-        groupId,
-    }: {
-        clientId: string;
-        groupId: string;
-    }): DynamicModule {
+    static forRoot({ clientId }: { clientId: string }): DynamicModule {
         return {
             module: KafkaEmitterModule,
             imports: [
@@ -23,9 +17,6 @@ export class KafkaEmitterModule {
                             client: {
                                 brokers: [env.KAFKA_BROKER],
                                 clientId,
-                            },
-                            consumer: {
-                                groupId,
                             },
                         },
                     },

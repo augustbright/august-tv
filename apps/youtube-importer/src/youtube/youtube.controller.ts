@@ -1,15 +1,17 @@
+// TODO: forbid console.log
+
 import { Controller } from '@nestjs/common';
 import { YoutubeService } from './youtube.service';
 import { EventPattern } from '@nestjs/microservices';
 import { YoutubeImportRequestDto } from '@august-tv/server/dto';
+import { KafkaTopics } from '@august-tv/server/kafka';
 
 @Controller('youtube')
 export class YoutubeController {
   constructor(private readonly youtubeService: YoutubeService) {}
 
-  @EventPattern('youtube-import-requested')
+  @EventPattern(KafkaTopics.YouTubeImportRequested)
   importFromYoutube(data: YoutubeImportRequestDto) {
-    console.log('Importing from YouTube - controller');
     this.youtubeService.importFromYoutube(data);
   }
 }

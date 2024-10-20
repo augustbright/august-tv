@@ -7,7 +7,6 @@ import { randomUUID } from "crypto";
 import * as fs from "fs/promises";
 import { Prisma, Video } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
-import { TranscodeService } from "../transcode/transcode.service";
 import { ImageService } from "../image/image.service";
 import { JobsService } from "../jobs/jobs.service";
 import { ensureUploadPath, resolveUploadPath } from "../../fs-utils";
@@ -28,7 +27,6 @@ export class MediaUploadService {
     private readonly MAX_FILE_SIZE_MB = 50;
     constructor(
         private readonly prisma: PrismaService,
-        private readonly transcodeService: TranscodeService,
         private readonly imageService: ImageService,
         private readonly jobsService: JobsService
     ) {}
@@ -124,79 +122,73 @@ export class MediaUploadService {
         const tempFilePath = file.path;
 
         try {
-            const transcoded = await this.transcodeService.transcode(
-                tempFilePath,
-                {
-                    onProgress: (percent) => {
-                        job.progress(percent);
-                    },
-                    outputFolder,
-                    filename,
-                }
-            );
-
-            const videoVariantFiles = await getManyFiles(
-                transcoded.videoFolder,
-                "_variant.m3u8"
-            );
-            const videoPartsFiles = await getManyFiles(
-                transcoded.videoFolder,
-                ".ts"
-            );
-            const videoMasterFiles = await getManyFiles(
-                transcoded.videoFolder,
-                "_master.m3u8"
-            );
-
-            const thumbnailsFilenames = await Promise.all(
-                (await getManyFiles(transcoded.thumbnailsFolder, ".png")).map(
-                    async (thumbnail) => {
-                        const thumbnailName =
-                            randomUUID() + path.extname(thumbnail);
-                        await fs.rename(
-                            thumbnail,
-                            resolveUploadPath(thumbnailName)
-                        );
-                        return thumbnailName;
-                    }
-                )
-            );
-
-            job.stage("uploading files");
-            await uploadManyFiles(videoVariantFiles, video.fileSetId);
-            await uploadManyFiles(videoPartsFiles, video.fileSetId);
-            const [uploadedMaster] = await uploadManyFiles(
-                videoMasterFiles,
-                video.fileSetId
-            );
-
-            const dbThumbnails = await Promise.all(
-                thumbnailsFilenames.map((thumbnailFilename) =>
-                    this.imageService.upload(thumbnailFilename, {
-                        ownerId: video.authorId,
-                        setId: video.thumbnailSetId,
-                    })
-                )
-            );
-
-            await this.prisma.video.update({
-                where: { id: video.id },
-                data: {
-                    status: "READY",
-                    master: {
-                        connect: {
-                            id: uploadedMaster.id,
-                        },
-                    },
-                    thumbnail: {
-                        connect: {
-                            id: dbThumbnails[0].id,
-                        },
-                    },
-                },
-            });
-
-            job.done();
+            // const transcoded = await this.transcodeService.transcode(
+            //     tempFilePath,
+            //     {
+            //         onProgress: (percent) => {
+            //             job.progress(percent);
+            //         },
+            //         outputFolder,
+            //         filename,
+            //     }
+            // );
+            // const videoVariantFiles = await getManyFiles(
+            //     transcoded.videoFolder,
+            //     "_variant.m3u8"
+            // );
+            // const videoPartsFiles = await getManyFiles(
+            //     transcoded.videoFolder,
+            //     ".ts"
+            // );
+            // const videoMasterFiles = await getManyFiles(
+            //     transcoded.videoFolder,
+            //     "_master.m3u8"
+            // );
+            // const thumbnailsFilenames = await Promise.all(
+            //     (await getManyFiles(transcoded.thumbnailsFolder, ".png")).map(
+            //         async (thumbnail) => {
+            //             const thumbnailName =
+            //                 randomUUID() + path.extname(thumbnail);
+            //             await fs.rename(
+            //                 thumbnail,
+            //                 resolveUploadPath(thumbnailName)
+            //             );
+            //             return thumbnailName;
+            //         }
+            //     )
+            // );
+            // job.stage("uploading files");
+            // await uploadManyFiles(videoVariantFiles, video.fileSetId);
+            // await uploadManyFiles(videoPartsFiles, video.fileSetId);
+            // const [uploadedMaster] = await uploadManyFiles(
+            //     videoMasterFiles,
+            //     video.fileSetId
+            // );
+            // const dbThumbnails = await Promise.all(
+            //     thumbnailsFilenames.map((thumbnailFilename) =>
+            //         this.imageService.upload(thumbnailFilename, {
+            //             ownerId: video.authorId,
+            //             setId: video.thumbnailSetId,
+            //         })
+            //     )
+            // );
+            // await this.prisma.video.update({
+            //     where: { id: video.id },
+            //     data: {
+            //         status: "READY",
+            //         master: {
+            //             connect: {
+            //                 id: uploadedMaster.id,
+            //             },
+            //         },
+            //         thumbnail: {
+            //             connect: {
+            //                 id: dbThumbnails[0].id,
+            //             },
+            //         },
+            //     },
+            // });
+            // job.done();
         } catch (error) {
             await this.prisma.video.update({
                 where: { id: video.id },

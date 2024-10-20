@@ -31,6 +31,18 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Video Transcoder",
+            "runtimeExecutable": "yarn",
+            "runtimeArgs": [
+                "start:dev"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "cwd": "${workspaceFolder}/apps/video-transcoder"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Web",
             "runtimeExecutable": "yarn",
             "runtimeArgs": [

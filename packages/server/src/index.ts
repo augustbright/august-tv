@@ -3,7 +3,7 @@ import { INestApplication } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { Transport } from "@nestjs/microservices";
 import { createServerLogger } from "./utils";
-import { iAmHealthy } from "./modules";
+import { iAmHealthy } from "./iAmHealthy";
 
 export { createServerLogger } from "./utils/logger";
 

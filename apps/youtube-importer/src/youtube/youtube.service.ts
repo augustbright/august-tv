@@ -6,10 +6,13 @@ import { times } from 'lodash';
 import { VideoDownloaderService } from './video-downloader.service';
 import * as path from 'path';
 import { YoutubeImportRequestDto } from '@august-tv/server/dto';
-import { JobsService } from '@august-tv/server/modules';
-import { Job } from '@august-tv/server/modules';
-import { MediaUploadService } from '@august-tv/server/modules';
-import { PrismaService } from '@august-tv/server/modules';
+import {
+  JobsService,
+  Job,
+  PrismaService,
+  KafkaEmitterService,
+} from '@august-tv/server/modules';
+import { KafkaTopics } from '@august-tv/server/kafka';
 
 const YOUTUBE_CC_CHANNEL_ID = 'UCTwECeGqMZee77BjdoYtI2Q';
 
@@ -18,14 +21,14 @@ export class YoutubeService {
   private readonly API_URL = env.YOUTUBE_API_URL;
   private readonly API_KEY = env.YOUTUBE_API_KEY;
 
-  private logger: Logger = new Logger(YoutubeService.name);
+  private readonly logger: Logger = new Logger(YoutubeService.name);
 
   constructor(
     private readonly httpService: HttpService,
     private readonly videoDownloaderService: VideoDownloaderService,
     private readonly jobsService: JobsService,
-    private readonly mediaUploadService: MediaUploadService,
     private readonly prismaService: PrismaService,
+    private readonly kafkaEmitterService: KafkaEmitterService,
   ) {
     this.logger.log('YouTube service initialized');
   }
@@ -144,42 +147,16 @@ export class YoutubeService {
       job.registerChildJob(downloadJob);
 
       downloadJob.once('done', async () => {
-        job.stage('Processing video');
         const { filePath } = downloadJob.metadata;
-        const { job: processingJob, video: dbVideo } =
-          await this.mediaUploadService.upload(
-            {
-              path: filePath as string,
-              originalname: path.basename(filePath as string),
-            },
-            params.authorId,
-            {
-              observers: params.observers,
-            },
-          );
-
-        job.registerChildJob(processingJob);
-
-        processingJob.once('done', async () => {
-          await this.prismaService.video.update({
-            where: { id: dbVideo.id },
-            data: {
-              ...(params.publicImmediately ? { visibility: 'PUBLIC' } : {}),
-              title: video.snippet?.title ?? 'Untitled',
-              description: video.snippet?.description ?? '',
-              imported: {
-                create: {
-                  source: 'youtube',
-                  originalId: video.id,
-                },
-              },
-            },
-          });
-          job.done();
-        });
-        processingJob.once('fail', (error) => {
-          job.error(error);
-        });
+        this.kafkaEmitterService.emit(
+          KafkaTopics.YoutubeVideoForImportDownloaded,
+          {
+            authorId: params.authorId,
+            jobId: job.id,
+            originalname: path.basename(filePath as string),
+            path: filePath as string,
+          },
+        );
       });
       downloadJob.once('fail', (error) => {
         job.error(error);

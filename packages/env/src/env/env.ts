@@ -40,6 +40,19 @@ export const envSchema = z.object({
             message: `YOUTUBE_IMPORTER_PORT must be a positive number`,
         }),
 
+    VIDEO_TRANSCODER_HOST: z.string({
+        required_error: "Missing VIDEO_TRANSCODER_HOST environment variable",
+    }),
+    VIDEO_TRANSCODER_PORT: z
+        .string({
+            required_error:
+                "Missing VIDEO_TRANSCODER_PORT environment variable",
+        })
+        .transform(Number)
+        .refine((val) => val > 0, {
+            message: `VIDEO_TRANSCODER_PORT must be a positive number`,
+        }),
+
     GOOGLE_CLOUD_PROJECT_ID: z.string({
         required_error: "Missing GOOGLE_CLOUD_PROJECT_ID environment variable",
     }),

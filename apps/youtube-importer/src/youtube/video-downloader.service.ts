@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as ytdl from '@distube/ytdl-core';
+import ytdl from '@distube/ytdl-core';
 import * as fs from 'fs';
 import { ensureDir, resolveUploadPath } from '@august-tv/server/fs-utils';
 import { JobsService } from '@august-tv/server/modules';

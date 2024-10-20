@@ -5,9 +5,24 @@ import { Prisma, Job as PrismaJob } from "@prisma/client";
 import { Job, TJobParams, TJobUpdateParams } from "./Job";
 import { TJobAction, TJobTestParams } from "@august-tv/common/types";
 import { KafkaTopics } from "../../kafka";
+import { throttle } from "lodash";
+
+const JOB_NOTIFICATION_THROTTLE = 1000;
 
 @Injectable()
 export class JobsService {
+    private readonly notifyObservers: (
+        job: PrismaJob,
+        action: TJobAction,
+        observers: string[]
+    ) => void = throttle((job, action, observers) => {
+        this.kafkaEmitterService.emit(KafkaTopics.JobsStatusUpdated, {
+            action,
+            job,
+            observers,
+        });
+    }, JOB_NOTIFICATION_THROTTLE);
+
     constructor(
         private readonly prismaService: PrismaService,
         private readonly kafkaEmitterService: KafkaEmitterService
@@ -42,7 +57,24 @@ export class JobsService {
             }
         });
 
-        return new Job(this, job);
+        return new Job(this, job, observers);
+    }
+
+    async getById(id: string) {
+        const job = await this.prismaService.job.findUniqueOrThrow({
+            where: { id },
+            include: {
+                observers: {
+                    select: {
+                        id: true,
+                    },
+                },
+            },
+        });
+
+        const observers = job.observers.map((o) => o.id);
+
+        return new Job(this, job, observers);
     }
 
     async registerChildJob(parentJobId: string, childJobId: string) {
@@ -126,17 +158,17 @@ export class JobsService {
         return job;
     }
 
-    private async notifyObservers(
-        job: PrismaJob,
-        action: TJobAction,
-        observers: string[]
-    ) {
-        this.kafkaEmitterService.emit(KafkaTopics.JobsStatusUpdated, {
-            action,
-            job,
-            observers,
-        });
-    }
+    // private async notifyObservers(
+    //     job: PrismaJob,
+    //     action: TJobAction,
+    //     observers: string[]
+    // ) {
+    //     this.kafkaEmitterService.emit(KafkaTopics.JobsStatusUpdated, {
+    //         action,
+    //         job,
+    //         observers,
+    //     });
+    // }
 
     async getJobsObservedByUser(userId: string) {
         return this.prismaService.job.findMany({

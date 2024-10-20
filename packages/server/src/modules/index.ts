@@ -20,8 +20,4 @@ export { PrismaService } from "./prisma/prisma.service";
 export { StorageModule } from "./storage/storage.module";
 export { StorageService } from "./storage/storage.service";
 
-export { TranscodeModule } from "./transcode/transcode.module";
-export { TranscodeService } from "./transcode/transcode.service";
-
 export { HealthModule } from "./health/health.module";
-export { iAmHealthy } from "../iAmHealthy";

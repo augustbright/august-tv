@@ -32,7 +32,8 @@ export class Job extends EventEmitter<{
     public metadata: Record<string, unknown> = {};
     constructor(
         private readonly jobsService: JobsService,
-        private readonly job: PrismaJob
+        private readonly job: PrismaJob,
+        public readonly observers: string[]
     ) {
         super();
         this.logger = new Logger(`Job:${job.type}:${job.name} (${job.id})`);
@@ -76,7 +77,7 @@ export class Job extends EventEmitter<{
         return !!this.parentJob;
     }
 
-    async registerChildJob(job: Job) {
+    async registerChildJob(job: Job): Promise<Job> {
         if (this.job.status !== "IN_PROGRESS") {
             this.logger.error(
                 `Cannot register child job for job ${this.job.id} with status ${this.job.status}`
@@ -85,12 +86,16 @@ export class Job extends EventEmitter<{
         }
 
         if (this.isChild) {
-            return await this.parentJob?.registerChildJob(job);
+            return (await this.parentJob?.registerChildJob(job)) ?? this;
         } else {
             this.jobsService.registerChildJob(this.job.id, job.job.id);
             job.parentJob = this;
             return this;
         }
+    }
+
+    get id() {
+        return this.job.id;
     }
 
     private cleanup() {
