@@ -4,6 +4,6 @@ import { AppModule } from './app.module';
 
 bootstrapMicroservice({
   AppModule,
-  tag: 'youtube-importer',
-  port: env.YOUTUBE_IMPORTER_PORT,
+  tag: 'dummy',
+  port: env.DUMMY_PORT,
 });

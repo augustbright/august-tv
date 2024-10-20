@@ -1,6 +1,6 @@
 import { NestFactory } from "@nestjs/core";
-import { HealthModule } from "./health.module";
-import { HealthCheckFn } from "./types";
+import { HealthModule } from "./modules/health/health.module";
+import { HealthCheckFn } from "./modules/health/types";
 
 export async function iAmHealthy(
     port: number,

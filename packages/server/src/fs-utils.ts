@@ -1,7 +1,8 @@
+import { env } from "@august-tv/env";
 import { promises as fs } from "fs";
 import * as path from "path";
 
-export const UPLOAD_PATH = "./tmp/";
+export const UPLOAD_PATH = env.TMP_DIR;
 
 export const resolveUploadPath = (...paths: string[]) =>
     path.resolve(path.join(UPLOAD_PATH, ...paths));

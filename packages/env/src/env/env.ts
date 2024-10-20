@@ -3,6 +3,18 @@ init();
 import { z } from "zod";
 
 export const envSchema = z.object({
+    DUMMY_HOST: z.string({
+        required_error: "Missing DUMMY_HOST environment variable",
+    }),
+    DUMMY_PORT: z
+        .string({
+            required_error: "Missing DUMMY_PORT environment variable",
+        })
+        .transform(Number)
+        .refine((val) => val > 0, {
+            message: `DUMMY_PORT must be a positive number`,
+        }),
+
     REST_HOST: z.string({
         required_error: "Missing REST_HOST environment variable",
     }),
@@ -12,7 +24,7 @@ export const envSchema = z.object({
         })
         .transform(Number)
         .refine((val) => val > 0, {
-            message: `PORT must be a positive number`,
+            message: `REST_PORT must be a positive number`,
         }),
 
     YOUTUBE_IMPORTER_HOST: z.string({
@@ -56,6 +68,9 @@ export const envSchema = z.object({
     }),
     DATABASE_URL: z.string({
         required_error: "Missing DATABASE_URL environment variable",
+    }),
+    TMP_DIR: z.string({
+        required_error: "Missing TMP_DIR environment variable",
     }),
 });
 
