@@ -8,7 +8,7 @@ import { UserService } from 'src/user/user.service';
 import { PatchMedia } from './media.dto';
 
 export type TTempFile = {
-  originalname: string;
+  originalName: string;
   path: string;
 };
 

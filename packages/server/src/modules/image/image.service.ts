@@ -4,6 +4,7 @@ import sharp from "sharp";
 import * as path from "path";
 import {
     cleanUp,
+    ensureDir,
     ensureUploadPath,
     moveUploadedFile,
     resolveUploadPath,
@@ -151,6 +152,24 @@ export class ImageService {
             result = result.resize({ width: size.width });
             await result.toFile(resizedImagePath);
         }
+    }
+
+    async createMultipleSizes({ originalPath }: { originalPath: string }) {
+        const originalDir = path.dirname(originalPath);
+        const name = path.basename(originalPath);
+        const extension = path.extname(name);
+        const resizedDir = path.join(originalDir, name);
+        await ensureDir(resizedDir);
+
+        await Promise.all(
+            IMAGE_SIZES.map(async (size) => {
+                const filename = `${size.name}${extension}`;
+                const filePath = path.join(resizedDir, filename);
+                await sharp(originalPath)
+                    .resize({ width: size.width })
+                    .toFile(filePath);
+            })
+        );
     }
 
     async delete(imageId: string) {

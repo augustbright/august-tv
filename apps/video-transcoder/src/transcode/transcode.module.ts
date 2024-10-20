@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TranscodeService } from './transcode.service';
 import { TranscodeController } from './transcode.controller';
-import { JobsModule, KafkaEmitterModule } from '@august-tv/server/modules';
+import {
+  ImageModule,
+  JobsModule,
+  KafkaEmitterModule,
+} from '@august-tv/server/modules';
 
 @Module({
   imports: [
@@ -9,6 +13,7 @@ import { JobsModule, KafkaEmitterModule } from '@august-tv/server/modules';
       clientId: 'video-transcoder',
     }),
     JobsModule,
+    ImageModule,
   ],
   providers: [TranscodeService],
   exports: [TranscodeService],

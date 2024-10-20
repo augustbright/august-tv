@@ -43,6 +43,18 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Storage Uploading",
+            "runtimeExecutable": "yarn",
+            "runtimeArgs": [
+                "start:dev"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "cwd": "${workspaceFolder}/apps/storage-uploading"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Web",
             "runtimeExecutable": "yarn",
             "runtimeArgs": [

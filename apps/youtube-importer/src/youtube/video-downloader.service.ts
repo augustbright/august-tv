@@ -47,7 +47,7 @@ export class VideoDownloaderService {
         job.stage('downloading video');
         const filePath = resolveUploadPath(`${randomUUID()}.mp4`);
         await ensureDir(path.dirname(filePath));
-        job.metadata = { filePath, originalname: `${videoTitle}.mp4` };
+        job.metadata = { filePath, originalName: `${videoTitle}.mp4` };
 
         const videoStream = ytdl(videoUrl, { format });
         const writeStream = fs.createWriteStream(filePath);

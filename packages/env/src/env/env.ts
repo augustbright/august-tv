@@ -52,6 +52,18 @@ export const envSchema = z.object({
         .refine((val) => val > 0, {
             message: `VIDEO_TRANSCODER_PORT must be a positive number`,
         }),
+    STORAGE_UPLOADING_HOST: z.string({
+        required_error: "Missing STORAGE_UPLOADING_HOST environment variable",
+    }),
+    STORAGE_UPLOADING_PORT: z
+        .string({
+            required_error:
+                "Missing STORAGE_UPLOADING_PORT environment variable",
+        })
+        .transform(Number)
+        .refine((val) => val > 0, {
+            message: `STORAGE_UPLOADING_PORT must be a positive number`,
+        }),
 
     GOOGLE_CLOUD_PROJECT_ID: z.string({
         required_error: "Missing GOOGLE_CLOUD_PROJECT_ID environment variable",

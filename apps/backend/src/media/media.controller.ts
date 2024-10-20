@@ -9,8 +9,8 @@ import {
   UseInterceptors,
   Get,
   Delete,
+  NotImplementedException,
 } from '@nestjs/common';
-import { MediaUploadService } from '@august-tv/server/modules';
 import { MediaService } from './media.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -24,10 +24,7 @@ import { PatchMedia } from './media.dto';
 
 @Controller('media')
 export class MediaController {
-  constructor(
-    private readonly mediaService: MediaService,
-    private readonly mediaUploadService: MediaUploadService,
-  ) {}
+  constructor(private readonly mediaService: MediaService) {}
 
   @Post('upload')
   @UseInterceptors(
@@ -51,11 +48,12 @@ export class MediaController {
     @UploadedFile() file: Express.Multer.File,
     @User({ required: true }) user: DecodedIdToken,
   ) {
-    const { video } = await this.mediaUploadService.upload(file, user?.uid, {
-      observers: [user?.uid],
-    });
+    throw new NotImplementedException();
+    // const { video } = await this.mediaUploadService.upload(file, user?.uid, {
+    //   observers: [user?.uid],
+    // });
 
-    return video;
+    // return video;
   }
 
   @Patch(':id')

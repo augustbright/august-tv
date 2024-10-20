@@ -153,7 +153,7 @@ export class YoutubeService {
           {
             authorId: params.authorId,
             jobId: job.id,
-            originalname: path.basename(filePath as string),
+            originalName: path.basename(filePath as string),
             path: filePath as string,
           },
         );

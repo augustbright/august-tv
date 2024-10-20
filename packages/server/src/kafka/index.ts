@@ -19,16 +19,13 @@ export type KafkaPayloads = {
     [KafkaTopics.YoutubeVideoForImportDownloaded]: {
         jobId: string;
         path: string;
-        originalname: string;
+        originalName: string;
         authorId: string;
     };
     [KafkaTopics.YoutubeVideoForImportTranscoded]: {
         jobId: string;
-        videoOutputDir: string;
-        thumbnailOutputDir: string;
-        masterOutputPath: string;
-        originalPath: string;
-        originalname: string;
+        dir: string;
+        originalName: string;
         authorId: string;
     };
 };

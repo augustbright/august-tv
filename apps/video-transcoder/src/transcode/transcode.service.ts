@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import ffmpeg from 'fluent-ffmpeg';
 import { writeFile } from 'fs/promises';
-import { JobsService } from '@august-tv/server/modules';
+import { ImageService, JobsService } from '@august-tv/server/modules';
 import { ensureUploadPath } from '@august-tv/server/fs-utils';
 import { randomUUID } from 'crypto';
 import path from 'path';
+import fs from 'fs/promises';
 
 const resolutions = [
   // {
@@ -43,7 +44,10 @@ type TParams = {
 @Injectable()
 export class TranscodeService {
   private readonly logger = new Logger(TranscodeService.name);
-  constructor(private readonly jobsService: JobsService) {}
+  constructor(
+    private readonly jobsService: JobsService,
+    private readonly imageService: ImageService,
+  ) {}
 
   async transcode(params: TParams) {
     const job = await this.jobsService.getById(params.jobId);
@@ -66,6 +70,7 @@ export class TranscodeService {
       const videoFolderName = 'video';
       const thumbnailsFolderName = 'thumbnails';
 
+      const dir = await ensureUploadPath(uuid);
       const videoOutputDir = await ensureUploadPath(uuid, videoFolderName);
       const thumbnailOutputDir = await ensureUploadPath(
         uuid,
@@ -76,10 +81,6 @@ export class TranscodeService {
       const transcodedFiles = Promise.all(
         resolutions.map((resolution, index) => {
           return new Promise<string>((resolve, reject) => {
-            // const outputPath = path.join(
-            //   videoOutputDir,
-            //   `${resolution.resolution}.mp4`,
-            // );
             const outputPath = path.join(
               videoOutputDir,
               `${resolution.resolution}_variant.m3u8`,
@@ -139,7 +140,7 @@ export class TranscodeService {
         }),
       );
 
-      processingJob.stage('Generating thumbnails');
+      // Generate thumbnails
       await new Promise((resolve, reject) => {
         ffmpeg(params.inputPath)
           .on('end', () => resolve(null))
@@ -152,11 +153,19 @@ export class TranscodeService {
           });
       });
 
+      // Resize thumbnails to multiple sizes
+      const thumbnailFilesPaths = await fs.readdir(thumbnailOutputDir);
+      await Promise.all(
+        thumbnailFilesPaths.map((thumbnailPath) => {
+          this.imageService.createMultipleSizes({
+            originalPath: thumbnailPath,
+          });
+        }),
+      );
+
       await transcodedFiles;
 
-      // Generate master playlist file
-      const masterName = `master.m3u8`;
-      const masterOutputPath = path.join(videoOutputDir, masterName);
+      const masterOutputPath = path.join(videoOutputDir, 'master.m3u8');
       const streamFilesContent = resolutions.map((resolution) => {
         return [
           `#EXT-X-STREAM-INF:BANDWIDTH=${resolution.bandwidth},RESOLUTION=${resolution.size}`,
@@ -170,11 +179,9 @@ export class TranscodeService {
       processingJob.done();
       job.done();
 
-      return {
-        videoOutputDir,
-        thumbnailOutputDir,
-        masterOutputPath,
-      };
+      await fs.rename(params.inputPath, path.join(dir, 'original.mp4'));
+
+      return { dir };
     } catch (error) {
       this.logger.error('Failed to transcode video', error);
       processingJob.error('Failed to process video');

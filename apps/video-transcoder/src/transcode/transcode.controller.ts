@@ -27,11 +27,8 @@ export class TranscodeController {
           {
             authorId: payload.authorId,
             jobId: payload.jobId,
-            originalname: payload.originalname,
-            originalPath: payload.path,
-            masterOutputPath: result.masterOutputPath,
-            thumbnailOutputDir: result.thumbnailOutputDir,
-            videoOutputDir: result.videoOutputDir,
+            originalName: payload.originalName,
+            dir: result.dir,
           },
         );
       })
