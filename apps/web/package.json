@@ -15,9 +15,9 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@august-tv/env": "^1.0.0",
-    "@august-tv/common": "^1.0.0",
-    "@august-tv/generated-types": "^1.0.0",
+    "@august-tv/common": "workspace:^",
+    "@august-tv/env": "workspace:^",
+    "@august-tv/generated-types": "workspace:^",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-avatar": "^1.1.0",

@@ -163,7 +163,7 @@ export class UserService implements IWithPermissions {
 
   async isAdmin(userId: string) {
     const roles = await this.getRoles(userId);
-    return roles.some((role) => role.name === 'ADMIN');
+    return roles.some((role) => role.name === 'admin');
   }
 
   async getUserSubscriptions(userId: string) {

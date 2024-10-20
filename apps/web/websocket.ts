@@ -1,4 +1,3 @@
-// TODO: fix websocket connection
 import { isServer } from '@tanstack/react-query';
 
 import { Socket, io } from 'socket.io-client';
@@ -10,11 +9,6 @@ class WS {
     if (isServer) return;
 
     this.disconnect();
-
-    // const socket = io("localhost:3101", {
-    //     path: process.env.NEXT_PUBLIC_WS_PREFIX,
-    //     transports: ["websocket", "polling"],
-    // });
 
     const socket = io('localhost:3101', {
       path: '/io',

@@ -53,114 +53,141 @@ export class YoutubeService {
     params: YoutubeImportRequestDto,
     job: Job,
   ) {
-    if (params.videoId) {
-      const importOneJob = await this.jobsService.create(
-        {
-          type: 'import-one-from-youtube',
-          name: `Importing video`,
-          payload: {},
-        },
-        {
-          observers: params.observers,
-        },
-      );
-      await job.registerChildJob(importOneJob);
-      this.performJobImportOneVideoFromYoutube(
-        {
-          ...params,
-          videoId: params.videoId,
-        },
-        importOneJob,
-      );
-      importOneJob.once('done', () => job.done());
-      importOneJob.once('fail', (error) => job.error(error));
-    } else {
-      let jobsRemaining = params.numberOfVideos ?? 1;
-      times(params.numberOfVideos ?? 1, async (idx) => {
+    try {
+      if (params.videoId) {
         const importOneJob = await this.jobsService.create(
           {
             type: 'import-one-from-youtube',
-            name: `Importing video ${idx + 1}`,
+            name: `Importing video`,
             payload: {},
           },
           {
             observers: params.observers,
           },
         );
-
         await job.registerChildJob(importOneJob);
-        this.performJobImportOneVideoFromYoutube(params, importOneJob);
-        importOneJob.once('finished', () => {
-          jobsRemaining--;
-          if (jobsRemaining === 0) {
-            job.done();
-          }
+        this.performJobImportOneVideoFromYoutube(
+          {
+            ...params,
+            videoId: params.videoId,
+          },
+          importOneJob,
+        );
+        importOneJob.once('done', () => job.done());
+        importOneJob.once('fail', (error) => job.error(error));
+      } else {
+        let jobsRemaining = params.numberOfVideos ?? 1;
+
+        job.stage(
+          `${params.numberOfVideos - jobsRemaining}/${params.numberOfVideos} videos imported`,
+        );
+
+        times(params.numberOfVideos ?? 1, async (idx) => {
+          const importOneJob = await this.jobsService.create(
+            {
+              type: 'import-one-from-youtube',
+              name: `Importing video ${idx + 1}`,
+              payload: {},
+            },
+            {
+              observers: params.observers,
+            },
+          );
+
+          await job.registerChildJob(importOneJob);
+          this.performJobImportOneVideoFromYoutube(params, importOneJob);
+          importOneJob.once('finished', () => {
+            jobsRemaining--;
+
+            job.stage(
+              `${params.numberOfVideos - jobsRemaining}/${params.numberOfVideos} videos imported`,
+            );
+
+            if (jobsRemaining === 0) {
+              job.done();
+            }
+          });
         });
-      });
+      }
+    } catch (error) {
+      this.logger.error('Failed to import videos', error);
+      job.error('Failed to import videos');
     }
   }
 
+  // TODO: Job processors should return some special class, JobGuarantee, that will ensure that the job is done
   private async performJobImportOneVideoFromYoutube(
     params: YoutubeImportRequestDto & { videoId?: string },
     job: Job,
   ) {
-    let video: any = null;
-    if (!params.videoId) {
-      job.stage('Looking for a video to import');
-      const channelId = params.channelId ?? YOUTUBE_CC_CHANNEL_ID;
-      video = await this.getRandomSmallVideoFromChannel(channelId);
-    } else {
-      video = (await this.getVideoDetails([params.videoId])).at(0);
-    }
-    if (!video) {
-      job.error('No video found');
-      return;
-    }
+    try {
+      let video: any = null;
+      if (!params.videoId) {
+        job.stage('Looking for a video to import');
+        const channelId = params.channelId ?? YOUTUBE_CC_CHANNEL_ID;
+        video = await this.getRandomSmallVideoFromChannel(channelId);
+      } else {
+        video = (await this.getVideoDetails([params.videoId])).at(0);
+      }
+      if (!video) {
+        job.error('No video found');
+        return;
+      }
 
-    job.stage('Downloading video');
-    const downloadJob = await this.videoDownloaderService.downloadVideo(
-      video.id,
-      {
-        observers: params.observers,
-      },
-    );
-    job.registerChildJob(downloadJob);
+      job.stage('Downloading video');
+      const downloadJob = await this.videoDownloaderService.downloadVideo(
+        video.id,
+        {
+          observers: params.observers,
+        },
+      );
+      job.registerChildJob(downloadJob);
 
-    downloadJob.once('done', async () => {
-      job.stage('Processing video');
-      const { filePath } = downloadJob.metadata;
-      const { job: processingJob, video: dbVideo } =
-        await this.mediaUploadService.upload(
-          {
-            path: filePath as string,
-            originalname: path.basename(filePath as string),
-          },
-          params.authorId,
-          {
-            observers: params.observers,
-          },
-        );
+      downloadJob.once('done', async () => {
+        job.stage('Processing video');
+        const { filePath } = downloadJob.metadata;
+        const { job: processingJob, video: dbVideo } =
+          await this.mediaUploadService.upload(
+            {
+              path: filePath as string,
+              originalname: path.basename(filePath as string),
+            },
+            params.authorId,
+            {
+              observers: params.observers,
+            },
+          );
 
-      job.registerChildJob(processingJob);
+        job.registerChildJob(processingJob);
 
-      processingJob.once('done', async () => {
-        await this.prismaService.video.update({
-          where: { id: dbVideo.id },
-          data: {
-            ...(params.publicImmediately ? { visibility: 'PUBLIC' } : {}),
-            title: video.snippet?.title ?? 'Untitled',
-            description: video.snippet?.description ?? '',
-            imported: {
-              create: {
-                source: 'youtube',
-                originalId: video.id,
+        processingJob.once('done', async () => {
+          await this.prismaService.video.update({
+            where: { id: dbVideo.id },
+            data: {
+              ...(params.publicImmediately ? { visibility: 'PUBLIC' } : {}),
+              title: video.snippet?.title ?? 'Untitled',
+              description: video.snippet?.description ?? '',
+              imported: {
+                create: {
+                  source: 'youtube',
+                  originalId: video.id,
+                },
               },
             },
-          },
+          });
+          job.done();
         });
-        job.done();
+        processingJob.once('fail', (error) => {
+          job.error(error);
+        });
       });
-    });
+      downloadJob.once('fail', (error) => {
+        job.error(error);
+      });
+    } catch (error) {
+      this.logger.error('Failed to import video', error);
+      job.error('Failed to import video');
+    }
   }
 
   private async getRandomVideoFromChannel(
@@ -178,7 +205,8 @@ export class YoutubeService {
 
       // Return an array of video IDs
       return videos.map((video) => video.id.videoId);
-    } catch {
+    } catch (error) {
+      this.logger.error('Failed to fetch videos', error);
       throw new HttpException('Failed to fetch videos', HttpStatus.BAD_REQUEST);
     }
   }
@@ -199,7 +227,6 @@ export class YoutubeService {
         return duration < 10 * 60; // Videos less than 10 minutes
       });
 
-      //TODO: filter out previously imported videos. For this it is necessary to add original video id to the imported model
       const alreadyImported = await this.prismaService.imported.findMany({
         where: {
           AND: [
@@ -243,7 +270,8 @@ export class YoutubeService {
       const response = await firstValueFrom(this.httpService.get(url));
 
       return response.data.items; // Returns video details including contentDetails and snippet
-    } catch {
+    } catch (error) {
+      this.logger.error('Failed to fetch video details', error);
       throw new HttpException(
         'Failed to fetch video details',
         HttpStatus.BAD_REQUEST,

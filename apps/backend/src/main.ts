@@ -1,6 +1,3 @@
-// TODO migrate to yarn 4
-// TODO use keycloak for authentication
-
 import { env } from '@august-tv/env';
 import cookieParser from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';

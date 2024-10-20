@@ -66,6 +66,19 @@ export class TranscodeService {
             `${outputFolder}${thumbnailsFolder}/`
         );
 
+        // Create thumbnails
+        await new Promise((resolve, reject) => {
+            ffmpeg(inputPath)
+                .on("end", () => resolve(null))
+                .on("error", (err: Error) => reject(err))
+                .screenshots({
+                    count: thumbnailsCount,
+                    folder: thumbnailOutputFolder,
+                    filename: `${filename}_thumbnail.png`,
+                    size: "1280x720",
+                });
+        });
+
         // Transcode video to different resolutions
         const transcodedFiles = await Promise.all(
             resolutions.map((resolution, index) => {
@@ -109,18 +122,6 @@ export class TranscodeService {
                 });
             })
         );
-
-        // Create thumbnails
-        await new Promise((resolve, reject) => {
-            ffmpeg(inputPath)
-                .on("end", () => resolve(null))
-                .on("error", (err: Error) => reject(err))
-                .thumbnail({
-                    count: thumbnailsCount,
-                    filename: `${thumbnailOutputFolder}${filename}_thumbnail.png`,
-                    size: "1280x720",
-                });
-        });
 
         await transcodedFiles;
 

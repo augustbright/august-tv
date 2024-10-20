@@ -64,7 +64,12 @@ export const MediaInfo = ({ mediaId }: { mediaId: string }) => {
               </CardHeader>
               <CardContent>
                 <p className='text-xs text-muted-foreground'>
-                  {media.description}
+                  {media.description?.split('\n').map((line, i) => (
+                    <span key={i}>
+                      {line}
+                      <br />
+                    </span>
+                  ))}
                 </p>
               </CardContent>
             </Card>

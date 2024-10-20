@@ -22,7 +22,7 @@ import Link from 'next/link';
 export const AdminLink = () => {
   return (
     <Guard
-      roles={['ADMIN']}
+      roles={['admin']}
       fallback={null}
     >
       {() => (

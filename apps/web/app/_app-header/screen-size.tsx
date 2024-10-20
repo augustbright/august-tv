@@ -5,7 +5,7 @@ import { Guard } from '@/components/guard';
 export const ScreenSize = () => {
   return (
     <Guard
-      roles={['ADMIN']}
+      roles={['admin']}
       fallback={null}
     >
       {() => (

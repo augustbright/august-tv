@@ -4,7 +4,7 @@ import { LayoutWithSidebar } from '@/components/layout-with-sidebar';
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <Guard
-      roles={['ADMIN']}
+      roles={['admin']}
       error={RedirectHome}
       fallback={<RedirectHome />}
     >

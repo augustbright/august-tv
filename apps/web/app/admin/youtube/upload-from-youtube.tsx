@@ -17,7 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import { number, z } from 'zod';
+import { z } from 'zod';
 
 import { UserInput } from '../user-input';
 
@@ -40,7 +40,8 @@ const formSchema = z.object({
     }
   ),
   publicImmediately: z.boolean().optional().default(true),
-  numberOfVideos: number()
+  numberOfVideos: z.coerce
+    .number()
     .int()
     .positive()
     .lte(10, 'Maximum 10 videos')
@@ -141,6 +142,25 @@ export const UploadFromYoutube = () => {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name='numberOfVideos'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Number of videos</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type='number'
+                      placeholder='Number of videos'
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className='flex justify-start'>
               <Button
                 disabled={isPending}

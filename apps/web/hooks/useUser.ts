@@ -44,7 +44,9 @@ export const useUser = () => {
     return 0;
   });
 
-  const activeJobs = (jobs ?? []).filter((job) => job.status === 'IN_PROGRESS');
+  const activeJobs = (jobs ?? []).filter(
+    (job) => job.status === 'IN_PROGRESS' || job.status === 'FAILED'
+  );
   const signIn = {
     showModal: () => {},
     google: useMutateSignInWithGoogle()

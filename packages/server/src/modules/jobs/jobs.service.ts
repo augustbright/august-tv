@@ -27,6 +27,7 @@ export class JobsService {
                 description: params.description,
                 type: params.type,
                 payload: params.payload,
+                stage: params.stage,
                 observers: {
                     connect: observers.map((observer) => ({ id: observer })),
                 },

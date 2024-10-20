@@ -1,3 +1,4 @@
+// TODO: Implement media transcode microservice
 import { env } from "@august-tv/env";
 
 import { Injectable } from "@nestjs/common";
@@ -9,13 +10,13 @@ import { PrismaService } from "../prisma/prisma.service";
 import { TranscodeService } from "../transcode/transcode.service";
 import { ImageService } from "../image/image.service";
 import { JobsService } from "../jobs/jobs.service";
-import { resolveUploadPath } from "../../fs-utils";
+import { ensureUploadPath, resolveUploadPath } from "../../fs-utils";
 import * as path from "path";
+import { Job } from "../jobs/Job";
 
 const storage = new Storage();
 const bucketName = env.GOOGLE_CLOUD_MEDIA_BUCKET_NAME;
 const transferManager = new TransferManager(storage.bucket(bucketName));
-const rootOutputFolder = "tmp/transcoded/";
 
 export type TTempFile = {
     originalname: string;
@@ -59,19 +60,6 @@ export class MediaUploadService {
             },
         });
 
-        return {
-            job: await this.processVideo(file, video, params),
-            video,
-        };
-    }
-
-    private async processVideo(
-        file: TTempFile,
-        video: Video,
-        params: {
-            observers: string[];
-        }
-    ) {
         const job = await this.jobsService.create(
             {
                 name: "Processing video",
@@ -86,10 +74,16 @@ export class MediaUploadService {
                 observers: params.observers,
             }
         );
-        const filename = `${randomUUID()}_${file.originalname}`;
-        const outputFolder = `${rootOutputFolder}${filename}/`;
-        const tempFilePath = file.path;
 
+        this.processVideo(file, video, job);
+
+        return {
+            job,
+            video,
+        };
+    }
+
+    private async processVideo(file: TTempFile, video: Video, job: Job) {
         async function getManyFiles(folder: string, ending: string) {
             const allFiles = await fs.readdir(`${outputFolder}${folder}`);
             return allFiles
@@ -122,36 +116,41 @@ export class MediaUploadService {
             return dbFiles;
         };
 
-        setImmediate(async () => {
-            try {
-                const transcoded = await this.transcodeService.transcode(
-                    tempFilePath,
-                    {
-                        onProgress: (percent) => {
-                            job.progress(percent);
-                        },
-                        outputFolder,
-                        filename,
-                    }
-                );
+        const fileUUID = randomUUID();
+        const filename = `${fileUUID}`;
+        const rootOutputFolder = resolveUploadPath(fileUUID);
+        ensureUploadPath(fileUUID);
+        const outputFolder = `${rootOutputFolder}/`;
+        const tempFilePath = file.path;
 
-                const videoVariantFiles = await getManyFiles(
-                    transcoded.videoFolder,
-                    "_variant.m3u8"
-                );
-                const videoPartsFiles = await getManyFiles(
-                    transcoded.videoFolder,
-                    ".ts"
-                );
-                const videoMasterFiles = await getManyFiles(
-                    transcoded.videoFolder,
-                    "_master.m3u8"
-                );
+        try {
+            const transcoded = await this.transcodeService.transcode(
+                tempFilePath,
+                {
+                    onProgress: (percent) => {
+                        job.progress(percent);
+                    },
+                    outputFolder,
+                    filename,
+                }
+            );
 
-                const thumbnailsFilenames = await Promise.all(
-                    (
-                        await getManyFiles(transcoded.thumbnailsFolder, ".png")
-                    ).map(async (thumbnail) => {
+            const videoVariantFiles = await getManyFiles(
+                transcoded.videoFolder,
+                "_variant.m3u8"
+            );
+            const videoPartsFiles = await getManyFiles(
+                transcoded.videoFolder,
+                ".ts"
+            );
+            const videoMasterFiles = await getManyFiles(
+                transcoded.videoFolder,
+                "_master.m3u8"
+            );
+
+            const thumbnailsFilenames = await Promise.all(
+                (await getManyFiles(transcoded.thumbnailsFolder, ".png")).map(
+                    async (thumbnail) => {
                         const thumbnailName =
                             randomUUID() + path.extname(thumbnail);
                         await fs.rename(
@@ -159,57 +158,55 @@ export class MediaUploadService {
                             resolveUploadPath(thumbnailName)
                         );
                         return thumbnailName;
+                    }
+                )
+            );
+
+            job.stage("uploading files");
+            await uploadManyFiles(videoVariantFiles, video.fileSetId);
+            await uploadManyFiles(videoPartsFiles, video.fileSetId);
+            const [uploadedMaster] = await uploadManyFiles(
+                videoMasterFiles,
+                video.fileSetId
+            );
+
+            const dbThumbnails = await Promise.all(
+                thumbnailsFilenames.map((thumbnailFilename) =>
+                    this.imageService.upload(thumbnailFilename, {
+                        ownerId: video.authorId,
+                        setId: video.thumbnailSetId,
                     })
-                );
+                )
+            );
 
-                job.stage("uploading files");
-                await uploadManyFiles(videoVariantFiles, video.fileSetId);
-                await uploadManyFiles(videoPartsFiles, video.fileSetId);
-                const [uploadedMaster] = await uploadManyFiles(
-                    videoMasterFiles,
-                    video.fileSetId
-                );
-
-                const dbThumbnails = await Promise.all(
-                    thumbnailsFilenames.map((thumbnailFilename) =>
-                        this.imageService.upload(thumbnailFilename, {
-                            ownerId: video.authorId,
-                            setId: video.thumbnailSetId,
-                        })
-                    )
-                );
-
-                await this.prisma.video.update({
-                    where: { id: video.id },
-                    data: {
-                        status: "READY",
-                        master: {
-                            connect: {
-                                id: uploadedMaster.id,
-                            },
-                        },
-                        thumbnail: {
-                            connect: {
-                                id: dbThumbnails[0].id,
-                            },
+            await this.prisma.video.update({
+                where: { id: video.id },
+                data: {
+                    status: "READY",
+                    master: {
+                        connect: {
+                            id: uploadedMaster.id,
                         },
                     },
-                });
+                    thumbnail: {
+                        connect: {
+                            id: dbThumbnails[0].id,
+                        },
+                    },
+                },
+            });
 
-                job.done();
-            } catch (error) {
-                await this.prisma.video.update({
-                    where: { id: video.id },
-                    data: { status: "ERROR" },
-                });
+            job.done();
+        } catch (error) {
+            await this.prisma.video.update({
+                where: { id: video.id },
+                data: { status: "ERROR" },
+            });
 
-                job.error(String(error));
-            } finally {
-                await fs.rm(rootOutputFolder, { recursive: true });
-                await fs.rm(file.path);
-            }
-        });
-
-        return job;
+            job.error(String(error));
+        } finally {
+            await fs.rm(rootOutputFolder, { recursive: true });
+            await fs.rm(file.path);
+        }
     }
 }
