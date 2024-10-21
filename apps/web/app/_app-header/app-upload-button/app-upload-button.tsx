@@ -1,5 +1,6 @@
 'use client';
 
+import { postMediaUpload } from '@/api/media';
 import { Query } from '@/components/Query';
 import { Guard } from '@/components/guard';
 import { Icon } from '@/components/icon';
@@ -13,7 +14,6 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
-import { useMutateUploadMedia } from '@/mutations/uploadMedia';
 
 import { AlertCircle, CirclePlus, Loader2, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -24,7 +24,7 @@ import { AppUploadUnauthenticated } from './app-upload-unauthenticated';
 export const AppUploadButton = () => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const uploadMedia = useMutateUploadMedia();
+  const uploadMedia = postMediaUpload.useMutation();
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) {
       return;

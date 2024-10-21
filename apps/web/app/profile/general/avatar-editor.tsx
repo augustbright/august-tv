@@ -1,5 +1,11 @@
 'use client';
 
+import {
+  getUserProfilePictures,
+  postUserUnsetProfilePicture,
+  postUserUpdateProfilePicture,
+  postUserUploadProfilePicture
+} from '@/api/user';
 import { Icon } from '@/components/icon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/button';
@@ -13,10 +19,6 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog';
 import { useUser } from '@/hooks/useUser';
-import { useMutateUnsetProfilePicture } from '@/mutations/unsetProfilePicture';
-import { useMutateUpdateProfilePicture } from '@/mutations/updateProfilePicture';
-import { useMutateUploadProfilePicture } from '@/mutations/uploadProfilePicture';
-import { useQueryProfilePictures } from '@/queries/profilePictures';
 import { checkExhaustiveness } from '@august-tv/common';
 
 import {
@@ -75,20 +77,20 @@ export const AvatarEditor = () => {
     ? selectedImageFromGallery.original.publicUrl
     : localFileUrl;
 
-  const { data: pictures } = useQueryProfilePictures();
+  const { data: pictures } = getUserProfilePictures.useQuery();
   const hasPictures = !!pictures?.images.length;
   const {
     mutateAsync: uploadProfilePicture,
     isPending: isUploadingProfilePicture
-  } = useMutateUploadProfilePicture();
+  } = postUserUploadProfilePicture.useMutation();
   const {
     mutateAsync: updateProfilePicture,
     isPending: isUpdatingProfilePicture
-  } = useMutateUpdateProfilePicture();
+  } = postUserUpdateProfilePicture.useMutation();
   const {
     mutateAsync: unsetProfilePicture,
     isPending: isRemovingProfilePicture
-  } = useMutateUnsetProfilePicture();
+  } = postUserUnsetProfilePicture.useMutation();
   const currentPicture = current?.data?.picture;
   const [crop, setCrop] = useState<Crop>({
     height: 0,

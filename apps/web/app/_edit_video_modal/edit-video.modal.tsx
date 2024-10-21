@@ -1,8 +1,8 @@
 'use client';
 
+import { getMediaById } from '@/api/media';
 import { Query } from '@/components/Query';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { queryMedia } from '@/queries/media';
 
 import { useRouter } from 'next/navigation';
 
@@ -23,7 +23,7 @@ export const EditVideoModal = ({ videoId }: { videoId: string }) => {
     >
       <DialogContent className='max-w-5xl h-[600px] flex flex-col overflow-hidden'>
         <Query
-          query={queryMedia(videoId)}
+          query={getMediaById.query({ mediaId: videoId })}
           loading={Query.LOADING.ROW}
           error={Query.ERROR.ALERT}
         >

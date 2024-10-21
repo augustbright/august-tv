@@ -1,7 +1,9 @@
+import {
+  getUserMySubscriptions,
+  postUserSubscribe,
+  postUserUnsubscribe
+} from '@/api/user';
 import { cn } from '@/lib/utils';
-import { useMutateSubscribe } from '@/mutations/subscribe';
-import { useMutateUnsubscribe } from '@/mutations/unsubscribe';
-import { queryMySubscriptions } from '@/queries/mySubscriptions';
 import { Slot } from '@radix-ui/react-slot';
 
 import React from 'react';
@@ -16,11 +18,12 @@ export const SubscribeButton = React.forwardRef<
   }
 >(({ className, variant, size, asChild = false, authorId, ...props }, ref) => {
   const Comp = asChild ? Slot : 'button';
-  const { mutate: subscribe, isPending: isSubscribing } = useMutateSubscribe();
+  const { mutate: subscribe, isPending: isSubscribing } =
+    postUserSubscribe.useMutation();
   const { mutate: unsubscribe, isPending: isUnsubscribing } =
-    useMutateUnsubscribe();
+    postUserUnsubscribe.useMutation();
   return (
-    <Query query={queryMySubscriptions()}>
+    <Query query={getUserMySubscriptions.query()}>
       {({ data: { subscriptions } }) => {
         const isSubscribed = subscriptions.some(
           (subscription) => subscription.id === authorId
@@ -32,9 +35,9 @@ export const SubscribeButton = React.forwardRef<
             ref={ref}
             onClick={() => {
               if (isSubscribed) {
-                unsubscribe(authorId);
+                unsubscribe({ authorId });
               } else {
-                subscribe(authorId);
+                subscribe({ authorId });
               }
             }}
             disabled={props.disabled || isSubscribing || isUnsubscribing}

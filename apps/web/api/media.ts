@@ -14,7 +14,7 @@ export const getMediaById = createReadableEndpoint<
 export const postMediaRate = createMutableEndpoint<
   {
     mediaId: string;
-    rating: number;
+    type: string | null;
   },
   TMediaEndpointResult<'rateMedia'>
 >({
@@ -22,10 +22,7 @@ export const postMediaRate = createMutableEndpoint<
   prepareUrl: () => `/media/rate`
 });
 
-export const postMediaUpload = createMutableEndpoint<
-  File,
-  TMediaEndpointResult<'uploadMedia'>
->({
+export const postMediaUpload = createMutableEndpoint<File, { id: string }>({
   method: 'post',
   prepareUrl: () => '/media/upload',
   prepareBody: (file) => {
@@ -48,7 +45,10 @@ export const getMediaMy = createReadableEndpoint<
 });
 
 export const patchMedia = createMutableEndpoint<
-  { mediaId: string; body: { title: string; description: string } },
+  {
+    mediaId: string;
+    updateVideoDto: { title: string; description: string; visibility: string };
+  },
   TMediaEndpointResult<'patchMedia'>
 >({
   method: 'patch',

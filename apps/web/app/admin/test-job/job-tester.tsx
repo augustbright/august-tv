@@ -1,5 +1,6 @@
 'use client';
 
+import { postJobsTest } from '@/api/jobs';
 import { Icon } from '@/components/icon';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +14,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useMutateCreateTestJob } from '@/mutations/createTestJob';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Prisma } from '@prisma/client';
 
@@ -65,7 +65,7 @@ export const JobTester = () => {
   });
 
   const { mutateAsync: createTestJob, isPending: isCreating } =
-    useMutateCreateTestJob();
+    postJobsTest.useMutation();
 
   async function handleSubmit(values: z.infer<typeof formSchema>) {
     try {

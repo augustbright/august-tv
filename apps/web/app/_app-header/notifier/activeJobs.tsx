@@ -1,10 +1,10 @@
+import { postUserUnobserveJob } from '@/api/user';
 import { Icon } from '@/components/icon';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useUser } from '@/hooks/useUser';
 import { cn } from '@/lib/utils';
-import { useMutateUnobserveJob } from '@/mutations/unobserveJob';
 
 import { EyeOff } from 'lucide-react';
 
@@ -17,7 +17,7 @@ const STATUS_NAMES = {
 export const ActiveJobs = () => {
   const { activeJobs } = useUser();
   const { mutateAsync: unobserveJob, isPending: isUnobservingJob } =
-    useMutateUnobserveJob();
+    postUserUnobserveJob.useMutation();
   return activeJobs.map((job) => (
     <DropdownMenuItem
       key={job.id}
@@ -52,7 +52,7 @@ export const ActiveJobs = () => {
         <Button
           variant='ghost'
           size='sm'
-          onClick={() => unobserveJob(job.id)}
+          onClick={() => unobserveJob({ jobId: job.id })}
         >
           <Icon
             icon={EyeOff}

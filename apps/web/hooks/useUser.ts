@@ -1,9 +1,6 @@
-import { api } from '@/api';
+import { getUserCurrent, getUserMyJobs, postUserSignOut } from '@/api/user';
 import { useMutateSignInWithGoogle } from '@/mutations/signInWithGoogle';
-import { useMutateSignOut } from '@/mutations/signOut';
-import { KEY } from '@/queries/keys';
 import { TMessage } from '@august-tv/common/types';
-import { TUserEndpointResult } from '@august-tv/generated-types';
 import { Job } from '@prisma/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -16,19 +13,13 @@ import { ws } from '../websocket';
 const jobsAtom = atom<Job[]>([]);
 
 export const useUser = () => {
-  const { data: current } = useQuery(
-    api((r) => r.user.current).get.query<
-      TUserEndpointResult<'getCurrentUser'>
-    >()
-  );
+  const { data: current } = getUserCurrent.useQuery();
   const queryClient = useQueryClient();
   const [rawJobs, setJobs] = useAtom(jobsAtom);
   const { refetch: refetchMyJobs } = useQuery({
-    queryKey: KEY.MY_JOBS,
+    queryKey: ['user', 'myJobs'],
     queryFn: async () => {
-      const { data } = await api((r) => r.user.myJobs).get<
-        TUserEndpointResult<'getMyJobs'>
-      >();
+      const data = await getUserMyJobs.get();
       setJobs(data);
       return data;
     }
@@ -96,7 +87,7 @@ export const useUser = () => {
     }
   }, [current, queryClient, refetchMyJobs, setJobs]);
 
-  const signOut = useMutateSignOut();
+  const signOut = postUserSignOut.useMutation();
 
   return {
     current,

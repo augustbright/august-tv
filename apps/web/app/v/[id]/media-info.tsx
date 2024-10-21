@@ -1,12 +1,12 @@
 'use client';
 
+import { getMediaById } from '@/api/media';
 import { AuthorPicture } from '@/components/AuthorPicture';
 import { Query } from '@/components/Query';
 import { SubscribeButton } from '@/components/subscribe-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUser } from '@/hooks/useUser';
-import { queryMedia } from '@/queries/media';
 
 import { ChartNoAxesCombined, Edit } from 'lucide-react';
 import moment from 'moment';
@@ -19,7 +19,7 @@ export const MediaInfo = ({ mediaId }: { mediaId: string }) => {
   return (
     <div className='flex flex-col gap-2'>
       <Query
-        query={queryMedia(mediaId)}
+        query={getMediaById.query({ mediaId })}
         loading={Query.LOADING.ROW}
         error={Query.ERROR.ALERT}
       >

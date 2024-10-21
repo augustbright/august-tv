@@ -5,9 +5,9 @@ import { createMutableEndpoint } from './createMutableEndpoint';
 export const postJobsTest = createMutableEndpoint<
   {
     name: string;
-    description: string;
+    description?: string;
     payload: object;
-    stage: string;
+    stage?: string;
     timeout: number;
     observers: string[];
   },

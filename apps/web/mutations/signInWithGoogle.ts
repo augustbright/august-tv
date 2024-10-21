@@ -1,5 +1,5 @@
-import { KEY } from '@/queries/keys';
-import { getQueryClient } from '@/queries/queryClient';
+import { getQueryClient } from '@/api/queryClient';
+import { postUserSessionLogin } from '@/api/user';
 import { UseMutationOptions, useMutation } from '@tanstack/react-query';
 
 import {
@@ -8,7 +8,6 @@ import {
   signInWithPopup
 } from 'firebase/auth';
 
-import { api } from '../api';
 import { auth } from '../firebase';
 
 const googleProvider = new GoogleAuthProvider();
@@ -21,10 +20,10 @@ export const mutateSignInWithGoogle =
       const userCredential = await signInWithPopup(auth, googleProvider);
       const idToken = await userCredential.user.getIdToken();
 
-      await api((r) => r.user.sessionLogin).post({ idToken });
+      await postUserSessionLogin.mutate({ idToken });
 
       getQueryClient().invalidateQueries({
-        queryKey: KEY.CURRENT_USER
+        queryKey: ['user', 'current']
       });
       return userCredential;
     }

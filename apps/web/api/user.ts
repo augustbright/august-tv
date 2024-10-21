@@ -7,7 +7,7 @@ import { createReadableEndpoint } from './createReadableEndpoint';
 import { validatePictureFile } from './validators';
 
 export const postUserSessionLogin = createMutableEndpoint<
-  void,
+  { idToken: string },
   TUserEndpointResult<'sessionLogin'>
 >({
   prepareUrl: () => '/user/session/login',

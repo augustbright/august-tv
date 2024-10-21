@@ -1,5 +1,6 @@
 'use client';
 
+import { patchMedia } from '@/api/media';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,7 +22,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
-import { useMutateUpdateMedia } from '@/mutations/updateVideo';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { File, Video } from '@prisma/client';
 
@@ -58,7 +58,7 @@ export const EditVideoForm = ({
   const router = useRouter();
   const playerRef = useRef<HTMLVideoElement>(null);
   const { mutateAsync: updateVideo, isPending: isUpdatingVideo } =
-    useMutateUpdateMedia();
+    patchMedia.useMutation();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -72,7 +72,7 @@ export const EditVideoForm = ({
   async function handleSubmit(values: z.infer<typeof formSchema>) {
     try {
       await updateVideo({
-        id: video.id,
+        mediaId: video.id,
         updateVideoDto: values
       });
       toast.success('Video updated');

@@ -1,5 +1,5 @@
-import { getApiClient } from '@/api';
-import { getQueryClient } from '@/queries/queryClient';
+import { getApiClient } from '@/api/client';
+import { getQueryClient } from '@/api/queryClient';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
 
 // import 'animate.css';

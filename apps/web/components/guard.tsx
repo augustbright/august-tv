@@ -1,6 +1,6 @@
 'use client';
 
-import { queryCurrentUser } from '@/queries/currentUser';
+import { getUserCurrent } from '@/api/user';
 import { TUserEndpointResult } from '@august-tv/generated-types';
 
 import { redirect } from 'next/navigation';
@@ -34,7 +34,7 @@ export const Guard = ({
 } & TQueryChildrenProps<TUserEndpointResult<'getCurrentUser'>>) => {
   return (
     <Query
-      query={queryCurrentUser()}
+      query={getUserCurrent.query()}
       loading={loading}
       {...queryProps}
     >

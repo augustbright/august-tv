@@ -1,5 +1,5 @@
+import { getUserProfilePictures } from '@/api/user';
 import { Query } from '@/components/Query';
-import { queryProfilePictures } from '@/queries/profilePictures';
 import { File as PrismaFile, Image as PrismaImage } from '@prisma/client';
 
 import Image from 'next/image';
@@ -18,7 +18,7 @@ export const AvatarGallery = ({
       <Query
         error={Query.ERROR.ALERT}
         loading={Query.LOADING.ROW}
-        query={queryProfilePictures()}
+        query={getUserProfilePictures.query()}
       >
         {({ data: picturesSet }) =>
           picturesSet.images.map((picture) => (

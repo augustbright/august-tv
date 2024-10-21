@@ -1,5 +1,6 @@
 'use client';
 
+import { getMediaMy } from '@/api/media';
 import { Query } from '@/components/Query';
 import {
   Card,
@@ -16,7 +17,6 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-import { queryMyMedia } from '@/queries/myMedia';
 
 import { EmptyPlaceholder } from './empty-placeholder';
 import { VideoRow } from './video-row';
@@ -32,7 +32,7 @@ export const MyContent = () => {
       </CardHeader>
       <CardContent>
         <Query
-          query={queryMyMedia()}
+          query={getMediaMy.query()}
           loading={Query.LOADING.ROW}
           error={Query.ERROR.ALERT}
         >

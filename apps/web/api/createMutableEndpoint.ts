@@ -1,4 +1,4 @@
-import { getQueryClient } from '@/queries/queryClient';
+import { getQueryClient } from '@/api/queryClient';
 import {
   QueryClient,
   UseMutationOptions,
@@ -17,8 +17,8 @@ type TMutableEndpointConfig<P, R> = {
 
 type TMutableEndpoint<P, R> = {
   mutate: (params: P) => Promise<R>;
-  mutation: (params: P) => UseMutationOptions<R, unknown, P>;
-  useMutation: () => UseMutationResult<R, unknown, P>;
+  mutation: (params: P) => UseMutationOptions<R, Error, P>;
+  useMutation: () => UseMutationResult<R, Error, P>;
 };
 
 export const createMutableEndpoint = <P, R>(

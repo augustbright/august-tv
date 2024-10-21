@@ -1,3 +1,4 @@
+import { getMediaById, postMediaRate } from '@/api/media';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -7,8 +8,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { useMutateRate } from '@/mutations/rate';
-import { queryMedia } from '@/queries/media';
 import { TMediaEndpointResult } from '@august-tv/generated-types';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -24,7 +23,8 @@ import {
 import { useEffect, useRef, useState } from 'react';
 
 export const RatePanel = ({ mediaId }: { mediaId: string }) => {
-  const { mutateAsync: rate, isPending: isRating } = useMutateRate();
+  const { mutateAsync: rate, isPending: isRating } =
+    postMediaRate.useMutation();
   const queryClient = useQueryClient();
 
   const [likesCount, setLikesCount] = useState(0);
@@ -35,7 +35,7 @@ export const RatePanel = ({ mediaId }: { mediaId: string }) => {
   const likeEffectRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    queryClient.fetchQuery(queryMedia(mediaId)).then((video) => {
+    queryClient.fetchQuery(getMediaById.query({ mediaId })).then((video) => {
       setLikesCount(video.likesCount);
       setDislikesCount(video.dislikesCount);
       if (video.rates[0]?.type === 'LIKE') {
@@ -97,7 +97,7 @@ export const RatePanel = ({ mediaId }: { mediaId: string }) => {
     setLikesCount(likesCount + (isLiked ? -1 : 1));
     setDislikesCount(isDisliked ? dislikesCount - 1 : dislikesCount);
     const newData = await rate({
-      videoId: mediaId,
+      mediaId,
       type: isLiked ? null : 'LIKE'
     });
     updateFromData(newData);
@@ -109,7 +109,7 @@ export const RatePanel = ({ mediaId }: { mediaId: string }) => {
     setDislikesCount(dislikesCount + (isDisliked ? -1 : 1));
     setLikesCount(isLiked ? likesCount - 1 : likesCount);
     const newData = await rate({
-      videoId: mediaId,
+      mediaId,
       type: isDisliked ? null : 'DISLIKE'
     });
     updateFromData(newData);

@@ -1,7 +1,7 @@
 'use client';
 
+import { getFeedLatest } from '@/api/feed';
 import { Query } from '@/components/Query';
-import { queryFeedLatest } from '@/queries/feedLatest';
 
 import { VideosSkeleton } from './skeletons/videos-skeleton';
 import { VideoThumbnail } from './video-thumbnail';
@@ -9,7 +9,7 @@ import { VideoThumbnail } from './video-thumbnail';
 export const Videos = ({
   query
 }: {
-  query: ReturnType<typeof queryFeedLatest>;
+  query: ReturnType<typeof getFeedLatest.query>;
 }) => {
   return (
     <Query

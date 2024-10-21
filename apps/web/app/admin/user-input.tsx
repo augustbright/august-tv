@@ -1,5 +1,6 @@
 'use client';
 
+import { getUserSearch } from '@/api/user';
 import { AuthorPicture } from '@/components/AuthorPicture';
 import { Query } from '@/components/Query';
 import { Guard } from '@/components/guard';
@@ -15,7 +16,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { querySearchUsers } from '@/queries/searchUsers';
 import { File, User } from '@prisma/client';
 
 import { debounce } from 'lodash';
@@ -142,7 +142,7 @@ export const UserInput = (
                     loading={Query.LOADING.ROW}
                     error={Query.ERROR.TEXT}
                     query={{
-                      ...querySearchUsers({
+                      ...getUserSearch.query({
                         query,
                         limit: 10
                       }),

@@ -1,5 +1,6 @@
 'use client';
 
+import { postYoutubeImport } from '@/api/youtube';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -12,7 +13,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useUser } from '@/hooks/useUser';
-import { useMutateUploadRandomFromYoutube } from '@/mutations/uploadRandomFromYoutube';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { useForm } from 'react-hook-form';
@@ -59,7 +59,7 @@ export const UploadFromYoutube = () => {
   });
 
   const { mutateAsync: startImporting, isPending } =
-    useMutateUploadRandomFromYoutube();
+    postYoutubeImport.useMutation();
 
   async function handleSubmit(values: z.infer<typeof formSchema>) {
     try {

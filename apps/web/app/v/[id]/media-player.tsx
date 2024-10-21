@@ -1,7 +1,7 @@
 'use client';
 
+import { getMediaById } from '@/api/media';
 import { Query } from '@/components/Query';
-import { queryMedia } from '@/queries/media';
 
 import { useRef } from 'react';
 import ReactHlsPlayer from 'react-hls-player';
@@ -11,7 +11,7 @@ export const MediaPlayer = ({ mediaId }: { mediaId: string }) => {
 
   return (
     <Query
-      query={queryMedia(mediaId)}
+      query={getMediaById.query({ mediaId })}
       loading={Query.LOADING.ROW}
       error={Query.ERROR.ALERT}
     >
