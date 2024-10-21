@@ -1,4 +1,5 @@
 import { TMediaEndpointResult } from '@august-tv/generated-types';
+import { PatchMediaDto } from '@august-tv/generated-types/dto';
 
 import { createMutableEndpoint } from './createMutableEndpoint';
 import { createReadableEndpoint } from './createReadableEndpoint';
@@ -8,7 +9,15 @@ export const getMediaById = createReadableEndpoint<
   { mediaId: string },
   TMediaEndpointResult<'getMediaById'>
 >({
-  prepareUrl: () => `/media`
+  prepareUrl: ({ mediaId }) => `/media/${mediaId}`
+});
+
+export const deleteMedia = createMutableEndpoint<
+  { mediaId: string },
+  TMediaEndpointResult<'deleteMedia'>
+>({
+  method: 'delete',
+  prepareUrl: ({ mediaId }) => `/media/${mediaId}`
 });
 
 export const postMediaRate = createMutableEndpoint<
@@ -19,7 +28,8 @@ export const postMediaRate = createMutableEndpoint<
   TMediaEndpointResult<'rateMedia'>
 >({
   method: 'post',
-  prepareUrl: () => `/media/rate`
+  prepareUrl: ({ mediaId }) => `/media/rate/${mediaId}`,
+  prepareBody: ({ type }) => ({ type })
 });
 
 export const postMediaUpload = createMutableEndpoint<File, { id: string }>({
@@ -47,10 +57,11 @@ export const getMediaMy = createReadableEndpoint<
 export const patchMedia = createMutableEndpoint<
   {
     mediaId: string;
-    updateVideoDto: { title: string; description: string; visibility: string };
+    updateVideoDto: PatchMediaDto;
   },
   TMediaEndpointResult<'patchMedia'>
 >({
   method: 'patch',
-  prepareUrl: () => '/media'
+  prepareUrl: ({ mediaId }) => `/media/${mediaId}`,
+  prepareBody: ({ updateVideoDto }) => updateVideoDto
 });

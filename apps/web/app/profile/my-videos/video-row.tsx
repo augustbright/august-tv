@@ -1,3 +1,4 @@
+import { deleteMedia } from '@/api/media';
 import { useEditVideoModal } from '@/app/_edit_video_modal/edit-video.modal';
 import { useConfirm } from '@/app/confirm';
 import { ThumbnailPicture } from '@/components/thumbnail-picture';
@@ -11,7 +12,6 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { useMutateDeleteVideoById } from '@/mutations/deleteVideoById';
 import { File, Video } from '@prisma/client';
 
 import { Loader, MoreHorizontal, Trash } from 'lucide-react';
@@ -25,7 +25,7 @@ export const VideoRow = ({
   const editVideo = useEditVideoModal();
   const confirm = useConfirm();
   const { mutateAsync: deleteVideoById, isPending: isDeletingVideo } =
-    useMutateDeleteVideoById();
+    deleteMedia.useMutation();
   return (
     <TableRow
       onClick={() => {
@@ -93,7 +93,7 @@ export const VideoRow = ({
                   description: 'This video will be deleted permanently.',
                   continueText: 'Delete',
                   onContinue: () => {
-                    deleteVideoById(video.id);
+                    deleteVideoById({ mediaId: video.id });
                   }
                 });
               }}

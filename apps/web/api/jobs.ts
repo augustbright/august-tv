@@ -1,16 +1,10 @@
+import { TJobTestParams } from '@august-tv/common/types';
 import { TJobsEndpointResult } from '@august-tv/generated-types';
 
 import { createMutableEndpoint } from './createMutableEndpoint';
 
 export const postJobsTest = createMutableEndpoint<
-  {
-    name: string;
-    description?: string;
-    payload: object;
-    stage?: string;
-    timeout: number;
-    observers: string[];
-  },
+  TJobTestParams,
   TJobsEndpointResult<'testJob'>
 >({
   method: 'post',

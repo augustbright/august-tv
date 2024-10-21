@@ -1,4 +1,5 @@
 import { TUserEndpointResult } from '@august-tv/generated-types';
+import { ImageCropDto } from '@august-tv/generated-types/dto';
 
 import { Crop } from 'react-image-crop';
 
@@ -10,8 +11,9 @@ export const postUserSessionLogin = createMutableEndpoint<
   { idToken: string },
   TUserEndpointResult<'sessionLogin'>
 >({
-  prepareUrl: () => '/user/session/login',
-  method: 'post'
+  method: 'post',
+  prepareUrl: () => '/user/sessionLogin',
+  prepareBody: ({ idToken }) => ({ idToken })
 });
 
 export const postUserSignOut = createMutableEndpoint<
@@ -40,8 +42,9 @@ export const postUserUnobserveJob = createMutableEndpoint<
   { jobId: string },
   TUserEndpointResult<'unobserveJob'>
 >({
-  prepareUrl: ({ jobId }) => `/user/unobserveJob/${jobId}`,
-  method: 'post'
+  method: 'post',
+  prepareUrl: () => `/user/unobserveJob`,
+  prepareBody: (data) => data
 });
 
 export const getUserMySubscriptions = createReadableEndpoint<
@@ -55,16 +58,18 @@ export const postUserSubscribe = createMutableEndpoint<
   { authorId: string },
   TUserEndpointResult<'subscribe'>
 >({
+  method: 'post',
   prepareUrl: () => '/user/subscribe',
-  method: 'post'
+  prepareBody: ({ authorId }) => ({ authorId })
 });
 
 export const postUserUnsubscribe = createMutableEndpoint<
   { authorId: string },
   TUserEndpointResult<'unsubscribe'>
 >({
+  method: 'post',
   prepareUrl: () => '/user/unsubscribe',
-  method: 'post'
+  prepareBody: ({ authorId }) => ({ authorId })
 });
 
 export const getUserSearch = createReadableEndpoint<
@@ -119,11 +124,12 @@ export const postUserUploadProfilePicture = createMutableEndpoint<
 export const postUserUpdateProfilePicture = createMutableEndpoint<
   {
     imageId: string;
-    crop: Crop;
+    crop: ImageCropDto;
   },
   TUserEndpointResult<'updateProfilePicture'>
 >({
   prepareUrl: () => '/user/updateProfilePicture',
+  prepareBody: ({ imageId, crop }) => ({ imageId, crop }),
   method: 'post'
 });
 

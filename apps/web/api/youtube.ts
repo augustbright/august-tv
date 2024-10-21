@@ -8,5 +8,6 @@ export const postYoutubeImport = createMutableEndpoint<
   TYoutubeEndpointResult<'importFromYoutube'>
 >({
   method: 'post',
-  prepareUrl: () => '/youtube/importFromYoutube'
+  prepareUrl: () => '/youtube/importFromYoutube',
+  prepareBody: (data) => data
 });

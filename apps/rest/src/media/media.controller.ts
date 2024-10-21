@@ -20,7 +20,7 @@ import * as path from 'path';
 import { Guard } from '@august-tv/server/utils';
 import { User } from 'src/user/user.decorator';
 import { DecodedIdToken } from 'firebase-admin/auth';
-import { PatchMedia } from './media.dto';
+import { PatchMediaDto } from '@august-tv/server/dto';
 
 @Controller('media')
 export class MediaController {
@@ -60,7 +60,7 @@ export class MediaController {
   @Guard.scope('user')
   async patchMedia(
     @Param('id') id: string,
-    @Body() updateVideoDto: PatchMedia.Body,
+    @Body() updateVideoDto: PatchMediaDto,
     @User() user?: DecodedIdToken,
   ) {
     await this.mediaService.assertPermissionsForUser(id, user?.uid, 'WRITE');
