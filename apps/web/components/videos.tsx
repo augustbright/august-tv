@@ -3,6 +3,7 @@
 import { Query } from '@/components/Query';
 import { queryFeedLatest } from '@/queries/feedLatest';
 
+import { VideosSkeleton } from './skeletons/videos-skeleton';
 import { VideoThumbnail } from './video-thumbnail';
 
 export const Videos = ({
@@ -13,7 +14,7 @@ export const Videos = ({
   return (
     <Query
       query={query}
-      loading={Query.LOADING.ROW}
+      loading={VideosSkeleton}
       error={Query.ERROR.ALERT}
     >
       {({ data: { data: items } }) => {

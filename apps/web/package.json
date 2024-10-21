@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 8080",
     "start:dev": "next dev -p 8080",
     "lint": "yarn lint:pretty && yarn lint:next && yarn lint:es && yarn lint:ts",
     "test": "jest",
