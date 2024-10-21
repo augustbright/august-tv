@@ -1,7 +1,5 @@
 'use client';
 
-// TODO Video categories
-// TODO: handle statuses&visibility: ERROR, PROCESSING, READY, etc
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -145,7 +143,6 @@ export const EditVideoForm = ({
                   </FormItem>
                 )}
               />
-              {/* TODO tags */}
               <FormField
                 control={form.control}
                 name='visibility'
@@ -209,7 +206,6 @@ export const EditVideoForm = ({
                   </FormItem>
                 )}
               />
-              {/* TODO: thumbnail selector for videos */}
             </div>
           </div>
           <div className='flex-col items-start flex gap-4'>

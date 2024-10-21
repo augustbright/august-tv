@@ -22,9 +22,6 @@ import { EmptyPlaceholder } from './empty-placeholder';
 import { VideoRow } from './video-row';
 
 export const MyContent = () => {
-  // TODO: filter my videos
-  // TODO: pagination
-  // TODO: sorting
   return (
     <Card x-chunk='dashboard-06-chunk-0'>
       <CardHeader>

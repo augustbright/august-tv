@@ -6,7 +6,6 @@ const _api = buildApi({
   feed: {
     latest: true,
     subscriptions: true
-    // TODO feedPopular
   },
   user: {
     verifyToken: true,

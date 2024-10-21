@@ -28,7 +28,6 @@ const formSchema = z.object({
 });
 
 export const GeneralForm = () => {
-  // TODO: Complete profile general form
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {

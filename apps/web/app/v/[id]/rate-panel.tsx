@@ -117,7 +117,6 @@ export const RatePanel = ({ mediaId }: { mediaId: string }) => {
 
   return (
     <Card className='flex p-2'>
-      {/* TODO: Share */}
       <Button variant='ghost'>
         <Share2 className='w-6 h-6 mr-3' />
         <span>Share</span>
@@ -161,12 +160,10 @@ export const RatePanel = ({ mediaId }: { mediaId: string }) => {
         <DropdownMenuContent align='end'>
           <DropdownMenuLabel>More</DropdownMenuLabel>
           <DropdownMenuItem className='flex gap-2'>
-            {/* TODO: save video */}
             <Save className='w-4 h-4 mr-2' />
             <span>Save</span>
           </DropdownMenuItem>
           <DropdownMenuItem className='flex gap-2'>
-            {/* TODO: report video */}
             <FlagTriangleRight className='w-4 h-4' />
             <span>Report</span>
           </DropdownMenuItem>

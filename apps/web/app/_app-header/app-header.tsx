@@ -21,7 +21,6 @@ export const AppHeader = () => {
           <h1 className='text-lg font-bold text-primary'>August TV</h1>
         </Link>
         <ScreenSize />
-        {/* TODO Search bar */}
         <div className='flex-1' />
         <AdminLink />
         <AppUploadButton />

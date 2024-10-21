@@ -1,4 +1,3 @@
-//TODO: instant-loading-states
 import { getApiClient } from '@/api';
 import { getQueryClient } from '@/queries/queryClient';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';

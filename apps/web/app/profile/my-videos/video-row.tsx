@@ -1,4 +1,3 @@
-// TODO: block row while deleting
 import { useEditVideoModal } from '@/app/_edit_video_modal/edit-video.modal';
 import { useConfirm } from '@/app/confirm';
 import { ThumbnailPicture } from '@/components/thumbnail-picture';
@@ -61,7 +60,6 @@ export const VideoRow = ({
         )}
       </TableCell>
       <TableCell>
-        {/* TODO: Good status badges */}
         <Badge variant={video.status === 'ERROR' ? 'destructive' : 'outline'}>
           {video.status === 'PROCESSING' && (
             <Loader className='mr-2 w-3 h-3 animate-spin' />
@@ -70,11 +68,9 @@ export const VideoRow = ({
         </Badge>
       </TableCell>
       <TableCell className='hidden md:table-cell'>
-        {/* TODO: good date formatter (like, "3 days ago", etc)  */}
         {new Date(video.createdAt).toLocaleDateString()}
       </TableCell>
       <TableCell>
-        {/*TODO: Video actions */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

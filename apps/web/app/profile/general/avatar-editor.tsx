@@ -309,7 +309,6 @@ export const AvatarEditor = () => {
             src={currentPicture?.medium.publicUrl}
             alt='Avatar'
           />
-          {/* TODO: Avatar Loading state */}
           <AvatarFallback delayMs={500}>
             <CircleUserRound />
           </AvatarFallback>

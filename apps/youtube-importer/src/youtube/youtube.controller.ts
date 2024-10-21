@@ -1,5 +1,3 @@
-// TODO: forbid console.log
-
 import { Controller } from '@nestjs/common';
 import { YoutubeService } from './youtube.service';
 import { EventPattern } from '@nestjs/microservices';

@@ -1,6 +1,5 @@
 'use client';
 
-// TODO i18n
 import { ConfirmProvider } from '@/app/confirm';
 import { ThemeProvider } from '@/components/theme-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
