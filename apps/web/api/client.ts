@@ -2,7 +2,7 @@ import { isServer } from '@tanstack/react-query';
 
 import axios, { AxiosHeaders } from 'axios';
 
-export const baseURL = `http://${process.env.NEXT_PUBLIC_BACKEND_HOSTNAME}:${process.env.NEXT_PUBLIC_BACKEND_PORT}`;
+export const baseURL = `http://${process.env.NEXT_PUBLIC_REST_HOSTNAME}:${process.env.NEXT_PUBLIC_REST_PORT}`;
 
 export const getApiClient = async () => {
   let headers: AxiosHeaders | undefined;
@@ -17,8 +17,3 @@ export const getApiClient = async () => {
     headers
   });
 };
-
-// export const apiClient = axios.create({
-//   baseURL,
-//   withCredentials: true,
-// });

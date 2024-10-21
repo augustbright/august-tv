@@ -14,7 +14,7 @@
             ],
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
-            "cwd": "${workspaceFolder}/apps/backend"
+            "cwd": "${workspaceFolder}/apps/rest"
         },
         {
             "type": "node",

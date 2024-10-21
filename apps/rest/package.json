@@ -1,5 +1,5 @@
 {
-  "name": "@august-tv/backend",
+  "name": "@august-tv/rest",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -13,14 +13,14 @@
     "test": "jest",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/apps/august-tv-backend/main",
+    "start:prod": "node dist/apps/august-tv-rest/main",
     "lint:pretty": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\" --write",
     "lint:es": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "lint:ts": "tsc --noEmit",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/august-tv-backend/test/jest-e2e.json",
+    "test:e2e": "jest --config ./apps/august-tv-rest/test/jest-e2e.json",
     "generate:types": "tsc -p tsconfig.generate-types.json"
   },
   "dependencies": {

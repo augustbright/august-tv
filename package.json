@@ -10,7 +10,7 @@
     "lint:ts": "yarn workspaces foreach --all run lint:ts",
     "generate-types": "yarn generate:db && yarn generate:dtoTypes",
     "generate:db": "lerna run --stream --scope=@august-tv/db prisma:generate",
-    "generate:dtoTypes": "lerna run --stream --scope=@august-tv/backend build:types",
+    "generate:dtoTypes": "lerna run --stream --scope=@august-tv/rest build:types",
     "start:dev": "lerna run start:dev --stream"
   },
   "workspaces": [
