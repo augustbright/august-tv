@@ -17,7 +17,10 @@ export const deleteMedia = createMutableEndpoint<
   TMediaEndpointResult<'deleteMedia'>
 >({
   method: 'delete',
-  prepareUrl: ({ mediaId }) => `/media/${mediaId}`
+  prepareUrl: ({ mediaId }) => `/media/${mediaId}`,
+  onSuccess(queryClient) {
+    queryClient.invalidateQueries({ queryKey: ['media', 'my'] });
+  }
 });
 
 export const postMediaRate = createMutableEndpoint<
@@ -29,7 +32,10 @@ export const postMediaRate = createMutableEndpoint<
 >({
   method: 'post',
   prepareUrl: ({ mediaId }) => `/media/rate/${mediaId}`,
-  prepareBody: ({ type }) => ({ type })
+  prepareBody: ({ type }) => ({ type }),
+  onSuccess(queryClient) {
+    queryClient.invalidateQueries({ queryKey: ['media', 'my'] });
+  }
 });
 
 export const postMediaUpload = createMutableEndpoint<File, { id: string }>({
@@ -44,6 +50,9 @@ export const postMediaUpload = createMutableEndpoint<File, { id: string }>({
 
     formData.append('file', file, file.name);
     return formData;
+  },
+  onSuccess(queryClient) {
+    queryClient.invalidateQueries({ queryKey: ['media', 'my'] });
   }
 });
 
@@ -63,5 +72,8 @@ export const patchMedia = createMutableEndpoint<
 >({
   method: 'patch',
   prepareUrl: ({ mediaId }) => `/media/${mediaId}`,
-  prepareBody: ({ updateVideoDto }) => updateVideoDto
+  prepareBody: ({ updateVideoDto }) => updateVideoDto,
+  onSuccess(queryClient) {
+    queryClient.invalidateQueries({ queryKey: ['media', 'my'] });
+  }
 });

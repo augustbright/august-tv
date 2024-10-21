@@ -12,7 +12,11 @@ type TMutableEndpointConfig<P, R> = {
   prepareUrl: (params: P) => string;
   prepareBody?: (params: P) => unknown;
   method: 'post' | 'put' | 'patch' | 'delete';
-  onSuccess?: (queryClient: QueryClient, params: P, data: R) => Promise<void>;
+  onSuccess?: (
+    queryClient: QueryClient,
+    params: P,
+    data: R
+  ) => void | Promise<void>;
 };
 
 type TMutableEndpoint<P, R> = {

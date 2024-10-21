@@ -8,5 +8,8 @@ export const postJobsTest = createMutableEndpoint<
   TJobsEndpointResult<'testJob'>
 >({
   method: 'post',
-  prepareUrl: () => '/jobs/test'
+  prepareUrl: () => '/jobs/test',
+  onSuccess(queryClient) {
+    queryClient.invalidateQueries({ queryKey: ['user', 'myJobs'] });
+  }
 });

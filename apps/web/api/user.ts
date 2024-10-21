@@ -13,7 +13,10 @@ export const postUserSessionLogin = createMutableEndpoint<
 >({
   method: 'post',
   prepareUrl: () => '/user/sessionLogin',
-  prepareBody: ({ idToken }) => ({ idToken })
+  prepareBody: ({ idToken }) => ({ idToken }),
+  onSuccess(queryClient) {
+    queryClient.invalidateQueries();
+  }
 });
 
 export const postUserSignOut = createMutableEndpoint<
@@ -21,7 +24,10 @@ export const postUserSignOut = createMutableEndpoint<
   TUserEndpointResult<'signOut'>
 >({
   prepareUrl: () => '/user/sign-out',
-  method: 'post'
+  method: 'post',
+  onSuccess(queryClient) {
+    queryClient.invalidateQueries();
+  }
 });
 
 export const getUserCurrent = createReadableEndpoint<
@@ -44,7 +50,10 @@ export const postUserUnobserveJob = createMutableEndpoint<
 >({
   method: 'post',
   prepareUrl: () => `/user/unobserveJob`,
-  prepareBody: (data) => data
+  prepareBody: (data) => data,
+  onSuccess(queryClient) {
+    queryClient.invalidateQueries({ queryKey: ['user', 'myJobs'] });
+  }
 });
 
 export const getUserMySubscriptions = createReadableEndpoint<
@@ -60,7 +69,10 @@ export const postUserSubscribe = createMutableEndpoint<
 >({
   method: 'post',
   prepareUrl: () => '/user/subscribe',
-  prepareBody: ({ authorId }) => ({ authorId })
+  prepareBody: ({ authorId }) => ({ authorId }),
+  onSuccess(queryClient) {
+    queryClient.invalidateQueries({ queryKey: ['feed', 'subscriptions'] });
+  }
 });
 
 export const postUserUnsubscribe = createMutableEndpoint<
@@ -69,7 +81,10 @@ export const postUserUnsubscribe = createMutableEndpoint<
 >({
   method: 'post',
   prepareUrl: () => '/user/unsubscribe',
-  prepareBody: ({ authorId }) => ({ authorId })
+  prepareBody: ({ authorId }) => ({ authorId }),
+  onSuccess(queryClient) {
+    queryClient.invalidateQueries({ queryKey: ['feed', 'subscriptions'] });
+  }
 });
 
 export const getUserSearch = createReadableEndpoint<
@@ -130,7 +145,10 @@ export const postUserUpdateProfilePicture = createMutableEndpoint<
 >({
   prepareUrl: () => '/user/updateProfilePicture',
   prepareBody: ({ imageId, crop }) => ({ imageId, crop }),
-  method: 'post'
+  method: 'post',
+  onSuccess(queryClient) {
+    queryClient.invalidateQueries({ queryKey: ['user', 'current'] });
+  }
 });
 
 export const postUserUnsetProfilePicture = createMutableEndpoint<
@@ -138,5 +156,8 @@ export const postUserUnsetProfilePicture = createMutableEndpoint<
   TUserEndpointResult<'unsetProfilePicture'>
 >({
   prepareUrl: () => '/user/unsetProfilePicture',
-  method: 'post'
+  method: 'post',
+  onSuccess(queryClient) {
+    queryClient.invalidateQueries({ queryKey: ['user', 'current'] });
+  }
 });
