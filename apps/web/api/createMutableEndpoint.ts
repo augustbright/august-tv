@@ -28,7 +28,7 @@ export const createMutableEndpoint = <P, R>(
     const client = await getApiClient();
     let response;
     const url = config.prepareUrl(params);
-    const body = config.prepareBody ? config.prepareBody(params) : undefined;
+    const body = config.prepareBody ? config.prepareBody(params) : params;
     if (
       config.method === 'post' ||
       config.method === 'put' ||

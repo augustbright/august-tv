@@ -24,7 +24,7 @@ export const createReadableEndpoint = <P, R>(
     const client = await getApiClient();
     const url = config.prepareUrl(params);
     const { data } = await client.get(url, {
-      params: config.prepareParams ? config.prepareParams(params) : undefined
+      params: config.prepareParams ? config.prepareParams(params) : params
     });
 
     return data;
