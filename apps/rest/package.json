@@ -27,6 +27,7 @@
     "@august-tv/common": "workspace:^",
     "@august-tv/db": "workspace:^",
     "@august-tv/env": "workspace:^",
+    "@august-tv/generated-types": "workspace:^",
     "@august-tv/server": "workspace:^",
     "@distube/ytdl-core": "^4.14.4",
     "@nestjs/axios": "^3.0.3",

@@ -32,4 +32,15 @@ export class SocketsController {
       });
     });
   }
+
+  @EventPattern(KafkaTopics.VideoIsReady)
+  @Guard.scope('public')
+  onVideoFileFullyUploaded(payload: KafkaPayloads[KafkaTopics.VideoIsReady]) {
+    payload.observers.forEach((observer) => {
+      this.socketsGateway.sendToUser(observer, {
+        type: 'upload-finished',
+        video: payload.video,
+      });
+    });
+  }
 }

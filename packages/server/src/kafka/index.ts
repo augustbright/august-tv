@@ -7,7 +7,9 @@ export enum KafkaTopics {
     JobsStatusUpdated = "job-status-updated",
     YoutubeVideoForImportDownloaded = "youtube-video-for-import-downloaded",
     YoutubeVideoForImportTranscoded = "youtube-video-for-import-transcoded",
-    YoutubeVideoForImportUploaded = "youtube-video-for-import-uploaded",
+    VideoFileUploaded = "video-file-uploaded",
+    VideoFileTranscoded = "video-file-transcoded",
+    VideoIsReady = "video-is-ready",
 }
 
 export type KafkaPayloads = {
@@ -21,6 +23,7 @@ export type KafkaPayloads = {
         observers: string[];
         path: string;
         originalName: string;
+        originalId: string;
         authorId: string;
         videoTitle: string;
         videoDescription: string;
@@ -32,12 +35,25 @@ export type KafkaPayloads = {
         storageDir: string;
         thumbnailOriginalSize: { width: number; height: number };
         originalName: string;
+        originalId: string;
         authorId: string;
         videoTitle: string;
         videoDescription: string;
         publicImmediately: boolean;
     };
-    [KafkaTopics.YoutubeVideoForImportUploaded]: {
+    [KafkaTopics.VideoFileUploaded]: {
+        observers: string[];
+        path: string;
+        draft: Video;
+    };
+    [KafkaTopics.VideoFileTranscoded]: {
+        observers: string[];
+        dir: string;
+        storageDir: string;
+        thumbnailOriginalSize: { width: number; height: number };
+        draft: Video;
+    };
+    [KafkaTopics.VideoIsReady]: {
         observers: string[];
         video: Video;
     };

@@ -93,6 +93,7 @@ export class YoutubeService {
       authorId: params.authorId,
       observers: params.observers,
       originalName: path.basename(filePath as string),
+      originalId: video.id,
       path: filePath as string,
       videoTitle: video.snippet.title,
       videoDescription: video.snippet.description,

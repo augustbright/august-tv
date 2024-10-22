@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build:packages": "yarn workspaces foreach --from './packages/*' -W -t run build",
+    "build:packages": "yarn workspaces foreach --from './packages/*' --exclude @august-tv/generated-types -W -t run build && yarn workspace @august-tv/generated-types run build",
     "build": "yarn workspaces foreach --all -t run build",
     "lint": "lerna run lint --stream",
     "lint:ts": "yarn workspaces foreach --all run lint:ts",

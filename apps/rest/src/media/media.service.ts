@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
-import { ImageService } from '@august-tv/server/modules';
-import { DbFileService } from '@august-tv/server/modules';
-import { PrismaService } from '@august-tv/server/modules';
+import {
+  ImageService,
+  DbFileService,
+  PrismaService,
+} from '@august-tv/server/modules';
 import { IWithPermissions, TActionType } from 'src/common/IWithPermissions';
 import { UserService } from 'src/user/user.service';
 import { PatchMedia } from './media.dto';
+import { Prisma } from '@prisma/client';
 
 export type TTempFile = {
   originalName: string;
@@ -51,6 +54,10 @@ export class MediaService implements IWithPermissions {
     if (!permissions.includes(action)) {
       throw new Error('Permission denied');
     }
+  }
+
+  async createDraft(data: Prisma.VideoCreateInput) {
+    return this.prisma.video.create({ data });
   }
 
   async getMediaById(id: string, userId: string | undefined) {

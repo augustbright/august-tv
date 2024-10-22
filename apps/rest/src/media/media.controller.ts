@@ -9,7 +9,6 @@ import {
   UseInterceptors,
   Get,
   Delete,
-  NotImplementedException,
 } from '@nestjs/common';
 import { MediaService } from './media.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -21,10 +20,15 @@ import { Guard } from '@august-tv/server/utils';
 import { User } from 'src/user/user.decorator';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { PatchMediaDto } from '@august-tv/server/dto';
+import { KafkaEmitterService } from '@august-tv/server/modules';
+import { KafkaTopics } from '@august-tv/server/kafka';
 
 @Controller('media')
 export class MediaController {
-  constructor(private readonly mediaService: MediaService) {}
+  constructor(
+    private readonly mediaService: MediaService,
+    private readonly kafkaEmitterService: KafkaEmitterService,
+  ) {}
 
   @Post('upload')
   @UseInterceptors(
@@ -48,12 +52,28 @@ export class MediaController {
     @UploadedFile() file: Express.Multer.File,
     @User({ required: true }) user: DecodedIdToken,
   ) {
-    throw new NotImplementedException();
-    // const { video } = await this.mediaUploadService.upload(file, user?.uid, {
-    //   observers: [user?.uid],
-    // });
+    const draft = await this.mediaService.createDraft({
+      title: file.originalname,
+      author: {
+        connect: {
+          id: user.uid,
+        },
+      },
+      fileSet: {
+        create: {},
+      },
+      thumbnailSet: {
+        create: {},
+      },
+    });
 
-    // return video;
+    this.kafkaEmitterService.emit(KafkaTopics.VideoFileUploaded, {
+      observers: [user.uid],
+      path: file.path,
+      draft,
+    });
+
+    return draft;
   }
 
   @Patch(':id')

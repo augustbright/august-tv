@@ -77,6 +77,9 @@ export const useUser = () => {
                   );
                 }
                 break;
+              case 'upload-finished':
+                queryClient.invalidateQueries({ queryKey: ['media', 'my'] });
+                break;
             }
           }
         });

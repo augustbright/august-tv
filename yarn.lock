@@ -148,6 +148,7 @@ __metadata:
     "@august-tv/common": "workspace:^"
     "@august-tv/db": "workspace:^"
     "@august-tv/env": "workspace:^"
+    "@august-tv/generated-types": "workspace:^"
     "@august-tv/server": "workspace:^"
     "@distube/ytdl-core": "npm:^4.14.4"
     "@nestjs/axios": "npm:^3.0.3"

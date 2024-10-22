@@ -19,22 +19,53 @@ export class UploadingController {
     this.uploadingService
       .uploadTranscodedVideo({
         observers: payload.observers,
-        authorId: payload.authorId,
         dir: payload.dir,
         storageDir: payload.storageDir,
-        thumbnailOriginalSize: payload.thumbnailOriginalSize,
-        videoTitle: payload.videoTitle,
-        videoDescription: payload.videoDescription,
-        uploadImmediately: payload.publicImmediately,
+      })
+      .then((structured) => {
+        return this.uploadingService.createDraft({
+          authorId: payload.authorId,
+          originalId: payload.originalId,
+          structured,
+          thumbnailOriginalSize: payload.thumbnailOriginalSize,
+          uploadImmediately: payload.publicImmediately,
+          videoDescription: payload.videoDescription,
+          videoTitle: payload.videoTitle,
+        });
       })
       .then((result) => {
-        this.kafkaEmitterService.emit(
-          KafkaTopics.YoutubeVideoForImportUploaded,
-          {
-            observers: payload.observers,
-            video: result.video,
-          },
-        );
+        this.kafkaEmitterService.emit(KafkaTopics.VideoIsReady, {
+          observers: payload.observers,
+          video: result.video,
+        });
+      })
+      .catch((error) => {
+        this.logger.error(error);
+      });
+  }
+
+  @EventPattern(KafkaTopics.VideoFileTranscoded)
+  handleVideoFileTranscoded(
+    payload: KafkaPayloads[KafkaTopics.VideoFileTranscoded],
+  ) {
+    this.uploadingService
+      .uploadTranscodedVideo({
+        observers: payload.observers,
+        dir: payload.dir,
+        storageDir: payload.storageDir,
+      })
+      .then((structured) => {
+        return this.uploadingService.updateDraft({
+          draft: payload.draft,
+          structured,
+          thumbnailOriginalSize: payload.thumbnailOriginalSize,
+        });
+      })
+      .then((result) => {
+        this.kafkaEmitterService.emit(KafkaTopics.VideoIsReady, {
+          observers: payload.observers,
+          video: result.video,
+        });
       })
       .catch((error) => {
         this.logger.error(error);

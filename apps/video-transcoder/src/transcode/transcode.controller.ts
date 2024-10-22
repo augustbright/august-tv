@@ -29,6 +29,7 @@ export class TranscodeController {
             authorId: payload.authorId,
             observers: payload.observers,
             originalName: payload.originalName,
+            originalId: payload.originalId,
             videoDescription: payload.videoDescription,
             videoTitle: payload.videoTitle,
             dir: result.dir,
@@ -37,6 +38,30 @@ export class TranscodeController {
             publicImmediately: payload.publicImmediately,
           },
         );
+      })
+      .catch((error) => {
+        this.logger.error(error);
+      });
+  }
+
+  @EventPattern(KafkaTopics.VideoFileUploaded)
+  handleVideoFileUploaded(
+    payload: KafkaPayloads[KafkaTopics.VideoFileUploaded],
+  ) {
+    this.transcodeService
+      .transcode({
+        inputPath: payload.path,
+        observers: payload.observers,
+        authorId: payload.draft.authorId,
+      })
+      .then((result) => {
+        this.kafkaEmitterService.emit(KafkaTopics.VideoFileTranscoded, {
+          observers: payload.observers,
+          dir: result.dir,
+          storageDir: result.storageDir,
+          thumbnailOriginalSize: result.thumbnailOriginalSize,
+          draft: payload.draft,
+        });
       })
       .catch((error) => {
         this.logger.error(error);
