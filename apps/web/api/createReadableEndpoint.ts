@@ -31,7 +31,10 @@ export const createReadableEndpoint = <P, R>(
   };
 
   const query = (params: P) => ({
-    queryKey: [config.prepareUrl(params).replace(/^\//, '').split('/'), params],
+    queryKey: [
+      ...config.prepareUrl(params).replace(/^\//, '').split('/'),
+      params
+    ],
     queryFn: () => get(params)
   });
 

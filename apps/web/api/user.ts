@@ -71,7 +71,8 @@ export const postUserSubscribe = createMutableEndpoint<
   prepareUrl: () => '/user/subscribe',
   prepareBody: ({ authorId }) => ({ authorId }),
   onSuccess(queryClient) {
-    queryClient.invalidateQueries({ queryKey: ['feed', 'subscriptions'] });
+    queryClient.removeQueries({ queryKey: ['feed', 'subscriptions'] });
+    queryClient.invalidateQueries({ queryKey: ['user', 'mySubscriptions'] });
   }
 });
 
@@ -83,7 +84,8 @@ export const postUserUnsubscribe = createMutableEndpoint<
   prepareUrl: () => '/user/unsubscribe',
   prepareBody: ({ authorId }) => ({ authorId }),
   onSuccess(queryClient) {
-    queryClient.invalidateQueries({ queryKey: ['feed', 'subscriptions'] });
+    queryClient.removeQueries({ queryKey: ['feed', 'subscriptions'] });
+    queryClient.invalidateQueries({ queryKey: ['user', 'mySubscriptions'] });
   }
 });
 
