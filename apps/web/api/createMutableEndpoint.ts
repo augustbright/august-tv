@@ -38,7 +38,7 @@ export const createMutableEndpoint = <P, R>(
       config.method === 'put' ||
       config.method === 'patch'
     ) {
-      response = await client.post(url, body);
+      response = await client[config.method](url, body);
     } else if (config.method === 'delete') {
       response = await client.delete(url, { params: body });
     }
