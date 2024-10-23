@@ -2,10 +2,10 @@
 
 import { patchMedia } from '@/api/media';
 import { toast } from '@/components/hooks/use-toast';
+import { Icon } from '@/components/icon';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  DialogClose,
   DialogFooter,
   DialogHeader,
   DialogTitle
@@ -24,11 +24,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { File, Video } from '@prisma/client';
 import { DialogDescription } from '@radix-ui/react-dialog';
 
-import { Loader2, Save } from 'lucide-react';
+import { Save, Sparkles } from 'lucide-react';
 import { useController, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { SwitchVideoStatus } from './switch-video-status';
+import { SwitchVideoVisibility } from './switch-video-visibility';
 import { VideoEditorAside } from './video-editor-aside';
 import { VideoEditorFieldThumbnail } from './video-editor-field-thumbnail';
 import { VideoEditorFieldVisibility } from './video-editor-field-visibility';
@@ -49,7 +50,7 @@ export const EditVideoForm = ({
     defaultValues: {
       title: video.title,
       description: video.description ?? '',
-      visibility: video.visibility === 'DRAFT' ? undefined : video.visibility,
+      visibility: video.visibility,
       thumbnailImageId: video.thumbnailId ?? undefined
     },
     disabled: isUpdatingVideo
@@ -79,6 +80,8 @@ export const EditVideoForm = ({
       });
     }
   }
+
+  const submit = () => form.handleSubmit(handleSubmit)();
 
   return (
     <Form {...form}>
@@ -170,21 +173,141 @@ export const EditVideoForm = ({
         </div>
 
         <DialogFooter className='p-3'>
-          <DialogClose asChild>
-            <Button variant='secondary'>Cancel</Button>
-          </DialogClose>
-          <Button
-            type='submit'
-            variant='default'
-            disabled={isUpdatingVideo}
-          >
-            {isUpdatingVideo ? (
-              <Loader2 className='animate-spin mr-2' />
-            ) : (
-              <Save className='mr-2' />
-            )}
-            <span>Save</span>
-          </Button>
+          <SwitchVideoVisibility
+            mediaId={video.id}
+            forDraft={
+              <SwitchVideoStatus
+                mediaId={video.id}
+                processing={
+                  <Button
+                    type='submit'
+                    variant='default'
+                    disabled={isUpdatingVideo}
+                  >
+                    <Icon
+                      icon={Save}
+                      loading={isUpdatingVideo}
+                      className='mr-2'
+                    />
+                    <span>Save Draft</span>
+                  </Button>
+                }
+                ready={
+                  <>
+                    <Button
+                      type='submit'
+                      variant='ghost'
+                      disabled={isUpdatingVideo}
+                    >
+                      <Icon
+                        icon={Save}
+                        loading={isUpdatingVideo}
+                        className='mr-2'
+                      />
+                      <span>Save Draft</span>
+                    </Button>
+
+                    <Button
+                      type='button'
+                      variant='default'
+                      disabled={isUpdatingVideo}
+                      onClick={() => {
+                        form.setValue('visibility', 'PUBLIC');
+                        submit();
+                      }}
+                    >
+                      <Icon
+                        icon={Sparkles}
+                        loading={isUpdatingVideo}
+                        className='mr-2'
+                      />
+                      <span>Publish</span>
+                    </Button>
+                  </>
+                }
+              />
+            }
+            forPublic={
+              <Button
+                type='submit'
+                variant='default'
+                disabled={isUpdatingVideo}
+              >
+                <Icon
+                  icon={Save}
+                  loading={isUpdatingVideo}
+                  className='mr-2'
+                />
+                <span>Save</span>
+              </Button>
+            }
+            forPrivate={
+              <>
+                <Button
+                  type='button'
+                  variant='ghost'
+                  disabled={isUpdatingVideo}
+                  onClick={() => {
+                    form.setValue('visibility', 'PUBLIC');
+                    submit();
+                  }}
+                >
+                  <Icon
+                    icon={Sparkles}
+                    loading={isUpdatingVideo}
+                    className='mr-2'
+                  />
+                  <span>Publish</span>
+                </Button>
+
+                <Button
+                  type='submit'
+                  variant='default'
+                  disabled={isUpdatingVideo}
+                >
+                  <Icon
+                    icon={Save}
+                    loading={isUpdatingVideo}
+                    className='mr-2'
+                  />
+                  <span>Save</span>
+                </Button>
+              </>
+            }
+            forUnlisted={
+              <>
+                <Button
+                  type='button'
+                  variant='ghost'
+                  disabled={isUpdatingVideo}
+                  onClick={() => {
+                    form.setValue('visibility', 'PUBLIC');
+                    submit();
+                  }}
+                >
+                  <Icon
+                    icon={Sparkles}
+                    loading={isUpdatingVideo}
+                    className='mr-2'
+                  />
+                  <span>Publish</span>
+                </Button>
+
+                <Button
+                  type='submit'
+                  variant='default'
+                  disabled={isUpdatingVideo}
+                >
+                  <Icon
+                    icon={Save}
+                    loading={isUpdatingVideo}
+                    className='mr-2'
+                  />
+                  <span>Save</span>
+                </Button>
+              </>
+            }
+          />
         </DialogFooter>
       </form>
     </Form>

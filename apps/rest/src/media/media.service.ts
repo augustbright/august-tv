@@ -121,6 +121,7 @@ export class MediaService implements IWithPermissions {
 
   async patch(id: string, data: PatchMediaDto) {
     let thumbnailId = data.thumbnailImageId;
+
     if (!thumbnailId) {
       const { images } = await this.prisma.imageSet.findFirstOrThrow({
         where: {
@@ -136,7 +137,7 @@ export class MediaService implements IWithPermissions {
           },
         },
       });
-      thumbnailId = images[0].id;
+      thumbnailId = images[0]?.id;
     }
 
     return this.prisma.video.update({
@@ -145,11 +146,13 @@ export class MediaService implements IWithPermissions {
         description: data.description,
         title: data.title,
         visibility: data.visibility,
-        thumbnail: {
-          connect: {
-            id: thumbnailId,
+        ...(thumbnailId ? {
+          thumbnail: {
+            connect: {
+              id: thumbnailId,
+            },
           }
-        }
+        } : {}),
       },
     });
   }

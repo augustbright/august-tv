@@ -9,7 +9,7 @@ export const formSchema = z.object({
         .min(1, 'Title is required')
         .max(255, 'Title is too long'),
     description: z.string().max(1000, 'Description is too long'),
-    visibility: z.enum(['PRIVATE', 'UNLISTED', 'PUBLIC'], {
+    visibility: z.enum(['PRIVATE', 'UNLISTED', 'PUBLIC', 'DRAFT'], {
         required_error: 'Please select a visibility option'
     }),
     thumbnailImageId: z.string().optional()
