@@ -1,6 +1,7 @@
 'use client';
 
 import { postJobsTest } from '@/api/jobs';
+import { toast } from '@/components/hooks/use-toast';
 import { Icon } from '@/components/icon';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +21,6 @@ import { Prisma } from '@prisma/client';
 import { Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import ReactJson from 'react-json-view';
-import { toast } from 'react-toastify';
 import { z } from 'zod';
 
 import { UserInput } from '../user-input';

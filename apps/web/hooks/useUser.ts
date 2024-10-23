@@ -6,9 +6,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { atom, useAtom } from 'jotai';
 import { useEffect } from 'react';
-import { toast } from 'react-toastify';
 
 import { ws } from '../websocket';
+import { toast } from '@/components/hooks/use-toast';
 
 const jobsAtom = atom<Job[]>([]);
 
@@ -39,7 +39,7 @@ export const useUser = () => {
     (job) => job.status === 'IN_PROGRESS' || job.status === 'FAILED'
   );
   const signIn = {
-    showModal: () => {},
+    showModal: () => { },
     google: useMutateSignInWithGoogle()
   };
 
@@ -79,6 +79,10 @@ export const useUser = () => {
                 break;
               case 'upload-finished':
                 queryClient.invalidateQueries({ queryKey: ['media', 'my'] });
+                queryClient.invalidateQueries({
+                  queryKey: ['media'],
+                  refetchType: 'all'
+                });
                 break;
             }
           }

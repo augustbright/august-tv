@@ -1,6 +1,7 @@
 'use client';
 
 import { postYoutubeImport } from '@/api/youtube';
+import { toast } from '@/components/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -16,7 +17,6 @@ import { useUser } from '@/hooks/useUser';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
 import { z } from 'zod';
 
 import { UserInput } from '../user-input';

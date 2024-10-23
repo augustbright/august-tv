@@ -1,5 +1,6 @@
 'use client';
 
+import { toast } from '@/components/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -14,7 +15,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { Save } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
 import { z } from 'zod';
 
 const formSchema = z.object({

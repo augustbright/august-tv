@@ -6,14 +6,14 @@ import { createReadableEndpoint } from './createReadableEndpoint';
 import { validateMediaFile } from './validators';
 
 export const getMediaById = createReadableEndpoint<
-  { mediaId: string },
+  { mediaId: string; },
   TMediaEndpointResult<'getMediaById'>
 >({
   prepareUrl: ({ mediaId }) => `/media/${mediaId}`
 });
 
 export const deleteMedia = createMutableEndpoint<
-  { mediaId: string },
+  { mediaId: string; },
   TMediaEndpointResult<'deleteMedia'>
 >({
   method: 'delete',
@@ -38,7 +38,7 @@ export const postMediaRate = createMutableEndpoint<
   }
 });
 
-export const postMediaUpload = createMutableEndpoint<File, { id: string }>({
+export const postMediaUpload = createMutableEndpoint<File, { id: string; }>({
   method: 'post',
   prepareUrl: () => '/media/upload',
   prepareBody: (file) => {
@@ -73,7 +73,10 @@ export const patchMedia = createMutableEndpoint<
   method: 'patch',
   prepareUrl: ({ mediaId }) => `/media/${mediaId}`,
   prepareBody: ({ updateVideoDto }) => updateVideoDto,
-  onSuccess(queryClient) {
+  onSuccess(queryClient, { mediaId }) {
     queryClient.invalidateQueries({ queryKey: ['media', 'my'] });
+    queryClient.invalidateQueries({
+      queryKey: ['media', mediaId]
+    });
   }
 });

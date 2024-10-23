@@ -1,11 +1,11 @@
 'use client';
 
 import { patchMedia } from '@/api/media';
+import { toast } from '@/components/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   DialogClose,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle
@@ -26,13 +26,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { File, Video } from '@prisma/client';
 
 import { Loader2, Save } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useRef } from 'react';
-import ReactHLSPlayer from 'react-hls-player';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
 import { z } from 'zod';
+
+import { SwitchVideoStatus } from './switch-video-status';
+import { VideoEditorAside } from './video-editor-aside';
 
 const formSchema = z.object({
   title: z
@@ -56,7 +55,6 @@ export const EditVideoForm = ({
   > & { master: Pick<File, 'publicUrl'> | null };
 }) => {
   const router = useRouter();
-  const playerRef = useRef<HTMLVideoElement>(null);
   const { mutateAsync: updateVideo, isPending: isUpdatingVideo } =
     patchMedia.useMutation();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -75,18 +73,23 @@ export const EditVideoForm = ({
         mediaId: video.id,
         updateVideoDto: values
       });
-      toast.success('Video updated');
+      toast({
+        description: 'Video updated'
+      });
       router.push('/profile/my-videos');
     } catch (error) {
       console.error(error);
-      toast.error('Failed to update video');
+      toast({
+        variant: 'destructive',
+        description: 'Failed to update video'
+      });
     }
   }
 
   return (
     <Form {...form}>
       <form
-        className='flex flex-col grow'
+        className='flex flex-col grow overflow-y-hidden'
         onSubmit={form.handleSubmit(handleSubmit)}
       >
         <DialogHeader>
@@ -96,17 +99,14 @@ export const EditVideoForm = ({
               variant='default'
               className='ml-2'
             >
-              {video.status}
+              {video.visibility}
             </Badge>
           </DialogTitle>
-          <DialogDescription>
-            Configure the settings of your video.
-          </DialogDescription>
         </DialogHeader>
 
-        <div className='grid flex-1 gap-4 overflow-auto grid-cols-3 grow'>
-          <div className='flex-col items-start gap-8 flex col-span-2'>
-            <div className='grid w-full items-start gap-6'>
+        <div className='grid flex-1 gap-4 grid-cols-3 grow overflow-y-hidden'>
+          <div className='col-span-2 overflow-y-auto'>
+            <div className='flex flex-col gap-8 items-stretch'>
               <FormField
                 control={form.control}
                 name='title'
@@ -137,98 +137,87 @@ export const EditVideoForm = ({
                         id='message'
                         placeholder='Describe your video...'
                         className='min-h-12 resize-none p-3'
+                        rows={10}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name='visibility'
-                render={({ field }) => (
-                  <FormItem className='flex flex-col rounded-lg border p-4'>
-                    <div className='space-y-0.5'>
-                      <FormLabel className='text-base'>Publish video</FormLabel>
-                    </div>
-                    <FormControl>
-                      <RadioGroup {...field}>
-                        <div className='flex items-start space-x-2'>
-                          <RadioGroupItem
-                            value='PRIVATE'
-                            id='private'
-                            className='mt-1'
-                            onClick={() => {
-                              form.setValue('visibility', 'PRIVATE');
-                            }}
-                          />
-                          <Label htmlFor='private'>
-                            Private
-                            <p className='text-sm text-gray-500'>
-                              Only you can view the video
-                            </p>
-                          </Label>
+              <SwitchVideoStatus
+                mediaId={video.id}
+                ready={
+                  <FormField
+                    control={form.control}
+                    name='visibility'
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className='space-y-0.5'>
+                          <FormLabel>Publish video</FormLabel>
                         </div>
-                        <div className='flex items-start space-x-2'>
-                          <RadioGroupItem
-                            value='PUBLIC'
-                            id='public'
-                            className='mt-1'
-                            onClick={() => {
-                              form.setValue('visibility', 'PUBLIC');
-                            }}
-                          />
-                          <Label htmlFor='public'>
-                            Public
-                            <p className='text-sm text-gray-500'>
-                              Everyone can view the video
-                            </p>
-                          </Label>
-                        </div>
-                        <div className='flex items-start space-x-2'>
-                          <RadioGroupItem
-                            value='UNLISTED'
-                            id='unlisted'
-                            onClick={() => {
-                              form.setValue('visibility', 'UNLISTED');
-                            }}
-                          />
-                          <Label htmlFor='unlisted'>
-                            Unlisted
-                            <p className='text-sm text-gray-500'>
-                              Only people with the link can view the video
-                            </p>
-                          </Label>
-                        </div>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                        <FormControl>
+                          <RadioGroup
+                            {...field}
+                            className='flex flex-col rounded-lg border p-4'
+                          >
+                            <div className='flex items-start space-x-2'>
+                              <RadioGroupItem
+                                value='PRIVATE'
+                                id='private'
+                                className='mt-1'
+                                onClick={() => {
+                                  form.setValue('visibility', 'PRIVATE');
+                                }}
+                              />
+                              <Label htmlFor='private'>
+                                Private
+                                <p className='text-sm text-gray-500'>
+                                  Only you can view the video
+                                </p>
+                              </Label>
+                            </div>
+                            <div className='flex items-start space-x-2'>
+                              <RadioGroupItem
+                                value='PUBLIC'
+                                id='public'
+                                className='mt-1'
+                                onClick={() => {
+                                  form.setValue('visibility', 'PUBLIC');
+                                }}
+                              />
+                              <Label htmlFor='public'>
+                                Public
+                                <p className='text-sm text-gray-500'>
+                                  Everyone can view the video
+                                </p>
+                              </Label>
+                            </div>
+                            <div className='flex items-start space-x-2'>
+                              <RadioGroupItem
+                                value='UNLISTED'
+                                id='unlisted'
+                                onClick={() => {
+                                  form.setValue('visibility', 'UNLISTED');
+                                }}
+                              />
+                              <Label htmlFor='unlisted'>
+                                Unlisted
+                                <p className='text-sm text-gray-500'>
+                                  Only people with the link can view the video
+                                </p>
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                }
               />
             </div>
           </div>
-          <div className='flex-col items-start flex gap-4'>
-            {video.master && (
-              <ReactHLSPlayer
-                className='w-full rounded-lg aspect-video'
-                src={video.master.publicUrl}
-                playerRef={playerRef}
-                controls
-              />
-            )}
-            <div>
-              <div>
-                <p className='text-sm text-gray-500'>Link to the video</p>
-              </div>
-              <Link
-                href={`/v/${video.id}`}
-                className='text-sm underline font-bold text-blue-600'
-              >
-                {location.origin}/v/{video.id}
-              </Link>
-            </div>
-          </div>
+          <VideoEditorAside mediaId={video.id} />
         </div>
 
         <DialogFooter>

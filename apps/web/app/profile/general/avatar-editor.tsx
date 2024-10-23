@@ -6,6 +6,7 @@ import {
   postUserUpdateProfilePicture,
   postUserUploadProfilePicture
 } from '@/api/user';
+import { toast } from '@/components/hooks/use-toast';
 import { Icon } from '@/components/icon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/button';
@@ -32,7 +33,6 @@ import {
 } from 'lucide-react';
 import { ChangeEvent, useMemo, useState } from 'react';
 import { Crop } from 'react-image-crop';
-import { toast } from 'react-toastify';
 
 import { AvatarGallery, TImageFromGallery } from './avatar-gallery';
 import { AvatarTuner } from './avatar-tuner';

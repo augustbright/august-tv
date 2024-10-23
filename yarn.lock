@@ -321,11 +321,14 @@ __metadata:
     "@radix-ui/react-dropdown-menu": "npm:^2.1.1"
     "@radix-ui/react-label": "npm:^2.1.0"
     "@radix-ui/react-radio-group": "npm:^1.2.1"
+    "@radix-ui/react-scroll-area": "npm:^1.2.0"
     "@radix-ui/react-slot": "npm:^1.1.0"
     "@radix-ui/react-switch": "npm:^1.1.0"
     "@radix-ui/react-tabs": "npm:^1.1.0"
+    "@radix-ui/react-toast": "npm:^1.2.2"
     "@radix-ui/react-tooltip": "npm:^1.1.3"
     "@tanstack/react-query": "npm:^5.59.0"
+    "@tanstack/react-query-devtools": "npm:^5.59.15"
     "@trivago/prettier-plugin-sort-imports": "npm:^4.3.0"
     "@types/animejs": "npm:^3.1.12"
     "@types/jest": "npm:^29.5.13"
@@ -357,7 +360,6 @@ __metadata:
     react-hook-form: "npm:^7.53.0"
     react-image-crop: "npm:^11.0.7"
     react-json-view: "npm:^1.21.3"
-    react-toastify: "npm:^10.0.5"
     sass: "npm:^1.79.4"
     socket.io-client: "npm:^4.8.0"
     tailwind-merge: "npm:^2.5.2"
@@ -3449,6 +3451,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/number@npm:1.1.0":
+  version: 1.1.0
+  resolution: "@radix-ui/number@npm:1.1.0"
+  checksum: 10c0/a48e34d5ff1484de1b7cf5d7317fefc831d49e96a2229f300fd37b657bd8cfb59c922830c00ec02838ab21de3b299a523474592e4f30882153412ed47edce6a4
+  languageName: node
+  linkType: hard
+
 "@radix-ui/primitive@npm:1.1.0":
   version: 1.1.0
   resolution: "@radix-ui/primitive@npm:1.1.0"
@@ -3947,6 +3956,33 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/react-scroll-area@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@radix-ui/react-scroll-area@npm:1.2.0"
+  dependencies:
+    "@radix-ui/number": "npm:1.1.0"
+    "@radix-ui/primitive": "npm:1.1.0"
+    "@radix-ui/react-compose-refs": "npm:1.1.0"
+    "@radix-ui/react-context": "npm:1.1.1"
+    "@radix-ui/react-direction": "npm:1.1.0"
+    "@radix-ui/react-presence": "npm:1.1.1"
+    "@radix-ui/react-primitive": "npm:2.0.0"
+    "@radix-ui/react-use-callback-ref": "npm:1.1.0"
+    "@radix-ui/react-use-layout-effect": "npm:1.1.0"
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 10c0/e33eca1b9f254003a08b2647add9278b1d90dd2e9128cbdd73b310e9363c4461d7149fd973e81ddcbdbf420b040b8fe864684919c58956a5f6e84fff2d1340b9
+  languageName: node
+  linkType: hard
+
 "@radix-ui/react-slot@npm:1.1.0, @radix-ui/react-slot@npm:^1.1.0":
   version: 1.1.0
   resolution: "@radix-ui/react-slot@npm:1.1.0"
@@ -4010,6 +4046,36 @@ __metadata:
     "@types/react-dom":
       optional: true
   checksum: 10c0/86fa6beda5ac5fbc6cede483e198641fbba0b1e4ad30db3488fbfefdf460ca4e35d765f5b22f73ded1849252b2432cfa755783218f282721462f90f2ad1adf30
+  languageName: node
+  linkType: hard
+
+"@radix-ui/react-toast@npm:^1.2.2":
+  version: 1.2.2
+  resolution: "@radix-ui/react-toast@npm:1.2.2"
+  dependencies:
+    "@radix-ui/primitive": "npm:1.1.0"
+    "@radix-ui/react-collection": "npm:1.1.0"
+    "@radix-ui/react-compose-refs": "npm:1.1.0"
+    "@radix-ui/react-context": "npm:1.1.1"
+    "@radix-ui/react-dismissable-layer": "npm:1.1.1"
+    "@radix-ui/react-portal": "npm:1.1.2"
+    "@radix-ui/react-presence": "npm:1.1.1"
+    "@radix-ui/react-primitive": "npm:2.0.0"
+    "@radix-ui/react-use-callback-ref": "npm:1.1.0"
+    "@radix-ui/react-use-controllable-state": "npm:1.1.0"
+    "@radix-ui/react-use-layout-effect": "npm:1.1.0"
+    "@radix-ui/react-visually-hidden": "npm:1.1.0"
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 10c0/e6a23fcbb6801fdfd26773c2786bf28bf5705ccdf4e5e96e457e66d11c5644a01781d92746f3e35a25df7c4a194cb0fb456d8679723b44e94b85fa1c026bec97
   languageName: node
   linkType: hard
 
@@ -4331,6 +4397,25 @@ __metadata:
   version: 5.59.0
   resolution: "@tanstack/query-core@npm:5.59.0"
   checksum: 10c0/c6b5c935670ea0b4ba1e3936d9f319cae5ba098d82863115546d43d45e9e171b9fce990aecd56cd7ef9a8b1de64cb4f74f6c8f83cc1e61cd62ee99d2c34fbefc
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-devtools@npm:5.58.0":
+  version: 5.58.0
+  resolution: "@tanstack/query-devtools@npm:5.58.0"
+  checksum: 10c0/3b0ad21503682f6c452f5f78f5cc9007e902f455c70fd7d537ca2c3b13f41607ab4ad612c0ca19abc24aa2a9fa9bf019101dfeb43abfa53f04782322558f19f6
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query-devtools@npm:^5.59.15":
+  version: 5.59.15
+  resolution: "@tanstack/react-query-devtools@npm:5.59.15"
+  dependencies:
+    "@tanstack/query-devtools": "npm:5.58.0"
+  peerDependencies:
+    "@tanstack/react-query": ^5.59.15
+    react: ^18 || ^19
+  checksum: 10c0/2b83e6ccd971eb01c65d25723f58a95a549ea76802ef17fa66f796268f030ca8fa2dda847df3694900232e3853ae0d8a356997d660d6c0da021ad12d5f08d313
   languageName: node
   linkType: hard
 
@@ -6595,7 +6680,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clsx@npm:^2.1.0, clsx@npm:^2.1.1":
+"clsx@npm:^2.1.1":
   version: 2.1.1
   resolution: "clsx@npm:2.1.1"
   checksum: 10c0/c4c8eb865f8c82baab07e71bfa8897c73454881c4f99d6bc81585aecd7c441746c1399d08363dc096c550cceaf97bd4ce1e8854e1771e9998d9f94c4fe075839
@@ -13839,18 +13924,6 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0
   checksum: 10c0/ea92fda2128983c1a8e84c74706ffb4b8bfa1a19c803d210868ec031c1ac3b8ceee8028766ef5d91017265da2bdccf6a85e5b6e5d553005e839f0c47e5758b43
-  languageName: node
-  linkType: hard
-
-"react-toastify@npm:^10.0.5":
-  version: 10.0.5
-  resolution: "react-toastify@npm:10.0.5"
-  dependencies:
-    clsx: "npm:^2.1.0"
-  peerDependencies:
-    react: ">=18"
-    react-dom: ">=18"
-  checksum: 10c0/66c68ec3d6c017d9f32652d73bb925224921c6a80b629b9d481430d5b4fd504abb7a99995a64b9aef0fc31326c74f3cbe088b3287b978dd0c355079c4bbf4158
   languageName: node
   linkType: hard
 

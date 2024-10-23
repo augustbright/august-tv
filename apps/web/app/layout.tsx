@@ -2,9 +2,7 @@ import { getApiClient } from '@/api/client';
 import { getQueryClient } from '@/api/queryClient';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
 
-// import 'animate.css';
 import { inRange } from 'lodash';
-import 'react-toastify/dist/ReactToastify.css';
 
 import { Providers } from '../components/Providers';
 import { AppHeader } from './_app-header/app-header';
