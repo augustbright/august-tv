@@ -19,39 +19,27 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { File, Video } from '@prisma/client';
 import { DialogDescription } from '@radix-ui/react-dialog';
 
 import { Loader2, Save } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { useController, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { SwitchVideoStatus } from './switch-video-status';
 import { VideoEditorAside } from './video-editor-aside';
-
-const formSchema = z.object({
-  title: z
-    .string({
-      required_error: 'Title is required'
-    })
-    .min(1, 'Title is required')
-    .max(255, 'Title is too long'),
-  description: z.string().max(1000, 'Description is too long'),
-  visibility: z.enum(['PRIVATE', 'UNLISTED', 'PUBLIC'], {
-    required_error: 'Please select a visibility option'
-  })
-});
+import { VideoEditorFieldThumbnail } from './video-editor-field-thumbnail';
+import { VideoEditorFieldVisibility } from './video-editor-field-visibility';
+import { formSchema } from './video-editor-form-schema';
 
 export const EditVideoForm = ({
   video
 }: {
   video: Pick<
     Video,
-    'id' | 'title' | 'visibility' | 'description' | 'status'
+    'id' | 'title' | 'visibility' | 'description' | 'status' | 'thumbnailId'
   > & { master: Pick<File, 'publicUrl'> | null };
 }) => {
   const { mutateAsync: updateVideo, isPending: isUpdatingVideo } =
@@ -61,9 +49,17 @@ export const EditVideoForm = ({
     defaultValues: {
       title: video.title,
       description: video.description ?? '',
-      visibility: video.visibility === 'DRAFT' ? undefined : video.visibility
+      visibility: video.visibility === 'DRAFT' ? undefined : video.visibility,
+      thumbnailImageId: video.thumbnailId ?? undefined
     },
     disabled: isUpdatingVideo
+  });
+
+  const {
+    field: { value: selectedThumbnailId }
+  } = useController({
+    control: form.control,
+    name: 'thumbnailImageId'
   });
 
   async function handleSubmit(values: z.infer<typeof formSchema>) {
@@ -90,7 +86,7 @@ export const EditVideoForm = ({
         className='flex flex-col grow overflow-y-hidden'
         onSubmit={form.handleSubmit(handleSubmit)}
       >
-        <DialogHeader className='mb-3'>
+        <DialogHeader className='p-3'>
           <DialogTitle>
             Video settings
             <Badge
@@ -114,7 +110,7 @@ export const EditVideoForm = ({
 
         <div className='grid flex-1 gap-1 grid-cols-3 grow overflow-y-hidden'>
           <div className='col-span-2 pr-4 overflow-y-auto'>
-            <div className='flex flex-col gap-8 items-stretch'>
+            <div className='flex flex-col gap-8 items-stretch ml-3'>
               <FormField
                 control={form.control}
                 name='title'
@@ -155,80 +151,25 @@ export const EditVideoForm = ({
               <SwitchVideoStatus
                 mediaId={video.id}
                 ready={
-                  <FormField
-                    control={form.control}
-                    name='visibility'
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className='space-y-0.5'>
-                          <FormLabel>Publish video</FormLabel>
-                        </div>
-                        <FormControl>
-                          <RadioGroup
-                            {...field}
-                            className='flex flex-col rounded-lg border p-4 h'
-                          >
-                            <div className='flex items-start space-x-2'>
-                              <RadioGroupItem
-                                value='PUBLIC'
-                                id='public'
-                                className='mt-1'
-                                onClick={() => {
-                                  form.setValue('visibility', 'PUBLIC');
-                                }}
-                              />
-                              <Label htmlFor='public'>
-                                Public
-                                <p className='text-sm text-gray-500'>
-                                  Everyone can view the video
-                                </p>
-                              </Label>
-                            </div>
-                            <div className='flex items-start space-x-2'>
-                              <RadioGroupItem
-                                value='PRIVATE'
-                                id='private'
-                                className='mt-1'
-                                onClick={() => {
-                                  form.setValue('visibility', 'PRIVATE');
-                                }}
-                              />
-                              <Label htmlFor='private'>
-                                Private
-                                <p className='text-sm text-gray-500'>
-                                  Only you can view the video
-                                </p>
-                              </Label>
-                            </div>
-                            <div className='flex items-start space-x-2'>
-                              <RadioGroupItem
-                                value='UNLISTED'
-                                id='unlisted'
-                                onClick={() => {
-                                  form.setValue('visibility', 'UNLISTED');
-                                }}
-                              />
-                              <Label htmlFor='unlisted'>
-                                Unlisted
-                                <p className='text-sm text-gray-500'>
-                                  Only people with the link can view the video
-                                </p>
-                              </Label>
-                            </div>
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <>
+                    <VideoEditorFieldVisibility form={form} />
+                    <VideoEditorFieldThumbnail
+                      form={form}
+                      mediaId={video.id}
+                    />
+                  </>
                 }
               />
             </div>
           </div>
-          <VideoEditorAside mediaId={video.id} />
+          <VideoEditorAside
+            mediaId={video.id}
+            selectedThumbnailId={selectedThumbnailId}
+            className='mr-3'
+          />
         </div>
 
-        <DialogFooter>
+        <DialogFooter className='p-3'>
           <DialogClose asChild>
             <Button variant='secondary'>Cancel</Button>
           </DialogClose>

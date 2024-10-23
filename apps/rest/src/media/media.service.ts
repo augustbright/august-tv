@@ -7,8 +7,8 @@ import {
 } from '@august-tv/server/modules';
 import { IWithPermissions, TActionType } from 'src/common/IWithPermissions';
 import { UserService } from 'src/user/user.service';
-import { PatchMedia } from './media.dto';
 import { Prisma } from '@prisma/client';
+import { PatchMediaDto } from '@august-tv/server/dto';
 
 export type TTempFile = {
   originalName: string;
@@ -22,7 +22,7 @@ export class MediaService implements IWithPermissions {
     private readonly imageService: ImageService,
     private readonly dbFileService: DbFileService,
     private readonly userService: UserService,
-  ) {}
+  ) { }
 
   async getPermissionsForUser(
     id: string,
@@ -86,13 +86,59 @@ export class MediaService implements IWithPermissions {
     });
   }
 
-  async patch(id: string, data: PatchMedia.Body) {
+  async getThumbnails(id: string) {
+    const { images } = await this.prisma.imageSet.findFirstOrThrow({
+      where: {
+        video: {
+          id
+        }
+      },
+      select: {
+        images: {
+          include: {
+            large: true,
+            medium: true,
+            small: true,
+            original: true,
+          }
+        }
+      }
+    });
+
+    return images;
+  }
+
+  async patch(id: string, data: PatchMediaDto) {
+    let thumbnailId = data.thumbnailImageId;
+    if (!thumbnailId) {
+      const { images } = await this.prisma.imageSet.findFirstOrThrow({
+        where: {
+          video: {
+            id,
+          }
+        },
+        select: {
+          images: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+      thumbnailId = images[0].id;
+    }
+
     return this.prisma.video.update({
       where: { id },
       data: {
         description: data.description,
         title: data.title,
         visibility: data.visibility,
+        thumbnail: {
+          connect: {
+            id: thumbnailId,
+          }
+        }
       },
     });
   }

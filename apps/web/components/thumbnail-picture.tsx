@@ -16,25 +16,25 @@ export const ThumbnailPicture = ({
   height?: number;
   alt: string;
 }) => {
-  if (thumbnail) {
-    return (
-      <Image
-        style={{ width }}
-        src={thumbnail.medium?.publicUrl}
-        width={width}
-        height={height}
-        alt={alt}
-        className='rounded-lg aspect-video'
-      />
-    );
-  }
-
   return (
-    <div
-      style={{ width }}
-      className={`aspect-video flex justify-center items-center dark:bg-slate-900 bg-slate-100 rounded-lg max-w-full`}
-    >
-      <FileVideo className='w-4 h-4' />
+    <div>
+      {thumbnail ? (
+        <Image
+          style={{ width }}
+          src={thumbnail.medium?.publicUrl}
+          width={width}
+          height={height}
+          alt={alt}
+          className='rounded-lg aspect-video'
+        />
+      ) : (
+        <div
+          style={{ width }}
+          className={`aspect-video flex justify-center items-center dark:bg-slate-900 bg-slate-100 rounded-lg max-w-full`}
+        >
+          <FileVideo className='w-4 h-4' />
+        </div>
+      )}
     </div>
   );
 };

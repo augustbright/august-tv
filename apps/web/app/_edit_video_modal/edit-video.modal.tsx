@@ -21,7 +21,7 @@ export const EditVideoModal = ({ videoId }: { videoId: string }) => {
       open
       onOpenChange={handleOpenChange}
     >
-      <DialogContent className='max-w-5xl h-[600px] flex flex-col overflow-hidden'>
+      <DialogContent className='max-w-5xl h-[600px] flex flex-col overflow-hidden p-0'>
         <Query
           query={getMediaById.query({ mediaId: videoId })}
           loading={Query.LOADING.ROW}

@@ -28,7 +28,7 @@ export class MediaController {
   constructor(
     private readonly mediaService: MediaService,
     private readonly kafkaEmitterService: KafkaEmitterService,
-  ) {}
+  ) { }
 
   @Post('upload')
   @UseInterceptors(
@@ -76,6 +76,16 @@ export class MediaController {
     return draft;
   }
 
+  @Get(':id/thumbnails')
+  @Guard.scope('user')
+  async getThumbnails(
+    @Param('id') id: string,
+    @User({ required: true }) user?: DecodedIdToken,
+  ) {
+    await this.mediaService.assertPermissionsForUser(id, user?.uid, 'WRITE');
+    return this.mediaService.getThumbnails(id);
+  }
+
   @Patch(':id')
   @Guard.scope('user')
   async patchMedia(
@@ -113,7 +123,7 @@ export class MediaController {
   @Guard.scope('user')
   async rateMedia(
     @Param('id') id: string,
-    @Body() rateDto: { type: 'LIKE' | 'DISLIKE' | null },
+    @Body() rateDto: { type: 'LIKE' | 'DISLIKE' | null; },
     @User({ required: true }) user: DecodedIdToken,
   ) {
     return this.mediaService.rate(id, user.uid, rateDto.type);

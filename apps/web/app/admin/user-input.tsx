@@ -4,6 +4,7 @@ import { getUserSearch } from '@/api/user';
 import { AuthorPicture } from '@/components/AuthorPicture';
 import { Query } from '@/components/Query';
 import { Guard } from '@/components/guard';
+import { TWithInputProps } from '@/components/types/with-input-props.type';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -28,15 +29,11 @@ export type TUserItem = Pick<User, 'id' | 'nickname' | 'email'> & {
 
 type TSingleUserInputProps = {
   single: true;
-  value: TUserItem | undefined;
-  onChange: (event: { target: { value: TUserItem | undefined } }) => void;
-};
+} & TWithInputProps<TUserItem | undefined>;
 
 type TMultipleUserInputProps = {
   single?: false;
-  value: TUserItem[] | undefined;
-  onChange: (event: { target: { value: TUserItem[] } }) => void;
-};
+} & TWithInputProps<TUserItem[] | undefined>;
 
 const onlyDefined = <T,>(value: (T | undefined)[]): T[] =>
   value.filter(Boolean) as T[];

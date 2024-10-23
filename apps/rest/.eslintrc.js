@@ -23,6 +23,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'unused-imports/no-unused-imports': 'error',
     '@typescript-eslint/no-namespace': 'off',
+    'prettier/prettier': 'off',
     'no-restricted-syntax': [
       'error',
       {

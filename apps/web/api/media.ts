@@ -63,6 +63,12 @@ export const getMediaMy = createReadableEndpoint<
   prepareUrl: () => '/media/my'
 });
 
+export const getMediaThumbnails = createReadableEndpoint<
+  { mediaId: string; },
+  TMediaEndpointResult<'getThumbnails'>>({
+    prepareUrl: ({ mediaId }) => `/media/${mediaId}/thumbnails`
+  });
+
 export const patchMedia = createMutableEndpoint<
   {
     mediaId: string;

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsIn, IsString } from "class-validator";
+import { IsIn, IsOptional, IsString, IsUUID } from "class-validator";
 import { Video, Visibility } from "@prisma/client";
 
 export class PatchMediaDto {
@@ -15,4 +15,10 @@ export class PatchMediaDto {
     @IsString()
     @IsIn(Object.keys(Visibility))
     visibility!: Video["visibility"];
+
+    @ApiProperty({ description: "Media thumbnail image id" })
+    @IsString()
+    @IsUUID()
+    @IsOptional()
+    thumbnailImageId?: string;
 }
