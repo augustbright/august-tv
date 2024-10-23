@@ -24,9 +24,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { File, Video } from '@prisma/client';
+import { DialogDescription } from '@radix-ui/react-dialog';
 
 import { Loader2, Save } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -54,7 +54,6 @@ export const EditVideoForm = ({
     'id' | 'title' | 'visibility' | 'description' | 'status'
   > & { master: Pick<File, 'publicUrl'> | null };
 }) => {
-  const router = useRouter();
   const { mutateAsync: updateVideo, isPending: isUpdatingVideo } =
     patchMedia.useMutation();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -76,7 +75,6 @@ export const EditVideoForm = ({
       toast({
         description: 'Video updated'
       });
-      router.push('/profile/my-videos');
     } catch (error) {
       console.error(error);
       toast({
@@ -92,7 +90,7 @@ export const EditVideoForm = ({
         className='flex flex-col grow overflow-y-hidden'
         onSubmit={form.handleSubmit(handleSubmit)}
       >
-        <DialogHeader>
+        <DialogHeader className='mb-3'>
           <DialogTitle>
             Video settings
             <Badge
@@ -102,10 +100,20 @@ export const EditVideoForm = ({
               {video.visibility}
             </Badge>
           </DialogTitle>
+          <DialogDescription>
+            <SwitchVideoStatus
+              mediaId={video.id}
+              processing={
+                <p className='text-sm text-gray-500'>
+                  This video is currently being processed
+                </p>
+              }
+            />
+          </DialogDescription>
         </DialogHeader>
 
-        <div className='grid flex-1 gap-4 grid-cols-3 grow overflow-y-hidden'>
-          <div className='col-span-2 overflow-y-auto'>
+        <div className='grid flex-1 gap-1 grid-cols-3 grow overflow-y-hidden'>
+          <div className='col-span-2 pr-4 overflow-y-auto'>
             <div className='flex flex-col gap-8 items-stretch'>
               <FormField
                 control={form.control}
@@ -158,24 +166,8 @@ export const EditVideoForm = ({
                         <FormControl>
                           <RadioGroup
                             {...field}
-                            className='flex flex-col rounded-lg border p-4'
+                            className='flex flex-col rounded-lg border p-4 h'
                           >
-                            <div className='flex items-start space-x-2'>
-                              <RadioGroupItem
-                                value='PRIVATE'
-                                id='private'
-                                className='mt-1'
-                                onClick={() => {
-                                  form.setValue('visibility', 'PRIVATE');
-                                }}
-                              />
-                              <Label htmlFor='private'>
-                                Private
-                                <p className='text-sm text-gray-500'>
-                                  Only you can view the video
-                                </p>
-                              </Label>
-                            </div>
                             <div className='flex items-start space-x-2'>
                               <RadioGroupItem
                                 value='PUBLIC'
@@ -189,6 +181,22 @@ export const EditVideoForm = ({
                                 Public
                                 <p className='text-sm text-gray-500'>
                                   Everyone can view the video
+                                </p>
+                              </Label>
+                            </div>
+                            <div className='flex items-start space-x-2'>
+                              <RadioGroupItem
+                                value='PRIVATE'
+                                id='private'
+                                className='mt-1'
+                                onClick={() => {
+                                  form.setValue('visibility', 'PRIVATE');
+                                }}
+                              />
+                              <Label htmlFor='private'>
+                                Private
+                                <p className='text-sm text-gray-500'>
+                                  Only you can view the video
                                 </p>
                               </Label>
                             </div>

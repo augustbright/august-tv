@@ -20,7 +20,7 @@ export const VideoEditorAside = ({ mediaId }: { mediaId: string }) => {
           <SwitchVideoStatus
             mediaId={mediaId}
             processing={
-              <Skeleton className='w-full aspect-video flex justify-center items-center text-gray-500'>
+              <Skeleton className='w-full aspect-video rounded-lg flex justify-center items-center text-gray-500'>
                 <Loader2 className='animate-spin h-3' />
                 <p className='text-sm'>Your video is being processed</p>
               </Skeleton>
