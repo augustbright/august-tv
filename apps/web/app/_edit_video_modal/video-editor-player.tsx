@@ -45,7 +45,7 @@ export const VideoEditorPlayer = ({
           );
           return (
             <div
-              className='relative group cursor-pointer'
+              className={cn('relative group cursor-pointer', className)}
               role='button'
               onClick={() => {
                 setIsActivated(true);
@@ -53,7 +53,7 @@ export const VideoEditorPlayer = ({
             >
               <ThumbnailPicture
                 thumbnail={selectedThumbnail ?? thumbnails[0]}
-                width={selectedThumbnail?.originalWidth}
+                width={400}
                 alt='Vide preview'
               />
               <div

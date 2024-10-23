@@ -1,14 +1,13 @@
 import { TUserEndpointResult } from '@august-tv/generated-types';
 import { ImageCropDto } from '@august-tv/generated-types/dto';
 
-import { Crop } from 'react-image-crop';
 
 import { createMutableEndpoint } from './createMutableEndpoint';
 import { createReadableEndpoint } from './createReadableEndpoint';
 import { validatePictureFile } from './validators';
 
 export const postUserSessionLogin = createMutableEndpoint<
-  { idToken: string },
+  { idToken: string; },
   TUserEndpointResult<'sessionLogin'>
 >({
   method: 'post',
@@ -45,7 +44,7 @@ export const getUserMyJobs = createReadableEndpoint<
 });
 
 export const postUserUnobserveJob = createMutableEndpoint<
-  { jobId: string },
+  { jobId: string; },
   TUserEndpointResult<'unobserveJob'>
 >({
   method: 'post',
@@ -64,7 +63,7 @@ export const getUserMySubscriptions = createReadableEndpoint<
 });
 
 export const postUserSubscribe = createMutableEndpoint<
-  { authorId: string },
+  { authorId: string; },
   TUserEndpointResult<'subscribe'>
 >({
   method: 'post',
@@ -77,7 +76,7 @@ export const postUserSubscribe = createMutableEndpoint<
 });
 
 export const postUserUnsubscribe = createMutableEndpoint<
-  { authorId: string },
+  { authorId: string; },
   TUserEndpointResult<'unsubscribe'>
 >({
   method: 'post',
@@ -115,7 +114,7 @@ export const getUserProfilePictures = createReadableEndpoint<
 export const postUserUploadProfilePicture = createMutableEndpoint<
   {
     file: File;
-    crop: Crop;
+    crop: ImageCropDto;
   },
   TUserEndpointResult<'uploadProfilePicture'>
 >({

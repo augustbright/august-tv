@@ -270,11 +270,24 @@ export const AvatarEditor = () => {
     if (isUploadingProfilePicture) return;
     try {
       if (localFile) {
-        await uploadProfilePicture({ file: localFile, crop });
+        await uploadProfilePicture({
+          file: localFile,
+          crop: {
+            x: Math.round(crop.x),
+            y: Math.round(crop.y),
+            width: Math.round(crop.width),
+            height: Math.round(crop.height)
+          }
+        });
       } else if (selectedImageFromGallery) {
         await updateProfilePicture({
           imageId: selectedImageFromGallery.id,
-          crop
+          crop: {
+            x: Math.round(crop.x),
+            y: Math.round(crop.y),
+            width: Math.round(crop.width),
+            height: Math.round(crop.height)
+          }
         });
       }
 
