@@ -26,10 +26,18 @@ function getImageDimensions(src: string) {
 
 export const AvatarTuner = ({
   imageSrc,
-  onSave
+  onSave,
+  circularCrop,
+  minWidth,
+  minHeight,
+  aspect
 }: {
   imageSrc: string;
   onSave: (crop: Crop) => void;
+  circularCrop: boolean;
+  minWidth: number;
+  minHeight: number;
+  aspect: number;
 }) => {
   const imgRef = useRef<HTMLImageElement>(null);
   const [dimensions, setDimensions] = useState<{
@@ -57,7 +65,7 @@ export const AvatarTuner = ({
             unit: '%',
             width: 90
           },
-          1,
+          aspect,
           width,
           height
         ),
@@ -67,18 +75,18 @@ export const AvatarTuner = ({
       setCrop(defaultCrop);
       setDimensions({ width, height });
     });
-  }, [imageSrc]);
+  }, [imageSrc, aspect]);
 
   return (
     <div className='flex flex-col gap-4'>
       <ReactCrop
-        aspect={1}
+        aspect={aspect}
         keepSelection
-        circularCrop
+        circularCrop={circularCrop}
         crop={crop}
         onChange={(c) => setCrop(c)}
-        minWidth={200}
-        minHeight={200}
+        minWidth={minWidth}
+        minHeight={minHeight}
       >
         {/* eslint-disable-next-line @next/next/no-img-element  */}
         <img

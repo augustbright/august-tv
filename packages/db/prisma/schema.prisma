@@ -101,10 +101,12 @@ model Video {
   author   User   @relation("VideoOwner", fields: [authorId], references: [id])
   authorId String
 
-  thumbnail      Image?   @relation("VideoThumbnail", fields: [thumbnailId], references: [id])
-  thumbnailId    String?  @unique @db.Uuid
-  thumbnailSet   ImageSet @relation("VideoThumbnailSet", fields: [thumbnailSetId], references: [id], onDelete: Cascade)
-  thumbnailSetId String   @unique @db.Uuid
+  thumbnail            Image?    @relation("VideoThumbnail", fields: [thumbnailId], references: [id])
+  thumbnailId          String?   @unique @db.Uuid
+  thumbnailSet         ImageSet  @relation("VideoThumbnailSet", fields: [thumbnailSetId], references: [id], onDelete: Cascade)
+  thumbnailSetId       String    @unique @db.Uuid
+  customThumbnailSet   ImageSet? @relation("VideoCustomThumbnailSet", fields: [customThumbnailSetId], references: [id], onDelete: Cascade)
+  customThumbnailSetId String?   @unique @db.Uuid
 
   master    File?   @relation("VideoMaster", fields: [masterId], references: [id])
   masterId  String? @unique @db.Uuid
@@ -198,8 +200,9 @@ model ImageSet {
 
   images Image[] @relation
 
-  user  User?  @relation("UserPictureSet")
-  video Video? @relation("VideoThumbnailSet")
+  user                      User?  @relation("UserPictureSet")
+  video                     Video? @relation("VideoThumbnailSet")
+  videoWithCustomThumbnails Video? @relation("VideoCustomThumbnailSet")
 
   @@map("image_sets")
 }

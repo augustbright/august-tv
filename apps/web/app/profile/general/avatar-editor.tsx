@@ -355,6 +355,10 @@ export const AvatarEditor = () => {
           <AvatarTuner
             onSave={handleApplyCrop}
             imageSrc={selectedImageUrl}
+            aspect={1}
+            circularCrop
+            minWidth={200}
+            minHeight={200}
           />
         )}
         {dialogState.preview && selectedImageUrl && (
@@ -430,7 +434,7 @@ export const AvatarEditor = () => {
                 className='hidden'
                 id='file'
                 name='file'
-                accept='image/*cvx'
+                accept='image/*'
                 type='file'
                 onChange={handleFileChange}
               />

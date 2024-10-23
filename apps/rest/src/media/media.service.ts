@@ -8,10 +8,11 @@ import {
 import { IWithPermissions, TActionType } from 'src/common/IWithPermissions';
 import { UserService } from 'src/user/user.service';
 import { Prisma } from '@prisma/client';
-import { PatchMediaDto } from '@august-tv/server/dto';
+import { ImageCropDto, PatchMediaDto } from '@august-tv/server/dto';
 
 export type TTempFile = {
   originalName: string;
+  filename: string;
   path: string;
 };
 
@@ -87,25 +88,35 @@ export class MediaService implements IWithPermissions {
   }
 
   async getThumbnails(id: string) {
-    const { images } = await this.prisma.imageSet.findFirstOrThrow({
-      where: {
-        video: {
-          id
-        }
-      },
+    return this.prisma.video.findFirstOrThrow({
+      where: { id },
       select: {
-        images: {
-          include: {
-            large: true,
-            medium: true,
-            small: true,
-            original: true,
-          }
+        thumbnailSet: {
+          select: {
+            images: {
+              include: {
+                large: true,
+                medium: true,
+                small: true,
+                original: true,
+              },
+            },
+          },
+        },
+        customThumbnailSet: {
+          select: {
+            images: {
+              include: {
+                large: true,
+                medium: true,
+                small: true,
+                original: true,
+              },
+            },
+          },
         }
       }
     });
-
-    return images;
   }
 
   async patch(id: string, data: PatchMediaDto) {
@@ -141,6 +152,41 @@ export class MediaService implements IWithPermissions {
         }
       },
     });
+  }
+
+  async uploadThumbnail({ videoId, crop, file, userId }: {
+    videoId: string;
+    crop: ImageCropDto;
+    userId: string;
+    file: TTempFile;
+  }) {
+    let { customThumbnailSetId } = await this.prisma.video.findFirstOrThrow({
+      where: { id: videoId },
+      select: {
+        customThumbnailSetId: true,
+      }
+    });
+
+    if (!customThumbnailSetId) {
+      customThumbnailSetId = (await this.prisma.imageSet.create({
+        data: {
+          videoWithCustomThumbnails: {
+            connect: {
+              id: videoId,
+            },
+          },
+        },
+      })).id;
+    }
+
+    const newImage = await this.imageService.upload(file.filename, {
+      ownerId: userId,
+      isProfilePicture: false,
+      crop,
+      setId: customThumbnailSetId,
+    });
+
+    return newImage;
   }
 
   async getUserMedia(user: any) {

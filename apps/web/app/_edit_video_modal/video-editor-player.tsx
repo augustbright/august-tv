@@ -30,7 +30,16 @@ export const VideoEditorPlayer = ({
   if (!isActivated) {
     return (
       <Query query={getMediaThumbnails.query({ mediaId })}>
-        {({ data: thumbnails }) => {
+        {({
+          data: {
+            thumbnailSet: { images: generatedThumbnails },
+            customThumbnailSet
+          }
+        }) => {
+          const thumbnails = [
+            ...generatedThumbnails,
+            ...(customThumbnailSet?.images ?? [])
+          ];
           const selectedThumbnail = thumbnails.find(
             (thumbnail) => thumbnail.id === selectedThumbnailId
           );

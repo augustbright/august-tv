@@ -1,9 +1,9 @@
 import { TMediaEndpointResult } from '@august-tv/generated-types';
-import { PatchMediaDto } from '@august-tv/generated-types/dto';
+import { PatchMediaDto, ImageCropDto } from '@august-tv/generated-types/dto';
 
 import { createMutableEndpoint } from './createMutableEndpoint';
 import { createReadableEndpoint } from './createReadableEndpoint';
-import { validateMediaFile } from './validators';
+import { validateMediaFile, validatePictureFile } from './validators';
 
 export const getMediaById = createReadableEndpoint<
   { mediaId: string; },
@@ -68,6 +68,39 @@ export const getMediaThumbnails = createReadableEndpoint<
   TMediaEndpointResult<'getThumbnails'>>({
     prepareUrl: ({ mediaId }) => `/media/${mediaId}/thumbnails`
   });
+
+export const postMediaUploadThumbnail = createMutableEndpoint<
+  {
+    mediaId: string;
+    file: File;
+    crop: ImageCropDto;
+  }, TMediaEndpointResult<'uploadThumbnail'>
+>({
+  prepareUrl: ({ mediaId }) => `/media/${mediaId}/uploadThumbnail`,
+  method: 'post',
+  prepareBody: ({ file, crop }) => {
+    const error = validatePictureFile(file);
+    if (error) {
+      throw new Error(error);
+    }
+    const formData = new FormData();
+
+    formData.append('file', file, file.name);
+
+    formData.append('width', crop.width.toString());
+    formData.append('height', crop.height.toString());
+    formData.append('x', crop.x.toString());
+    formData.append('y', crop.y.toString());
+
+    return formData;
+  },
+  onSuccess(queryClient, params, data) {
+    queryClient.invalidateQueries({ queryKey: ['media', 'my'] });
+    queryClient.invalidateQueries({
+      queryKey: ['media', params.mediaId]
+    });
+  },
+});
 
 export const patchMedia = createMutableEndpoint<
   {
