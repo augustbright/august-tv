@@ -69,7 +69,7 @@ export const VideoEditorPlayer = ({
                   )}
                 >
                   <Play className='w-6 h-6 text-white' />
-                  <Label className='text-white text-lg'>Watch</Label>
+                  <Label className='text-white text-lg'>Play</Label>
                 </div>
               </div>
             </div>
