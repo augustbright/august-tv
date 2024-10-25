@@ -24,6 +24,12 @@ export class FeedService {
             },
           },
         },
+        category: {
+          select: {
+            name: true,
+            id: true,
+          },
+        },
       },
       orderBy: {
         cursor: 'desc',
@@ -76,6 +82,12 @@ export class FeedService {
                 small: true,
               },
             },
+          },
+        },
+        category: {
+          select: {
+            name: true,
+            id: true,
           },
         },
       },

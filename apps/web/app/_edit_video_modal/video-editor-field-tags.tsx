@@ -1,5 +1,4 @@
 import { getTagsSearch, postTagsCreate } from '@/api/tags';
-import { AsyncCreatableSelect } from '@/components/ui/async-creatable-select';
 import {
   FormControl,
   FormDescription,
@@ -8,9 +7,10 @@ import {
   FormLabel,
   FormMessage
 } from '@/components/ui/form';
+import { AsyncCreatableSelect } from '@/components/ui/select';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { TVideoEditorForm } from './video-editor-form-schema';
+import { TVideoEditorForm } from './form-schema';
 
 export const VideoEditorFieldTags = ({ form }: { form: TVideoEditorForm }) => {
   const queryClient = useQueryClient();

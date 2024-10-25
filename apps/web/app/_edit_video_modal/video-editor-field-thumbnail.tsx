@@ -6,8 +6,8 @@ import {
   FormMessage
 } from '@/components/ui/form';
 
+import { TVideoEditorForm } from './form-schema';
 import { ThumbnailInput } from './thumbnail-input';
-import { TVideoEditorForm } from './video-editor-form-schema';
 
 export const VideoEditorFieldThumbnail = ({
   form,

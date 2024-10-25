@@ -83,6 +83,12 @@ export class MediaService implements IWithPermissions {
             userId: userId ?? 'NO_USER',
           },
         },
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         tags: {
           select: {
             id: true,
@@ -164,6 +170,15 @@ export class MediaService implements IWithPermissions {
         tags: {
           connect: (data.tags ?? []).map((tag) => ({ id: tag })),
         },
+        ...(data.category
+          ? {
+              category: {
+                connect: {
+                  id: data.category,
+                },
+              },
+            }
+          : {}),
       },
     });
   }

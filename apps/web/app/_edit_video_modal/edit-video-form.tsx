@@ -28,13 +28,14 @@ import { Save, Sparkles } from 'lucide-react';
 import { useController, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { formSchema } from './form-schema';
 import { SwitchVideoStatus } from './switch-video-status';
 import { SwitchVideoVisibility } from './switch-video-visibility';
 import { VideoEditorAside } from './video-editor-aside';
+import { VideoEditorFieldCategory } from './video-editor-field-category';
 import { VideoEditorFieldTags } from './video-editor-field-tags';
 import { VideoEditorFieldThumbnail } from './video-editor-field-thumbnail';
 import { VideoEditorFieldVisibility } from './video-editor-field-visibility';
-import { formSchema } from './video-editor-form-schema';
 
 export const EditVideoForm = ({
   video
@@ -44,7 +45,7 @@ export const EditVideoForm = ({
     'id' | 'title' | 'visibility' | 'description' | 'status' | 'thumbnailId'
   > & { master: Pick<File, 'publicUrl'> | null } & {
     tags: { id: number; name: string }[];
-  };
+  } & { category: { id: number; name: string } | null };
 }) => {
   const { mutateAsync: updateVideo, isPending: isUpdatingVideo } =
     patchMedia.useMutation();
@@ -52,6 +53,9 @@ export const EditVideoForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: video.title,
+      category: video.category
+        ? { value: video.category.id, label: video.category.name }
+        : null,
       description: video.description ?? '',
       visibility: video.visibility,
       thumbnailImageId: video.thumbnailId ?? undefined,
@@ -73,7 +77,8 @@ export const EditVideoForm = ({
         mediaId: video.id,
         updateVideoDto: {
           ...values,
-          tags: values.tags?.map((tag) => tag.value)
+          tags: values.tags?.map((tag) => tag.value),
+          category: values.category?.value
         }
       });
       toast({
@@ -139,6 +144,7 @@ export const EditVideoForm = ({
                   </FormItem>
                 )}
               />
+              <VideoEditorFieldCategory form={form} />
               <FormField
                 control={form.control}
                 name='description'
@@ -151,18 +157,18 @@ export const EditVideoForm = ({
                         id='message'
                         placeholder='Describe your video...'
                         className='min-h-12 resize-none p-3'
-                        rows={10}
+                        rows={6}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              <VideoEditorFieldTags form={form} />
               <SwitchVideoStatus
                 mediaId={video.id}
                 ready={
                   <>
-                    <VideoEditorFieldTags form={form} />
                     <VideoEditorFieldVisibility form={form} />
                     <VideoEditorFieldThumbnail
                       form={form}

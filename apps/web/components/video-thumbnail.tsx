@@ -24,6 +24,9 @@ export const VideoThumbnail = ({
         };
       } | null;
     };
+    category: {
+      name: string;
+    } | null;
   };
 }) => {
   return (
@@ -44,8 +47,13 @@ export const VideoThumbnail = ({
             {video.title}
           </h3>
           <p className='text-sm'>{video.author.nickname}</p>
-          <p className='text-sm'>
+          <p className='text-sm flex gap-2'>
             {moment(video.createdAt).format('MMMM Do, YYYY')}
+            {video.category && (
+              <span className='text-muted-foreground'>
+                {video.category.name}
+              </span>
+            )}
           </p>
         </div>
       </div>

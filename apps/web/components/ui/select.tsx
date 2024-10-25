@@ -10,12 +10,73 @@ import {
   GroupBase,
   MenuProps,
   MultiValueRemoveProps,
+  OptionProps,
   components
 } from 'react-select';
+import AsyncSelectOriginal, { AsyncProps } from 'react-select/async';
 import AsyncCreatableSelectOriginal, {
   AsyncCreatableProps
 } from 'react-select/async-creatable';
 import Select from 'react-select/dist/declarations/src/Select';
+
+const DropdownIndicator = <
+  Option = unknown,
+  IsMulti extends boolean = false,
+  Group extends GroupBase<Option> = GroupBase<Option>
+>(
+  props: DropdownIndicatorProps<Option, IsMulti, Group>
+) => {
+  return (
+    <components.DropdownIndicator {...props}>
+      <ChevronDown className='h-4 w-4' />
+    </components.DropdownIndicator>
+  );
+};
+
+const ClearIndicator = <
+  Option = unknown,
+  IsMulti extends boolean = false,
+  Group extends GroupBase<Option> = GroupBase<Option>
+>(
+  props: ClearIndicatorProps<Option, IsMulti, Group>
+) => {
+  return (
+    <components.ClearIndicator {...props}>
+      <X className='h-4 w-4' />
+    </components.ClearIndicator>
+  );
+};
+
+const MultiValueRemove = <
+  Option = unknown,
+  IsMulti extends boolean = false,
+  Group extends GroupBase<Option> = GroupBase<Option>
+>(
+  props: MultiValueRemoveProps<Option, IsMulti, Group>
+) => {
+  return (
+    <components.MultiValueRemove {...props}>
+      <X className='h-4 w-4' />
+    </components.MultiValueRemove>
+  );
+};
+
+const Option = <
+  Option = unknown,
+  IsMulti extends boolean = false,
+  Group extends GroupBase<Option> = GroupBase<Option>
+>(
+  props: OptionProps<Option, IsMulti, Group>
+) => {
+  return (
+    <components.Option {...props}>
+      {props.children}
+      {props.isSelected && (
+        <span className='ml-2 text-gray-500'>(current)</span>
+      )}
+    </components.Option>
+  );
+};
 
 const controlStyles = {
   base: 'flex min-h-10 w-full rounded-md border border-input bg-background text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground disabled:cursor-not-allowed disabled:opacity-50',
@@ -42,8 +103,8 @@ const menuStyles =
 const groupHeadingStyles = 'ml-3 mt-2 mb-1 text-gray-500 text-sm';
 const optionStyles = {
   base: 'hover:cursor-pointer px-3 py-2 rounded',
-  focus: 'bg-accent active:bg-gray-200',
-  selected: "after:content-['✔'] after:ml-2 after:text-green-500 text-gray-500"
+  focus: 'bg-accent active:bg-accent',
+  selected: 'after:content after:ml-2 text-gray-500'
 };
 const noOptionsMessageStyles = 'text-gray-500 p-2 border-gray-200 rounded-sm';
 
@@ -74,36 +135,6 @@ export const AsyncCreatableSelect = <
     return <components.Menu {...menuProps}>{content}</components.Menu>;
   };
 
-  const DropdownIndicator = (
-    props: DropdownIndicatorProps<Option, IsMulti, Group>
-  ) => {
-    return (
-      <components.DropdownIndicator {...props}>
-        <ChevronDown className='h-4 w-4' />
-      </components.DropdownIndicator>
-    );
-  };
-
-  const ClearIndicator = (
-    props: ClearIndicatorProps<Option, IsMulti, Group>
-  ) => {
-    return (
-      <components.ClearIndicator {...props}>
-        <X className='h-4 w-4' />
-      </components.ClearIndicator>
-    );
-  };
-
-  const MultiValueRemove = (
-    props: MultiValueRemoveProps<Option, IsMulti, Group>
-  ) => {
-    return (
-      <components.MultiValueRemove {...props}>
-        <X className='h-4 w-4' />
-      </components.MultiValueRemove>
-    );
-  };
-
   return (
     <AsyncCreatableSelectOriginal<Option, IsMulti, Group>
       {...props}
@@ -127,9 +158,85 @@ export const AsyncCreatableSelect = <
           transition: 'none'
         })
       }}
-      components={{ DropdownIndicator, ClearIndicator, MultiValueRemove, Menu }}
+      components={{
+        DropdownIndicator,
+        ClearIndicator,
+        MultiValueRemove,
+        Menu
+      }}
       menuPortalTarget={document.body}
       menuPosition='fixed'
+      classNames={{
+        control: ({ isFocused }) =>
+          cn(
+            isFocused ? controlStyles.focus : controlStyles.nonFocus,
+            controlStyles.base
+          ),
+        placeholder: () => placeholderStyles,
+        input: () => selectInputStyles,
+        valueContainer: () => valueContainerStyles,
+        singleValue: () => singleValueStyles,
+        multiValue: () => multiValueStyles,
+        multiValueLabel: () => multiValueLabelStyles,
+        multiValueRemove: () => multiValueRemoveStyles,
+        indicatorsContainer: () => indicatorsContainerStyles,
+        clearIndicator: () => clearIndicatorStyles,
+        indicatorSeparator: () => indicatorSeparatorStyles,
+        dropdownIndicator: () => dropdownIndicatorStyles,
+        menuPortal: () => '!z-50 pointer-events-auto',
+        menu: () => menuStyles,
+        groupHeading: () => groupHeadingStyles,
+        option: ({ isFocused, isSelected }) =>
+          cn(
+            isFocused && optionStyles.focus,
+            isSelected && optionStyles.selected,
+            optionStyles.base
+          ),
+        noOptionsMessage: () => noOptionsMessageStyles
+      }}
+    />
+  );
+};
+
+export const AsyncSelect = <
+  Option = unknown,
+  IsMulti extends boolean = false,
+  Group extends GroupBase<Option> = GroupBase<Option>
+>(
+  props: AsyncProps<Option, IsMulti, Group> &
+    React.RefAttributes<Select<Option, IsMulti, Group>>
+) => {
+  return (
+    <AsyncSelectOriginal<Option, IsMulti, Group>
+      {...props}
+      unstyled
+      styles={{
+        input: (base) => ({
+          ...base,
+          'input:focus': {
+            boxShadow: 'none'
+          }
+        }),
+        // On mobile, the label will truncate automatically, so we want to
+        // override that behavior.
+        multiValueLabel: (base) => ({
+          ...base,
+          whiteSpace: 'normal',
+          overflow: 'visible'
+        }),
+        control: (base) => ({
+          ...base,
+          transition: 'none'
+        })
+      }}
+      menuPortalTarget={document.body}
+      menuPosition='fixed'
+      components={{
+        DropdownIndicator,
+        ClearIndicator,
+        MultiValueRemove,
+        Option
+      }}
       classNames={{
         control: ({ isFocused }) =>
           cn(

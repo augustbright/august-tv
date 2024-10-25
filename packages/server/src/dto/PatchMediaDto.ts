@@ -16,6 +16,11 @@ export class PatchMediaDto {
     @IsString()
     title!: string;
 
+    @ApiProperty({ description: "Category" })
+    @IsNumber()
+    @IsOptional()
+    category?: number;
+
     @ApiProperty({ description: "Media description" })
     @IsString()
     description!: string;

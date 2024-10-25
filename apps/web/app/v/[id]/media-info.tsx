@@ -59,8 +59,13 @@ export const MediaInfo = ({ mediaId }: { mediaId: string }) => {
             </div>
             <Card x-chunk='dashboard-01-chunk-0'>
               <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                <CardTitle className='text-sm font-medium'>
+                <CardTitle className='flex items-center text-sm font-medium gap-2'>
                   {moment(media.createdAt).format('MMMM Do, YYYY')}
+                  {media.category && (
+                    <span className='text-muted-foreground'>
+                      {media.category.name}
+                    </span>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>

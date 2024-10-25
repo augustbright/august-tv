@@ -8,7 +8,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
-import { TVideoEditorForm } from './video-editor-form-schema';
+import { TVideoEditorForm } from './form-schema';
 
 export const VideoEditorFieldVisibility = ({
   form
