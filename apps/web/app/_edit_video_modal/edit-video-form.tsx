@@ -31,6 +31,7 @@ import { z } from 'zod';
 import { SwitchVideoStatus } from './switch-video-status';
 import { SwitchVideoVisibility } from './switch-video-visibility';
 import { VideoEditorAside } from './video-editor-aside';
+import { VideoEditorFieldTags } from './video-editor-field-tags';
 import { VideoEditorFieldThumbnail } from './video-editor-field-thumbnail';
 import { VideoEditorFieldVisibility } from './video-editor-field-visibility';
 import { formSchema } from './video-editor-form-schema';
@@ -41,7 +42,9 @@ export const EditVideoForm = ({
   video: Pick<
     Video,
     'id' | 'title' | 'visibility' | 'description' | 'status' | 'thumbnailId'
-  > & { master: Pick<File, 'publicUrl'> | null };
+  > & { master: Pick<File, 'publicUrl'> | null } & {
+    tags: { id: number; name: string }[];
+  };
 }) => {
   const { mutateAsync: updateVideo, isPending: isUpdatingVideo } =
     patchMedia.useMutation();
@@ -51,7 +54,8 @@ export const EditVideoForm = ({
       title: video.title,
       description: video.description ?? '',
       visibility: video.visibility,
-      thumbnailImageId: video.thumbnailId ?? undefined
+      thumbnailImageId: video.thumbnailId ?? undefined,
+      tags: video.tags.map((tag) => ({ value: tag.id, label: tag.name }))
     },
     disabled: isUpdatingVideo
   });
@@ -67,7 +71,10 @@ export const EditVideoForm = ({
     try {
       await updateVideo({
         mediaId: video.id,
-        updateVideoDto: values
+        updateVideoDto: {
+          ...values,
+          tags: values.tags?.map((tag) => tag.value)
+        }
       });
       toast({
         description: 'Video updated'
@@ -155,6 +162,7 @@ export const EditVideoForm = ({
                 mediaId={video.id}
                 ready={
                   <>
+                    <VideoEditorFieldTags form={form} />
                     <VideoEditorFieldVisibility form={form} />
                     <VideoEditorFieldThumbnail
                       form={form}

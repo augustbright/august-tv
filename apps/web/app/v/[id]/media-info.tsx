@@ -4,6 +4,7 @@ import { getMediaById } from '@/api/media';
 import { AuthorPicture } from '@/components/AuthorPicture';
 import { Query } from '@/components/Query';
 import { SubscribeButton } from '@/components/subscribe-button';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUser } from '@/hooks/useUser';
@@ -71,6 +72,17 @@ export const MediaInfo = ({ mediaId }: { mediaId: string }) => {
                     </span>
                   ))}
                 </p>
+                <div className='flex gap-2 flex-wrap'>
+                  {media.tags.map((tag) => (
+                    <Badge
+                      key={tag.id}
+                      variant='secondary'
+                      onClick={() => console.log(tag)}
+                    >
+                      {tag.name}
+                    </Badge>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </>

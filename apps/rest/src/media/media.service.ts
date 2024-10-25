@@ -23,7 +23,7 @@ export class MediaService implements IWithPermissions {
     private readonly imageService: ImageService,
     private readonly dbFileService: DbFileService,
     private readonly userService: UserService,
-  ) { }
+  ) {}
 
   async getPermissionsForUser(
     id: string,
@@ -83,6 +83,12 @@ export class MediaService implements IWithPermissions {
             userId: userId ?? 'NO_USER',
           },
         },
+        tags: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
   }
@@ -114,8 +120,8 @@ export class MediaService implements IWithPermissions {
               },
             },
           },
-        }
-      }
+        },
+      },
     });
   }
 
@@ -127,7 +133,7 @@ export class MediaService implements IWithPermissions {
         where: {
           video: {
             id,
-          }
+          },
         },
         select: {
           images: {
@@ -146,18 +152,28 @@ export class MediaService implements IWithPermissions {
         description: data.description,
         title: data.title,
         visibility: data.visibility,
-        ...(thumbnailId ? {
-          thumbnail: {
-            connect: {
-              id: thumbnailId,
-            },
-          }
-        } : {}),
+        ...(thumbnailId
+          ? {
+              thumbnail: {
+                connect: {
+                  id: thumbnailId,
+                },
+              },
+            }
+          : {}),
+        tags: {
+          connect: (data.tags ?? []).map((tag) => ({ id: tag })),
+        },
       },
     });
   }
 
-  async uploadThumbnail({ videoId, crop, file, userId }: {
+  async uploadThumbnail({
+    videoId,
+    crop,
+    file,
+    userId,
+  }: {
     videoId: string;
     crop: ImageCropDto;
     userId: string;
@@ -167,19 +183,21 @@ export class MediaService implements IWithPermissions {
       where: { id: videoId },
       select: {
         customThumbnailSetId: true,
-      }
+      },
     });
 
     if (!customThumbnailSetId) {
-      customThumbnailSetId = (await this.prisma.imageSet.create({
-        data: {
-          videoWithCustomThumbnails: {
-            connect: {
-              id: videoId,
+      customThumbnailSetId = (
+        await this.prisma.imageSet.create({
+          data: {
+            videoWithCustomThumbnails: {
+              connect: {
+                id: videoId,
+              },
             },
           },
-        },
-      })).id;
+        })
+      ).id;
     }
 
     const newImage = await this.imageService.upload(file.filename, {

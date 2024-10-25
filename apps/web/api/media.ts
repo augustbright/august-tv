@@ -1,19 +1,19 @@
 import { TMediaEndpointResult } from '@august-tv/generated-types';
-import { PatchMediaDto, ImageCropDto } from '@august-tv/generated-types/dto';
+import { ImageCropDto, PatchMediaDto } from '@august-tv/generated-types/dto';
 
 import { createMutableEndpoint } from './createMutableEndpoint';
 import { createReadableEndpoint } from './createReadableEndpoint';
 import { validateMediaFile, validatePictureFile } from './validators';
 
 export const getMediaById = createReadableEndpoint<
-  { mediaId: string; },
+  { mediaId: string },
   TMediaEndpointResult<'getMediaById'>
 >({
   prepareUrl: ({ mediaId }) => `/media/${mediaId}`
 });
 
 export const deleteMedia = createMutableEndpoint<
-  { mediaId: string; },
+  { mediaId: string },
   TMediaEndpointResult<'deleteMedia'>
 >({
   method: 'delete',
@@ -38,7 +38,7 @@ export const postMediaRate = createMutableEndpoint<
   }
 });
 
-export const postMediaUpload = createMutableEndpoint<File, { id: string; }>({
+export const postMediaUpload = createMutableEndpoint<File, { id: string }>({
   method: 'post',
   prepareUrl: () => '/media/upload',
   prepareBody: (file) => {
@@ -64,17 +64,19 @@ export const getMediaMy = createReadableEndpoint<
 });
 
 export const getMediaThumbnails = createReadableEndpoint<
-  { mediaId: string; },
-  TMediaEndpointResult<'getThumbnails'>>({
-    prepareUrl: ({ mediaId }) => `/media/${mediaId}/thumbnails`
-  });
+  { mediaId: string },
+  TMediaEndpointResult<'getThumbnails'>
+>({
+  prepareUrl: ({ mediaId }) => `/media/${mediaId}/thumbnails`
+});
 
 export const postMediaUploadThumbnail = createMutableEndpoint<
   {
     mediaId: string;
     file: File;
     crop: ImageCropDto;
-  }, TMediaEndpointResult<'uploadThumbnail'>
+  },
+  TMediaEndpointResult<'uploadThumbnail'>
 >({
   prepareUrl: ({ mediaId }) => `/media/${mediaId}/uploadThumbnail`,
   method: 'post',
@@ -94,12 +96,12 @@ export const postMediaUploadThumbnail = createMutableEndpoint<
 
     return formData;
   },
-  onSuccess(queryClient, params, data) {
+  onSuccess(queryClient, params) {
     queryClient.invalidateQueries({ queryKey: ['media', 'my'] });
     queryClient.invalidateQueries({
       queryKey: ['media', params.mediaId]
     });
-  },
+  }
 });
 
 export const patchMedia = createMutableEndpoint<

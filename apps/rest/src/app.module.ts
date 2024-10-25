@@ -10,6 +10,7 @@ import { Reflector } from '@nestjs/core';
 import { YoutubeModule } from './youtube/youtube.module';
 import { JobsModule } from './jobs/jobs.module';
 import { HealthModule } from '@august-tv/server/modules';
+import { TagsModule } from './tags/tags.module';
 
 @Module({
   imports: [
@@ -25,6 +26,8 @@ import { HealthModule } from '@august-tv/server/modules';
         ({ prisma }) => prisma.isHealthy('postgres'),
       ],
     }),
+    TagsModule,
+    
   ],
   controllers: [AppController],
   providers: [AppService, GuardCheckService, Reflector],

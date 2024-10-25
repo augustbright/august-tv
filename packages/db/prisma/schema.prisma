@@ -89,6 +89,7 @@ model Video {
 
   title       String      @db.VarChar(255)
   description String?
+  tags        Tag[]       @relation("VideoTags")
   status      VideoStatus @default(PROCESSING)
   visibility  Visibility  @default(DRAFT)
 
@@ -117,6 +118,20 @@ model Video {
 
   @@index([authorId])
   @@map("videos")
+}
+
+model Tag {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
+
+  name    String
+  videos  Video[] @relation("VideoTags")
+  videoId String? @db.Uuid
+
+  @@map("tags")
 }
 
 model Rating {

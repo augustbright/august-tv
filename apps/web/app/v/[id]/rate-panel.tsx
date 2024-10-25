@@ -128,7 +128,12 @@ export const RatePanel = ({ mediaId }: { mediaId: string }) => {
         <div
           ref={likeEffectRef}
           className='absolute w-5 h-5 opacity-0 pointer-events-none rounded-full bg-transparent border-pink-600 border'
-        />
+        >
+          <ThumbsUp
+            fill={isLiked ? 'white' : ''}
+            className='w-6 h-6'
+          />
+        </div>
         <ThumbsUp
           fill={isLiked ? 'white' : ''}
           className='w-6 h-6 mr-3'
