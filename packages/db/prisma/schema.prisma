@@ -88,6 +88,8 @@ model Video {
   deleted     Boolean   @default(false)
 
   title       String      @db.VarChar(255)
+  category    Category?   @relation("CategoryVideos", fields: [categoryId], references: [id])
+  categoryId  Int?
   description String?
   tags        Tag[]       @relation("VideoTags")
   status      VideoStatus @default(PROCESSING)
@@ -118,6 +120,20 @@ model Video {
 
   @@index([authorId])
   @@map("videos")
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  deleted   Boolean   @default(false)
+
+  name    String
+  videos  Video[] @relation("CategoryVideos")
+  videoId String? @db.Uuid
+
+  @@map("categories")
 }
 
 model Tag {

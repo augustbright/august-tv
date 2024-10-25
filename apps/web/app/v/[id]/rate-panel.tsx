@@ -79,14 +79,12 @@ export const RatePanel = ({ mediaId }: { mediaId: string }) => {
           {
             duration: 0,
             scale: 1,
-            borderWidth: 1,
             opacity: 1
           },
           {
             easing: 'easeOutQuart',
             duration: 1000,
             scale: 6,
-            borderWidth: 4,
             opacity: 0
           }
         ]
@@ -127,11 +125,11 @@ export const RatePanel = ({ mediaId }: { mediaId: string }) => {
       >
         <div
           ref={likeEffectRef}
-          className='absolute w-5 h-5 opacity-0 pointer-events-none rounded-full bg-transparent border-pink-600 border'
+          className='absolute w-5 h-5 opacity-0 pointer-events-none bg-transparent'
         >
           <ThumbsUp
             fill={isLiked ? 'white' : ''}
-            className='w-6 h-6'
+            className='w-6 h-6 transform -translate-x-1 -translate-y-2'
           />
         </div>
         <ThumbsUp

@@ -11,6 +11,7 @@ import { YoutubeModule } from './youtube/youtube.module';
 import { JobsModule } from './jobs/jobs.module';
 import { HealthModule } from '@august-tv/server/modules';
 import { TagsModule } from './tags/tags.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TagsModule } from './tags/tags.module';
       ],
     }),
     TagsModule,
+    CategoriesModule,
     
   ],
   controllers: [AppController],

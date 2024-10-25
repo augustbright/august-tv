@@ -13,6 +13,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         sidebarItems={[
           { name: 'Dashboard', href: '/admin/dashboard', segment: 'dashboard' },
           {
+            name: 'Categories',
+            href: '/admin/categories',
+            segment: 'categories'
+          },
+          {
             name: 'Import from Youtube',
             href: '/admin/youtube',
             segment: 'youtube'
