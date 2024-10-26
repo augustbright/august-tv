@@ -1,7 +1,7 @@
+import { firebaseApp } from '@august-tv/server';
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { getAuth } from 'firebase-admin/auth';
-import { firebaseApp } from '../firebase';
 
 @Injectable()
 export class FirebaseAuthMiddleware implements NestMiddleware {

@@ -9,8 +9,8 @@ import { Server, Socket } from 'socket.io';
 import { Injectable, Logger } from '@nestjs/common';
 import * as cookie from 'cookie';
 import { getAuth } from 'firebase-admin/auth';
-import { firebaseApp } from 'src/firebase';
 import { TMessage } from '@august-tv/common/types';
+import { firebaseApp } from '@august-tv/server';
 
 export interface TUser {
   uid: string;

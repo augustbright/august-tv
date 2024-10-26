@@ -12,38 +12,6 @@ export class TranscodeController {
     private readonly kafkaEmitterService: KafkaEmitterService,
   ) {}
 
-  @EventPattern(KafkaTopics.YoutubeVideoForImportDownloaded)
-  handleYoutubeVideoForImportDownloaded(
-    payload: KafkaPayloads[KafkaTopics.YoutubeVideoForImportDownloaded],
-  ) {
-    this.transcodeService
-      .transcode({
-        inputPath: payload.path,
-        observers: payload.observers,
-        authorId: payload.authorId,
-      })
-      .then((result) => {
-        this.kafkaEmitterService.emit(
-          KafkaTopics.YoutubeVideoForImportTranscoded,
-          {
-            authorId: payload.authorId,
-            observers: payload.observers,
-            originalName: payload.originalName,
-            originalId: payload.originalId,
-            videoDescription: payload.videoDescription,
-            videoTitle: payload.videoTitle,
-            dir: result.dir,
-            storageDir: result.storageDir,
-            thumbnailOriginalSize: result.thumbnailOriginalSize,
-            publicImmediately: payload.publicImmediately,
-          },
-        );
-      })
-      .catch((error) => {
-        this.logger.error(error);
-      });
-  }
-
   @EventPattern(KafkaTopics.VideoFileUploaded)
   handleVideoFileUploaded(
     payload: KafkaPayloads[KafkaTopics.VideoFileUploaded],
@@ -61,6 +29,7 @@ export class TranscodeController {
           storageDir: result.storageDir,
           thumbnailOriginalSize: result.thumbnailOriginalSize,
           draft: payload.draft,
+          publicImmediately: payload.publicImmediately,
         });
       })
       .catch((error) => {

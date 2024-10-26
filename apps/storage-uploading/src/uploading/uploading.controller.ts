@@ -12,38 +12,6 @@ export class UploadingController {
     private readonly kafkaEmitterService: KafkaEmitterService,
   ) {}
 
-  @EventPattern(KafkaTopics.YoutubeVideoForImportTranscoded)
-  handleYoutubeVideoForImportTranscoded(
-    payload: KafkaPayloads[KafkaTopics.YoutubeVideoForImportTranscoded],
-  ) {
-    this.uploadingService
-      .uploadTranscodedVideo({
-        observers: payload.observers,
-        dir: payload.dir,
-        storageDir: payload.storageDir,
-      })
-      .then((structured) => {
-        return this.uploadingService.createDraft({
-          authorId: payload.authorId,
-          originalId: payload.originalId,
-          structured,
-          thumbnailOriginalSize: payload.thumbnailOriginalSize,
-          uploadImmediately: payload.publicImmediately,
-          videoDescription: payload.videoDescription,
-          videoTitle: payload.videoTitle,
-        });
-      })
-      .then((result) => {
-        this.kafkaEmitterService.emit(KafkaTopics.VideoIsReady, {
-          observers: payload.observers,
-          video: result.video,
-        });
-      })
-      .catch((error) => {
-        this.logger.error(error);
-      });
-  }
-
   @EventPattern(KafkaTopics.VideoFileTranscoded)
   handleVideoFileTranscoded(
     payload: KafkaPayloads[KafkaTopics.VideoFileTranscoded],
@@ -59,12 +27,14 @@ export class UploadingController {
           draft: payload.draft,
           structured,
           thumbnailOriginalSize: payload.thumbnailOriginalSize,
+          publicImmediately: payload.publicImmediately,
         });
       })
       .then((result) => {
         this.kafkaEmitterService.emit(KafkaTopics.VideoIsReady, {
           observers: payload.observers,
           video: result.video,
+          publicImmediately: payload.publicImmediately,
         });
       })
       .catch((error) => {

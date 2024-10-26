@@ -6,6 +6,8 @@ import { createServerLogger } from "./utils";
 import { iAmHealthy } from "./iAmHealthy";
 
 export { createServerLogger } from "./utils/logger";
+export { IWithPermissions, TActionType } from "./utils";
+export { firebaseApp } from "./firebase";
 
 export const gracefulShutdown = (app: INestApplication) => {
     process.on("SIGINT", async () => {

@@ -8,7 +8,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { TMediaEndpointResult } from '@august-tv/generated-types';
+import { TVideoEndpointResult } from '@august-tv/generated-types';
 import { useQueryClient } from '@tanstack/react-query';
 
 import anime from 'animejs';
@@ -53,7 +53,7 @@ export const RatePanel = ({ mediaId }: { mediaId: string }) => {
     });
   }, [mediaId, queryClient]);
 
-  const updateFromData = (data: TMediaEndpointResult<'rateMedia'>) => {
+  const updateFromData = (data: TVideoEndpointResult<'rateMedia'>) => {
     setLikesCount(data.likesCount);
     setDislikesCount(data.dislikesCount);
     if (data.type === 'LIKE') {

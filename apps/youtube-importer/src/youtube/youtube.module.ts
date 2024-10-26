@@ -7,6 +7,7 @@ import {
   KafkaEmitterModule,
   PrismaModule,
   JobsModule,
+  VideoModule,
 } from '@august-tv/server/modules';
 
 @Module({
@@ -17,6 +18,7 @@ import {
     }),
     PrismaModule,
     JobsModule,
+    VideoModule,
   ],
   controllers: [YoutubeController],
   providers: [YoutubeService, VideoDownloaderService],

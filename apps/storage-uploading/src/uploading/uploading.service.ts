@@ -195,6 +195,7 @@ export class UploadingService {
     structured,
     draft,
     thumbnailOriginalSize,
+    publicImmediately,
   }: {
     structured: TStructuredFiles;
     draft: Video;
@@ -202,6 +203,7 @@ export class UploadingService {
       width: number;
       height: number;
     };
+    publicImmediately: boolean;
   }) {
     await this.prisma.fileSet.update({
       where: {
@@ -240,6 +242,7 @@ export class UploadingService {
       },
       data: {
         status: 'READY',
+        visibility: publicImmediately ? 'PUBLIC' : 'DRAFT',
         thumbnail: {
           connect: {
             id: dbThumbnails[0].id,

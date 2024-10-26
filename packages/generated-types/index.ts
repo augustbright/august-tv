@@ -1,11 +1,11 @@
 import { UserController } from "./rest/user/user.controller.js";
 import { FeedController } from "./rest/feed/feed.controller.js";
 import { JobsController } from "./rest/jobs/jobs.controller.js";
-import { MediaController } from "./rest/media/media.controller.js";
 import { SocketsController } from "./rest/sockets/sockets.controller.js";
 import { YoutubeController } from "./rest/youtube/youtube.controller.js";
 import { TagsController } from "./rest/tags/tags.controller.js";
 import { CategoriesController } from "./rest/categories/categories.controller.js";
+import { VideoController } from "./rest/video/video.controller.js";
 
 export {
     YoutubeImportRequestDto,
@@ -34,8 +34,8 @@ export type TFeedEndpointResult<E extends keyof FeedController> =
 export type TJobsEndpointResult<E extends keyof JobsController> =
     GetEndpointResult<typeof JobsController, E>;
 
-export type TMediaEndpointResult<E extends keyof MediaController> =
-    GetEndpointResult<typeof MediaController, E>;
+export type TVideoEndpointResult<E extends keyof VideoController> =
+    GetEndpointResult<typeof VideoController, E>;
 
 export type TSocketsEndpointResult<E extends keyof SocketsController> =
     GetEndpointResult<typeof SocketsController, E>;

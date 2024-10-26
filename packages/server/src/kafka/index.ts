@@ -5,8 +5,6 @@ import { Job, Video } from "@prisma/client";
 export enum KafkaTopics {
     YouTubeImportRequested = "youtube-import-requested",
     JobsStatusUpdated = "job-status-updated",
-    YoutubeVideoForImportDownloaded = "youtube-video-for-import-downloaded",
-    YoutubeVideoForImportTranscoded = "youtube-video-for-import-transcoded",
     VideoFileUploaded = "video-file-uploaded",
     VideoFileTranscoded = "video-file-transcoded",
     VideoIsReady = "video-is-ready",
@@ -19,32 +17,11 @@ export type KafkaPayloads = {
         action: TJobAction;
         job: Job;
     };
-    [KafkaTopics.YoutubeVideoForImportDownloaded]: {
-        observers: string[];
-        path: string;
-        originalName: string;
-        originalId: string;
-        authorId: string;
-        videoTitle: string;
-        videoDescription: string;
-        publicImmediately: boolean;
-    };
-    [KafkaTopics.YoutubeVideoForImportTranscoded]: {
-        observers: string[];
-        dir: string;
-        storageDir: string;
-        thumbnailOriginalSize: { width: number; height: number };
-        originalName: string;
-        originalId: string;
-        authorId: string;
-        videoTitle: string;
-        videoDescription: string;
-        publicImmediately: boolean;
-    };
     [KafkaTopics.VideoFileUploaded]: {
         observers: string[];
         path: string;
         draft: Video;
+        publicImmediately: boolean;
     };
     [KafkaTopics.VideoFileTranscoded]: {
         observers: string[];
@@ -52,9 +29,11 @@ export type KafkaPayloads = {
         storageDir: string;
         thumbnailOriginalSize: { width: number; height: number };
         draft: Video;
+        publicImmediately: boolean;
     };
     [KafkaTopics.VideoIsReady]: {
         observers: string[];
         video: Video;
+        publicImmediately: boolean;
     };
 };

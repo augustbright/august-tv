@@ -1,25 +1,30 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
-import { MediaModule } from './media/media.module';
 import { SocketsModule } from './sockets/sockets.module';
 import { FeedModule } from './feed/feed.module';
 import { GuardCheckService } from './common/guard-check.service';
 import { Reflector } from '@nestjs/core';
-import { YoutubeModule } from './youtube/youtube.module';
-import { JobsModule } from './jobs/jobs.module';
-import { HealthModule } from '@august-tv/server/modules';
+import {
+  HealthModule,
+  JobsModule,
+  KafkaEmitterModule,
+  UserModule,
+  VideoModule,
+} from '@august-tv/server/modules';
 import { TagsModule } from './tags/tags.module';
 import { CategoriesModule } from './categories/categories.module';
+import { UserController } from './user/user.controller';
+import { VideoController } from './video/video.controller';
+import { YoutubeController } from './youtube/youtube.controller';
+import { JobsController } from './jobs/jobs.controller';
 
 @Module({
   imports: [
     UserModule,
-    MediaModule,
+    VideoModule,
     SocketsModule,
     FeedModule,
-    YoutubeModule,
     JobsModule,
     HealthModule.forRoot({
       healthIndicators: [
@@ -29,9 +34,16 @@ import { CategoriesModule } from './categories/categories.module';
     }),
     TagsModule,
     CategoriesModule,
-    
+    KafkaEmitterModule.forRoot({
+      clientId: 'rest',
+    }),
   ],
-  controllers: [AppController],
-  providers: [AppService, GuardCheckService, Reflector],
+  controllers: [
+    AppController,
+    UserController,
+    VideoController,
+    YoutubeController,
+  ],
+  providers: [AppService, GuardCheckService, Reflector, JobsController],
 })
 export class AppModule {}

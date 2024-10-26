@@ -6,7 +6,7 @@ export class FeedService {
   constructor(private readonly prismaService: PrismaService) {}
   async getLatest() {
     const result = await this.prismaService.video.findMany({
-      take: 10,
+      take: 40,
       include: {
         thumbnail: {
           select: {
@@ -66,7 +66,7 @@ export class FeedService {
     const subIds = subscriptions.map((sub) => sub.id);
 
     const result = await this.prismaService.video.findMany({
-      take: 10,
+      take: 40,
       include: {
         thumbnail: {
           select: {

@@ -10,7 +10,6 @@ import {
   Get,
   Delete,
 } from '@nestjs/common';
-import { MediaService } from './media.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { UPLOAD_PATH } from '@august-tv/server/fs-utils';
@@ -20,13 +19,13 @@ import { Guard } from '@august-tv/server/utils';
 import { User } from 'src/user/user.decorator';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { ImageCropDto, PatchMediaDto } from '@august-tv/server/dto';
-import { KafkaEmitterService } from '@august-tv/server/modules';
+import { KafkaEmitterService, VideoService } from '@august-tv/server/modules';
 import { KafkaTopics } from '@august-tv/server/kafka';
 
-@Controller('media')
-export class MediaController {
+@Controller('video')
+export class VideoController {
   constructor(
-    private readonly mediaService: MediaService,
+    private readonly mediaService: VideoService,
     private readonly kafkaEmitterService: KafkaEmitterService,
   ) {}
 
@@ -71,6 +70,7 @@ export class MediaController {
       observers: [user.uid],
       path: file.path,
       draft,
+      publicImmediately: false,
     });
 
     return draft;

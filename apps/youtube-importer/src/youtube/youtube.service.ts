@@ -10,12 +10,12 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { times } from 'lodash';
 import { VideoDownloaderService } from './video-downloader.service';
-import * as path from 'path';
 import { YoutubeImportRequestDto } from '@august-tv/server/dto';
 import {
   JobsService,
   PrismaService,
   KafkaEmitterService,
+  VideoService,
 } from '@august-tv/server/modules';
 import { KafkaTopics } from '@august-tv/server/kafka';
 
@@ -34,6 +34,7 @@ export class YoutubeService {
     private readonly jobsService: JobsService,
     private readonly prismaService: PrismaService,
     private readonly kafkaEmitterService: KafkaEmitterService,
+    private readonly videoService: VideoService,
   ) {
     this.logger.log('YouTube service initialized');
   }
@@ -41,7 +42,6 @@ export class YoutubeService {
   async importFromYoutube(params: YoutubeImportRequestDto) {
     const numberOfVideos = params.numberOfVideos ?? 1;
 
-    console.log('Importing from YouTube');
     this.logger.log(`Importing ${numberOfVideos} videos from YouTube`);
     await this.jobsService.wrap(
       {
@@ -83,20 +83,38 @@ export class YoutubeService {
     }
     if (!video) throw new NotFoundException('Video not found');
 
+    const draft = await this.videoService.createDraft({
+      author: {
+        connect: {
+          id: params.authorId,
+        },
+      },
+      fileSet: {
+        create: {},
+      },
+      thumbnailSet: {
+        create: {},
+      },
+      title: video.snippet.title,
+      description: video.snippet.description,
+      imported: {
+        create: {
+          originalId: video.id,
+          source: 'youtube',
+        },
+      },
+    });
+
     const { filePath } = await this.videoDownloaderService.downloadVideo(
       video.id,
       {
         observers: params.observers,
       },
     );
-    this.kafkaEmitterService.emit(KafkaTopics.YoutubeVideoForImportDownloaded, {
-      authorId: params.authorId,
+    this.kafkaEmitterService.emit(KafkaTopics.VideoFileUploaded, {
       observers: params.observers,
-      originalName: path.basename(filePath as string),
-      originalId: video.id,
       path: filePath as string,
-      videoTitle: video.snippet.title,
-      videoDescription: video.snippet.description,
+      draft,
       publicImmediately: !!params.publicImmediately,
     });
   }

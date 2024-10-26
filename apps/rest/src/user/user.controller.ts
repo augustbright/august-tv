@@ -11,8 +11,6 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { DecodedIdToken, getAuth } from 'firebase-admin/auth';
-import { firebaseApp } from '../firebase';
-import { UserService } from './user.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { randomUUID } from 'crypto';
@@ -20,15 +18,16 @@ import { UPLOAD_PATH } from '@august-tv/server/fs-utils';
 import * as path from 'path';
 import { Guard } from '@august-tv/server/utils';
 import { User } from './user.decorator';
-import { JobsService } from '@august-tv/server/modules';
+import { JobsService, UserService } from '@august-tv/server/modules';
 import { ImageCropDto } from '@august-tv/server/dto';
+import { firebaseApp } from '@august-tv/server';
 
 @Controller('user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly jobsService: JobsService,
-  ) { }
+  ) {}
   private readonly expiresIn = 1000 * 60 * 60 * 24 * 14;
 
   @Post('sessionLogin')
@@ -104,7 +103,11 @@ export class UserController {
     @Body() body: ImageCropDto,
     @User({ required: true }) user: DecodedIdToken,
   ) {
-    const image = await this.userService.uploadProfilePicture(user.uid, file, body);
+    const image = await this.userService.uploadProfilePicture(
+      user.uid,
+      file,
+      body,
+    );
     return image;
   }
 
@@ -112,7 +115,7 @@ export class UserController {
   @Guard.scope('user')
   async updateProfilePicture(
     @User({ required: true }) user: DecodedIdToken,
-    @Body() body: { imageId: string; crop: ImageCropDto; },
+    @Body() body: { imageId: string; crop: ImageCropDto },
   ) {
     const image = await this.userService.updateProfilePicture(
       user.uid,
@@ -148,7 +151,7 @@ export class UserController {
   @Guard.scope('user')
   async subscribe(
     @User({ required: true }) user: DecodedIdToken,
-    @Body() body: { authorId: string; },
+    @Body() body: { authorId: string },
   ) {
     await this.userService.subscribe(user.uid, body.authorId);
     return {};
@@ -158,7 +161,7 @@ export class UserController {
   @Guard.scope('user')
   async unsubscribe(
     @User({ required: true }) user: DecodedIdToken,
-    @Body() body: { authorId: string; },
+    @Body() body: { authorId: string },
   ) {
     await this.userService.unsubscribe(user.uid, body.authorId);
     return {};
@@ -174,7 +177,7 @@ export class UserController {
   @Guard.scope('user')
   async unobserveJob(
     @User({ required: true }) user: DecodedIdToken,
-    @Body() body: { jobId: string; },
+    @Body() body: { jobId: string },
   ) {
     return this.jobsService.unobserveJob(body.jobId, user.uid);
   }

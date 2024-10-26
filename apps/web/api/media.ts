@@ -1,4 +1,4 @@
-import { TMediaEndpointResult } from '@august-tv/generated-types';
+import { TVideoEndpointResult } from '@august-tv/generated-types';
 import { ImageCropDto, PatchMediaDto } from '@august-tv/generated-types/dto';
 
 import { createMutableEndpoint } from './createMutableEndpoint';
@@ -7,19 +7,19 @@ import { validateMediaFile, validatePictureFile } from './validators';
 
 export const getMediaById = createReadableEndpoint<
   { mediaId: string },
-  TMediaEndpointResult<'getMediaById'>
+  TVideoEndpointResult<'getMediaById'>
 >({
-  prepareUrl: ({ mediaId }) => `/media/${mediaId}`
+  prepareUrl: ({ mediaId }) => `/video/${mediaId}`
 });
 
 export const deleteMedia = createMutableEndpoint<
   { mediaId: string },
-  TMediaEndpointResult<'deleteMedia'>
+  TVideoEndpointResult<'deleteMedia'>
 >({
   method: 'delete',
-  prepareUrl: ({ mediaId }) => `/media/${mediaId}`,
+  prepareUrl: ({ mediaId }) => `/video/${mediaId}`,
   onSuccess(queryClient) {
-    queryClient.invalidateQueries({ queryKey: ['media', 'my'] });
+    queryClient.invalidateQueries({ queryKey: ['video', 'my'] });
   }
 });
 
@@ -28,19 +28,19 @@ export const postMediaRate = createMutableEndpoint<
     mediaId: string;
     type: string | null;
   },
-  TMediaEndpointResult<'rateMedia'>
+  TVideoEndpointResult<'rateMedia'>
 >({
   method: 'post',
-  prepareUrl: ({ mediaId }) => `/media/rate/${mediaId}`,
+  prepareUrl: ({ mediaId }) => `/video/rate/${mediaId}`,
   prepareBody: ({ type }) => ({ type }),
   onSuccess(queryClient) {
-    queryClient.invalidateQueries({ queryKey: ['media', 'my'] });
+    queryClient.invalidateQueries({ queryKey: ['video', 'my'] });
   }
 });
 
 export const postMediaUpload = createMutableEndpoint<File, { id: string }>({
   method: 'post',
-  prepareUrl: () => '/media/upload',
+  prepareUrl: () => '/video/upload',
   prepareBody: (file) => {
     const error = validateMediaFile(file);
     if (error) {
@@ -52,22 +52,22 @@ export const postMediaUpload = createMutableEndpoint<File, { id: string }>({
     return formData;
   },
   onSuccess(queryClient) {
-    queryClient.invalidateQueries({ queryKey: ['media', 'my'] });
+    queryClient.invalidateQueries({ queryKey: ['video', 'my'] });
   }
 });
 
 export const getMediaMy = createReadableEndpoint<
   void,
-  TMediaEndpointResult<'getMyMedia'>
+  TVideoEndpointResult<'getMyMedia'>
 >({
-  prepareUrl: () => '/media/my'
+  prepareUrl: () => '/video/my'
 });
 
 export const getMediaThumbnails = createReadableEndpoint<
   { mediaId: string },
-  TMediaEndpointResult<'getThumbnails'>
+  TVideoEndpointResult<'getThumbnails'>
 >({
-  prepareUrl: ({ mediaId }) => `/media/${mediaId}/thumbnails`
+  prepareUrl: ({ mediaId }) => `/video/${mediaId}/thumbnails`
 });
 
 export const postMediaUploadThumbnail = createMutableEndpoint<
@@ -76,9 +76,9 @@ export const postMediaUploadThumbnail = createMutableEndpoint<
     file: File;
     crop: ImageCropDto;
   },
-  TMediaEndpointResult<'uploadThumbnail'>
+  TVideoEndpointResult<'uploadThumbnail'>
 >({
-  prepareUrl: ({ mediaId }) => `/media/${mediaId}/uploadThumbnail`,
+  prepareUrl: ({ mediaId }) => `/video/${mediaId}/uploadThumbnail`,
   method: 'post',
   prepareBody: ({ file, crop }) => {
     const error = validatePictureFile(file);
@@ -97,9 +97,9 @@ export const postMediaUploadThumbnail = createMutableEndpoint<
     return formData;
   },
   onSuccess(queryClient, params) {
-    queryClient.invalidateQueries({ queryKey: ['media', 'my'] });
+    queryClient.invalidateQueries({ queryKey: ['video', 'my'] });
     queryClient.invalidateQueries({
-      queryKey: ['media', params.mediaId]
+      queryKey: ['video', params.mediaId]
     });
   }
 });
@@ -109,15 +109,15 @@ export const patchMedia = createMutableEndpoint<
     mediaId: string;
     updateVideoDto: PatchMediaDto;
   },
-  TMediaEndpointResult<'patchMedia'>
+  TVideoEndpointResult<'patchMedia'>
 >({
   method: 'patch',
-  prepareUrl: ({ mediaId }) => `/media/${mediaId}`,
+  prepareUrl: ({ mediaId }) => `/video/${mediaId}`,
   prepareBody: ({ updateVideoDto }) => updateVideoDto,
   onSuccess(queryClient, { mediaId }) {
-    queryClient.invalidateQueries({ queryKey: ['media', 'my'] });
+    queryClient.invalidateQueries({ queryKey: ['video', 'my'] });
     queryClient.invalidateQueries({
-      queryKey: ['media', mediaId]
+      queryKey: ['video', mediaId]
     });
   }
 });

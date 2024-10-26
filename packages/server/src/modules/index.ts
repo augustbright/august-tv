@@ -18,3 +18,9 @@ export { StorageModule } from "./storage/storage.module";
 export { StorageService } from "./storage/storage.service";
 
 export { HealthModule } from "./health/health.module";
+
+export { UserModule } from "./user/user.module";
+export { UserService } from "./user/user.service";
+
+export { VideoModule } from "./video/video.module";
+export { VideoService } from "./video/video.service";
