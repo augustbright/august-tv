@@ -1,7 +1,7 @@
 import { AuthorPicture } from '@/components/AuthorPicture';
 import { ThumbnailPicture } from '@/components/thumbnail-picture';
 
-import moment from 'moment';
+import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 
 export const VideoThumbnail = ({
@@ -48,7 +48,7 @@ export const VideoThumbnail = ({
           </h3>
           <p className='text-sm'>{video.author.nickname}</p>
           <p className='text-sm flex gap-2'>
-            {moment(video.createdAt).format('MMMM Do, YYYY')}
+            {formatDistanceToNow(new Date(video.createdAt))} ago
             {video.category && (
               <span className='text-muted-foreground'>
                 {video.category.name}

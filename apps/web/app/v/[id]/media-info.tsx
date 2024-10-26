@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUser } from '@/hooks/useUser';
 
+import { formatDistanceToNow } from 'date-fns';
 import { ChartNoAxesCombined, Edit } from 'lucide-react';
-import moment from 'moment';
 import Link from 'next/link';
 
 import { RatePanel } from './rate-panel';
@@ -60,7 +60,7 @@ export const MediaInfo = ({ mediaId }: { mediaId: string }) => {
             <Card x-chunk='dashboard-01-chunk-0'>
               <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
                 <CardTitle className='flex items-center text-sm font-medium gap-2'>
-                  {moment(media.createdAt).format('MMMM Do, YYYY')}
+                  {formatDistanceToNow(new Date(media.createdAt))} ago
                   {media.category && (
                     <span className='text-muted-foreground'>
                       {media.category.name}
