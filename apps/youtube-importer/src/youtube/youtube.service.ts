@@ -19,7 +19,7 @@ import {
 } from '@august-tv/server/modules';
 import { KafkaTopics } from '@august-tv/server/kafka';
 
-const YOUTUBE_CC_CHANNEL_ID = 'UCTwECeGqMZee77BjdoYtI2Q';
+// const YOUTUBE_CC_CHANNEL_ID = 'UCTwECeGqMZee77BjdoYtI2Q';
 
 @Injectable()
 export class YoutubeService {
@@ -76,8 +76,9 @@ export class YoutubeService {
   ) {
     let video: any = null;
     if (!params.videoId) {
-      const channelId = params.channelId ?? YOUTUBE_CC_CHANNEL_ID;
-      video = await this.getRandomSmallVideoFromChannel(channelId);
+      video = await this.getOneRandomCCVideoToImport({
+        channelId: params.channelId,
+      });
     } else {
       video = (await this.getVideoDetails([params.videoId])).at(0);
     }
@@ -119,11 +120,27 @@ export class YoutubeService {
     });
   }
 
-  private async getRandomVideoFromChannel(
-    channelId: string,
-  ): Promise<string[]> {
+  private async getRandomCCVideos({
+    channelId,
+    regionCode,
+  }: {
+    channelId?: string;
+    regionCode?: string;
+  }) {
     try {
-      const url = `${this.API_URL}/search?key=${this.API_KEY}&channelId=${channelId}&part=snippet,id&order=viewCount&maxResults=300`;
+      const url = [
+        `${this.API_URL}/search?part=snippet`,
+        `maxResults=100`,
+        `order=viewCount`,
+        `regionCode=${regionCode ?? 'US'}`,
+        `type=video`,
+        channelId ? `channelId=${channelId}` : '',
+        `videoDuration=short`,
+        `videoLicense=creativeCommon`,
+        `key=${this.API_KEY}`,
+      ]
+        .filter(Boolean)
+        .join('&');
 
       const response = await firstValueFrom(this.httpService.get(url));
       const videos = response.data.items.filter((item) => item.id.videoId); // Only include videos
@@ -140,10 +157,13 @@ export class YoutubeService {
     }
   }
 
-  private async getRandomSmallVideoFromChannel(channelId: string) {
+  private async getOneRandomCCVideoToImport(params: {
+    channelId?: string;
+    regionCode?: string;
+  }) {
     try {
       // Step 1: Get video IDs from the channel
-      const videoIds = await this.getRandomVideoFromChannel(channelId);
+      const videoIds = await this.getRandomCCVideos(params);
 
       // Step 2: Get video details for those IDs
       const videoDetails = await this.getVideoDetails(videoIds);

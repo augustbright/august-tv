@@ -16,7 +16,7 @@ export class TranscodeController {
   handleVideoFileUploaded(
     payload: KafkaPayloads[KafkaTopics.VideoFileUploaded],
   ) {
-    this.transcodeService
+    return this.transcodeService
       .transcode({
         inputPath: payload.path,
         observers: payload.observers,
