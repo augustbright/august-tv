@@ -16,10 +16,19 @@ import {
   PrismaService,
   KafkaEmitterService,
   VideoService,
+  CategoriesService,
 } from '@august-tv/server/modules';
 import { KafkaTopics } from '@august-tv/server/kafka';
+import { TagsService } from '@august-tv/server/modules';
 
 // const YOUTUBE_CC_CHANNEL_ID = 'UCTwECeGqMZee77BjdoYtI2Q';
+
+type TYoutubeCategory = {
+  id: string;
+  snippet: {
+    title: string;
+  };
+};
 
 @Injectable()
 export class YoutubeService {
@@ -28,6 +37,8 @@ export class YoutubeService {
 
   private readonly logger: Logger = new Logger(YoutubeService.name);
 
+  private youtubeCategories: TYoutubeCategory[] = [];
+
   constructor(
     private readonly httpService: HttpService,
     private readonly videoDownloaderService: VideoDownloaderService,
@@ -35,8 +46,15 @@ export class YoutubeService {
     private readonly prismaService: PrismaService,
     private readonly kafkaEmitterService: KafkaEmitterService,
     private readonly videoService: VideoService,
+    private readonly categoriesService: CategoriesService,
+    private readonly tagsService: TagsService,
   ) {
     this.logger.log('YouTube service initialized');
+  }
+
+  async onModuleInit() {
+    this.youtubeCategories = await this.getYoutubeCategories();
+    this.logger.log('YouTube categories fetched');
   }
 
   async importFromYoutube(params: YoutubeImportRequestDto) {
@@ -57,10 +75,10 @@ export class YoutubeService {
             videoId: params.videoId,
           });
         } else {
-          const jobsRemaining = params.numberOfVideos ?? 1;
+          const jobsRemaining = numberOfVideos;
 
           job.stage(
-            `${params.numberOfVideos - jobsRemaining}/${params.numberOfVideos} videos imported`,
+            `${numberOfVideos - jobsRemaining}/${numberOfVideos} videos imported`,
           );
 
           await times(params.numberOfVideos ?? 1, async () => {
@@ -69,6 +87,55 @@ export class YoutubeService {
         }
       },
     );
+  }
+
+  private async getYoutubeCategories() {
+    try {
+      const url = `${this.API_URL}/videoCategories?part=snippet&regionCode=US&key=${this.API_KEY}`;
+
+      const response = await firstValueFrom(this.httpService.get(url));
+
+      return response.data.items;
+    } catch (error) {
+      this.logger.error('Failed to fetch video categories', error);
+      return [];
+    }
+  }
+
+  private async getCategoryInfo(
+    youtubeCategoryId: string,
+  ): Promise<TYoutubeCategory | null> {
+    try {
+      const category = this.youtubeCategories.find(
+        (category) => category.id === youtubeCategoryId,
+      );
+
+      if (!category) {
+        /*
+          GET https://youtube.googleapis.com/youtube/v3/videoCategories?part=snippet&id=1&key=[YOUR_API_KEY] HTTP/1.1
+        */
+        const url = `${this.API_URL}/videoCategories?part=snippet&id=${youtubeCategoryId}&key=${this.API_KEY}`;
+        const response = await firstValueFrom(this.httpService.get(url));
+        return response.data.items[0];
+      }
+
+      return category;
+    } catch {
+      return null;
+    }
+  }
+
+  private async getInternalCategory(youtubeCategoryId: string) {
+    const category = await this.getCategoryInfo(youtubeCategoryId);
+    if (!category) {
+      return null;
+    }
+
+    const internalCategory = await this.categoriesService.findOrCreateCategory({
+      name: category.snippet.title,
+    });
+
+    return internalCategory;
   }
 
   private async importOneVideoFromYoutube(
@@ -83,6 +150,15 @@ export class YoutubeService {
       video = (await this.getVideoDetails([params.videoId])).at(0);
     }
     if (!video) throw new NotFoundException('Video not found');
+
+    const thumbnailInfo = video.snippet.thumbnails.standard; // ?
+    const tagsInfo = video.snippet.tags ?? []; // ?
+    const youtubeCategoryId = video.snippet.categoryId; // ?
+    const channelId = video.snippet.channelId; // ?
+    const channelTitle = video.snippet.channelTitle; // ?
+    const internalCategory = await this.getInternalCategory(youtubeCategoryId);
+
+    const tags = await this.tagsService.createOrFindTags({ tags: tagsInfo });
 
     const draft = await this.videoService.createDraft({
       author: {
@@ -102,8 +178,16 @@ export class YoutubeService {
         create: {
           originalId: video.id,
           source: 'youtube',
+          channelId,
+          channelName: channelTitle,
         },
       },
+      tags: {
+        connect: tags.map((tag) => ({ id: tag.id })),
+      },
+      ...(internalCategory
+        ? { category: { connect: { id: internalCategory.id } } }
+        : {}),
     });
 
     const { filePath } = await this.videoDownloaderService.downloadVideo(
@@ -116,6 +200,7 @@ export class YoutubeService {
       observers: params.observers,
       path: filePath as string,
       draft,
+      thumbnailUrl: thumbnailInfo?.url,
       publicImmediately: !!params.publicImmediately,
     });
   }

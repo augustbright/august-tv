@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { randomUUID } from "crypto";
 import sharp from "sharp";
 import * as path from "path";
@@ -31,6 +31,7 @@ type TSizeFileMap = Record<TImageSizeWithOriginal, File>;
 
 @Injectable()
 export class ImageService {
+    private readonly logger = new Logger(ImageService.name);
     constructor(
         private readonly storageService: StorageService,
         private readonly prisma: PrismaService,
@@ -219,6 +220,17 @@ export class ImageService {
         ]);
 
         return deletedImage;
+    }
+
+    async downloadByUrl(url: string, outputPath: string) {
+        const response = await fetch(url);
+        if (!response.ok) {
+            this.logger.error(`Failed to download image from ${url}`);
+            throw new Error(`Failed to download image from ${url}`);
+        }
+
+        const buffer = await response.arrayBuffer();
+        await fs.writeFile(outputPath, Buffer.from(buffer));
     }
 
     private async uploadToStorage({

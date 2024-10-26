@@ -15,14 +15,56 @@ import Link from 'next/link';
 
 import { RatePanel } from './rate-panel';
 
+const urlRegex =
+  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
+
+function parseTextWithLinks(text: string) {
+  const matches = [...text.matchAll(urlRegex)];
+
+  const elements = [];
+  let lastIndex = 0;
+
+  matches.forEach((match, index) => {
+    const url = match[0];
+    const startIndex = match.index;
+
+    if (startIndex > lastIndex) {
+      elements.push(text.slice(lastIndex, startIndex));
+    }
+
+    elements.push(
+      <a
+        key={index}
+        href={url}
+        target='_blank'
+        className='font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline'
+        rel='noopener noreferrer'
+      >
+        {url}
+      </a>
+    );
+
+    lastIndex = startIndex + url.length;
+  });
+
+  if (lastIndex < text.length) {
+    elements.push(text.slice(lastIndex));
+  }
+
+  return elements;
+}
+
+function TextWithLinks({ text }: { text: string }) {
+  return <>{parseTextWithLinks(text)}</>;
+}
+
 export const MediaInfo = ({ mediaId }: { mediaId: string }) => {
   const { current } = useUser();
   return (
     <div className='flex flex-col gap-2'>
       <Query
         query={getMediaById.query({ mediaId })}
-        loading={Query.LOADING.ROW}
-        error={Query.ERROR.ALERT}
+        loading={Query.LOADING.NONE}
       >
         {({ data: media }) => (
           <>
@@ -68,11 +110,11 @@ export const MediaInfo = ({ mediaId }: { mediaId: string }) => {
                   )}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className='flex flex-col gap-4'>
                 <p className='text-xs text-muted-foreground'>
                   {media.description?.split('\n').map((line, i) => (
                     <span key={i}>
-                      {line}
+                      <TextWithLinks text={line} />
                       <br />
                     </span>
                   ))}

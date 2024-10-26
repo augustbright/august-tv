@@ -42,6 +42,7 @@ type TParams = {
   observers: string[];
   inputPath: string;
   authorId: string;
+  thumbnailUrl?: string;
 };
 
 @Injectable()
@@ -139,18 +140,29 @@ export class TranscodeService {
           }),
         );
 
-        // Generate thumbnails
-        await new Promise((resolve, reject) => {
-          ffmpeg(params.inputPath)
-            .on('end', () => resolve(null))
-            .on('error', (err: Error) => reject(err))
-            .screenshots({
-              count: thumbnailsCount,
-              folder: thumbnailOutputDir,
-              filename: `thumbnail.png`,
-              size: '1280x720',
-            });
-        });
+        if (params.thumbnailUrl) {
+          const thumbnailPath = path.join(
+            thumbnailOutputDir,
+            'thumbnail_1.png',
+          );
+          await this.imageService.downloadByUrl(
+            params.thumbnailUrl,
+            thumbnailPath,
+          );
+        } else {
+          // Generate thumbnails
+          await new Promise((resolve, reject) => {
+            ffmpeg(params.inputPath)
+              .on('end', () => resolve(null))
+              .on('error', (err: Error) => reject(err))
+              .screenshots({
+                count: thumbnailsCount,
+                folder: thumbnailOutputDir,
+                filename: `thumbnail.png`,
+                size: '1280x720',
+              });
+          });
+        }
 
         // Resize thumbnails to multiple sizes
         const thumbnailFilenames = await fs.readdir(thumbnailOutputDir);

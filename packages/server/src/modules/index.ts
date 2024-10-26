@@ -24,3 +24,9 @@ export { UserService } from "./user/user.service";
 
 export { VideoModule } from "./video/video.module";
 export { VideoService } from "./video/video.service";
+
+export { CategoriesModule } from "./categories/categories.module";
+export { CategoriesService } from "./categories/categories.service";
+
+export { TagsModule } from "./tags/tags.module";
+export { TagsService } from "./tags/tags.service";

@@ -8,6 +8,8 @@ import {
   PrismaModule,
   JobsModule,
   VideoModule,
+  CategoriesModule,
+  TagsModule,
 } from '@august-tv/server/modules';
 
 @Module({
@@ -19,6 +21,8 @@ import {
     PrismaModule,
     JobsModule,
     VideoModule,
+    CategoriesModule,
+    TagsModule,
   ],
   controllers: [YoutubeController],
   providers: [YoutubeService, VideoDownloaderService],

@@ -21,6 +21,7 @@ export type KafkaPayloads = {
         observers: string[];
         path: string;
         draft: Video;
+        thumbnailUrl?: string;
         publicImmediately: boolean;
     };
     [KafkaTopics.VideoFileTranscoded]: {

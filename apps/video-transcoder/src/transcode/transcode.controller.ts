@@ -21,6 +21,7 @@ export class TranscodeController {
         inputPath: payload.path,
         observers: payload.observers,
         authorId: payload.draft.authorId,
+        thumbnailUrl: payload.thumbnailUrl,
       })
       .then((result) => {
         this.kafkaEmitterService.emit(KafkaTopics.VideoFileTranscoded, {

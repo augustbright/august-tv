@@ -129,7 +129,7 @@ model Category {
   deletedAt DateTime?
   deleted   Boolean   @default(false)
 
-  name    String
+  name    String  @unique
   videos  Video[] @relation("CategoryVideos")
   videoId String? @db.Uuid
 
@@ -320,9 +320,11 @@ model Imported {
   deletedAt DateTime?
   deleted   Boolean   @default(false)
 
-  video      Video  @relation("ImportedVideo", fields: [id], references: [id])
-  source     String
-  originalId String
+  video       Video   @relation("ImportedVideo", fields: [id], references: [id])
+  source      String
+  originalId  String
+  channelId   String?
+  channelName String?
 
   @@map("imported")
 }

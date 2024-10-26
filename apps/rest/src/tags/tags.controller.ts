@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { TagsService } from './tags.service';
 import { Guard } from '@august-tv/server/utils';
 import { CreateTagDto } from '@august-tv/server/dto';
+import { TagsService } from '@august-tv/server/modules';
 
 @Controller('tags')
 export class TagsController {

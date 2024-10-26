@@ -9,8 +9,8 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { CategoriesService } from './categories.service';
 import { CategoryDto } from '@august-tv/server/dto';
+import { CategoriesService } from '@august-tv/server/modules';
 
 @Controller('categories')
 export class CategoriesController {
