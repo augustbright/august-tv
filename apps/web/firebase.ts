@@ -1,10 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
-import {
-  getAuth,
-  inMemoryPersistence,
-  onAuthStateChanged
-} from 'firebase/auth';
+import { getAuth, inMemoryPersistence } from 'firebase/auth';
 
 /* eslint-disable no-restricted-syntax */
 const firebaseApp = initializeApp({
@@ -20,15 +16,3 @@ const firebaseApp = initializeApp({
 export const auth = getAuth(firebaseApp);
 
 auth.setPersistence(inMemoryPersistence);
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User is signed in, see docs for a list of available properties
-    // https://firebase.google.com/docs/reference/js/auth.user
-    const uid = user.uid;
-    // ...
-  } else {
-    // User is signed out
-    // ...
-  }
-});

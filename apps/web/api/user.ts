@@ -1,20 +1,21 @@
+import { toast } from '@/components/hooks/use-toast';
 import { TUserEndpointResult } from '@august-tv/generated-types';
 import { ImageCropDto } from '@august-tv/generated-types/dto';
-
 
 import { createMutableEndpoint } from './createMutableEndpoint';
 import { createReadableEndpoint } from './createReadableEndpoint';
 import { validatePictureFile } from './validators';
 
 export const postUserSessionLogin = createMutableEndpoint<
-  { idToken: string; },
+  { idToken: string },
   TUserEndpointResult<'sessionLogin'>
 >({
   method: 'post',
   prepareUrl: () => '/user/sessionLogin',
   prepareBody: ({ idToken }) => ({ idToken }),
-  onSuccess(queryClient) {
-    queryClient.invalidateQueries();
+  async onSuccess(queryClient, _, data) {
+    await queryClient.invalidateQueries();
+    toast.success(`Signed in as ${data.nickname ?? data.email}`);
   }
 });
 
@@ -24,8 +25,9 @@ export const postUserSignOut = createMutableEndpoint<
 >({
   prepareUrl: () => '/user/sign-out',
   method: 'post',
-  onSuccess(queryClient) {
-    queryClient.invalidateQueries();
+  async onSuccess(queryClient) {
+    await queryClient.invalidateQueries();
+    toast.success('Signed out');
   }
 });
 
@@ -44,7 +46,7 @@ export const getUserMyJobs = createReadableEndpoint<
 });
 
 export const postUserUnobserveJob = createMutableEndpoint<
-  { jobId: string; },
+  { jobId: string },
   TUserEndpointResult<'unobserveJob'>
 >({
   method: 'post',
@@ -63,7 +65,7 @@ export const getUserMySubscriptions = createReadableEndpoint<
 });
 
 export const postUserSubscribe = createMutableEndpoint<
-  { authorId: string; },
+  { authorId: string },
   TUserEndpointResult<'subscribe'>
 >({
   method: 'post',
@@ -76,7 +78,7 @@ export const postUserSubscribe = createMutableEndpoint<
 });
 
 export const postUserUnsubscribe = createMutableEndpoint<
-  { authorId: string; },
+  { authorId: string },
   TUserEndpointResult<'unsubscribe'>
 >({
   method: 'post',

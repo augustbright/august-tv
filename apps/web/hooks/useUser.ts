@@ -1,4 +1,5 @@
 import { getUserCurrent, getUserMyJobs, postUserSignOut } from '@/api/user';
+import { toast } from '@/components/hooks/use-toast';
 import { useMutateSignInWithGoogle } from '@/mutations/signInWithGoogle';
 import { TMessage } from '@august-tv/common/types';
 import { Job } from '@prisma/client';
@@ -8,7 +9,6 @@ import { atom, useAtom } from 'jotai';
 import { useEffect } from 'react';
 
 import { ws } from '../websocket';
-import { toast } from '@/components/hooks/use-toast';
 
 const jobsAtom = atom<Job[]>([]);
 
@@ -18,6 +18,7 @@ export const useUser = () => {
   const [rawJobs, setJobs] = useAtom(jobsAtom);
   const { refetch: refetchMyJobs } = useQuery({
     queryKey: ['user', 'myJobs'],
+    enabled: !!current,
     queryFn: async () => {
       const data = await getUserMyJobs.get();
       setJobs(data);
@@ -39,7 +40,7 @@ export const useUser = () => {
     (job) => job.status === 'IN_PROGRESS' || job.status === 'FAILED'
   );
   const signIn = {
-    showModal: () => { },
+    showModal: () => {},
     google: useMutateSignInWithGoogle()
   };
 

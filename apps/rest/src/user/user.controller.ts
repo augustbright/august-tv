@@ -8,6 +8,7 @@ import {
   UploadedFile,
   Body,
   Param,
+  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { DecodedIdToken, getAuth } from 'firebase-admin/auth';
@@ -24,6 +25,7 @@ import { firebaseApp } from '@august-tv/server';
 
 @Controller('user')
 export class UserController {
+  private readonly logger = new Logger(UserController.name);
   constructor(
     private readonly userService: UserService,
     private readonly jobsService: JobsService,
@@ -35,23 +37,19 @@ export class UserController {
   async sessionLogin(@Req() req: Request, @Res() res: Response) {
     const idToken = req.body.idToken.toString();
 
-    try {
-      const sessionCookie = await getAuth(firebaseApp).createSessionCookie(
-        idToken,
-        { expiresIn: this.expiresIn },
-      );
+    const sessionCookie = await getAuth(firebaseApp).createSessionCookie(
+      idToken,
+      { expiresIn: this.expiresIn },
+    );
 
-      await this.userService.ensureUser(idToken);
+    const user = await this.userService.ensureUser(idToken);
 
-      const options = { maxAge: this.expiresIn, httpOnly: true, secure: true };
+    const options = { maxAge: this.expiresIn, httpOnly: true, secure: true };
 
-      // Set the session cookie
-      res.cookie('session', sessionCookie, options);
-      return res.json({});
-    } catch (error) {
-      console.error(error);
-      return { error: 'UNAUTHORIZED_REQUEST' };
-    }
+    // Set the session cookie
+    res.cookie('session', sessionCookie, options);
+    res.json(user);
+    return user;
   }
 
   @Get('current')

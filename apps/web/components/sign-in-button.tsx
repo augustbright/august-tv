@@ -1,4 +1,4 @@
-import { useUser } from '@/hooks/useUser';
+import { useSignInDialog } from '@/app/_sign-in/sign-in-dialog';
 import { cn } from '@/lib/utils';
 import { Slot } from '@radix-ui/react-slot';
 
@@ -9,13 +9,13 @@ import { ButtonProps, buttonVariants } from './ui/button';
 
 export const SignInButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const { setOpen } = useSignInDialog();
     const Comp = asChild ? Slot : 'button';
-    const { signIn } = useUser();
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        onClick={() => signIn.google.mutate()}
+        onClick={() => setOpen('signIn')}
         // eslint-disable-next-line react/no-children-prop
         children={
           <>

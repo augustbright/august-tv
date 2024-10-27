@@ -1,4 +1,8 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import {
+  createParamDecorator,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { DecodedIdToken } from 'firebase-admin/auth';
 
 export const User = createParamDecorator(
@@ -10,7 +14,7 @@ export const User = createParamDecorator(
   ) => {
     const request = ctx.switchToHttp().getRequest();
     if (data?.required && !request.user) {
-      throw new Error('User is required');
+      throw new UnauthorizedException('User is required');
     }
     return request.user as DecodedIdToken; // Assuming req.user is populated, e.g., by a JWT auth guard
   },

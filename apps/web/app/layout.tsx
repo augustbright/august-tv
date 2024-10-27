@@ -40,7 +40,7 @@ export default async function Layout({
             {isHealthy ? (
               <div className='flex flex-col'>
                 <AppHeader />
-                <div className='mt-16'>{children}</div>
+                <div>{children}</div>
               </div>
             ) : (
               <div className='flex flex-col items-center justify-center h-screen gap-4'>

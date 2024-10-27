@@ -35,6 +35,7 @@ export class TranscodeController {
       })
       .catch((error) => {
         this.logger.error(error);
+        return Promise.resolve();
       });
   }
 }

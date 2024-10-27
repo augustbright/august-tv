@@ -29,70 +29,72 @@ export const AppUserPanel = () => {
   };
 
   return (
-    <Guard fallback={<SignInButton variant='outline' />}>
-      {(current) => (
-        <Sheet
-          open={isSheetOpen}
-          onOpenChange={handleSheetOpenChange}
-        >
-          <SheetTrigger>
-            <Avatar>
-              <AvatarImage src={current.data.picture?.small.publicUrl} />
-              <AvatarFallback>{current.data?.nickname[0]}</AvatarFallback>
-            </Avatar>
-          </SheetTrigger>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle className='flex items-center gap-4'>
-                <Avatar>
-                  <AvatarImage src={current.data.picture?.small.publicUrl} />
-                  <AvatarFallback>{current.data?.nickname[0]}</AvatarFallback>
-                </Avatar>
-                <p>{current.data.nickname}</p>
-              </SheetTitle>
-            </SheetHeader>
-            <SheetDescription className='flex flex-col gap-1'>
-              <Button
-                asChild
-                variant={'ghost'}
-              >
-                <Link
-                  href='/profile/general'
-                  className='flex gap-2 p-4'
-                  onClick={handleClickNavItem}
+    <>
+      <Guard fallback={<SignInButton variant='default' />}>
+        {(current) => (
+          <Sheet
+            open={isSheetOpen}
+            onOpenChange={handleSheetOpenChange}
+          >
+            <SheetTrigger>
+              <Avatar>
+                <AvatarImage src={current.data.picture?.small.publicUrl} />
+                <AvatarFallback>{current.data?.nickname[0]}</AvatarFallback>
+              </Avatar>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle className='flex items-center gap-4'>
+                  <Avatar>
+                    <AvatarImage src={current.data.picture?.small.publicUrl} />
+                    <AvatarFallback>{current.data?.nickname[0]}</AvatarFallback>
+                  </Avatar>
+                  <p>{current.data.nickname}</p>
+                </SheetTitle>
+              </SheetHeader>
+              <SheetDescription className='flex flex-col gap-1'>
+                <Button
+                  asChild
+                  variant={'ghost'}
                 >
-                  <User className='h-4 w-4' />
-                  <span>Profile</span>
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant={'ghost'}
-              >
-                <Link
-                  href='/profile/my-videos'
-                  className='flex gap-2 p-4'
-                  onClick={handleClickNavItem}
+                  <Link
+                    href='/profile/general'
+                    className='flex gap-2 p-4'
+                    onClick={handleClickNavItem}
+                  >
+                    <User className='h-4 w-4' />
+                    <span>Profile</span>
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant={'ghost'}
                 >
-                  <Clapperboard className='h-4 w-4' />
-                  <span>My Videos</span>
-                </Link>
-              </Button>
+                  <Link
+                    href='/profile/my-videos'
+                    className='flex gap-2 p-4'
+                    onClick={handleClickNavItem}
+                  >
+                    <Clapperboard className='h-4 w-4' />
+                    <span>My Videos</span>
+                  </Link>
+                </Button>
 
-              <Button
-                variant='outline'
-                onClick={() => {
-                  signOut.mutate();
-                  handleClickNavItem();
-                }}
-              >
-                <LogOut className='mr-2 h-4 w-4' />
-                <span>Sign out</span>
-              </Button>
-            </SheetDescription>
-          </SheetContent>
-        </Sheet>
-      )}
-    </Guard>
+                <Button
+                  variant='outline'
+                  onClick={() => {
+                    signOut.mutate();
+                    handleClickNavItem();
+                  }}
+                >
+                  <LogOut className='mr-2 h-4 w-4' />
+                  <span>Sign out</span>
+                </Button>
+              </SheetDescription>
+            </SheetContent>
+          </Sheet>
+        )}
+      </Guard>
+    </>
   );
 };

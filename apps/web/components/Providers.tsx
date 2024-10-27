@@ -1,6 +1,7 @@
 'use client';
 
 import { getQueryClient } from '@/api/queryClient';
+import { SignInDialog } from '@/app/_sign-in/sign-in-dialog';
 import { ConfirmProvider } from '@/app/confirm';
 import { ThemeProvider } from '@/components/theme-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -20,7 +21,10 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
         disableTransitionOnChange
       >
         <TooltipProvider>
-          <ConfirmProvider>{children}</ConfirmProvider>
+          <ConfirmProvider>
+            {children}
+            <SignInDialog />
+          </ConfirmProvider>
         </TooltipProvider>
       </ThemeProvider>
       <Toaster />

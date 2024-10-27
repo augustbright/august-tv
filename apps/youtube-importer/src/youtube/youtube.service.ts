@@ -278,13 +278,13 @@ export class YoutubeService {
           ],
         },
         select: {
-          id: true,
+          originalId: true,
         },
       });
 
       filteredVideos = filteredVideos.filter(
         (video) =>
-          !alreadyImported.some((imported) => imported.id === video.id),
+          !alreadyImported.some((imported) => imported.originalId === video.id),
       );
 
       const randomVideo =

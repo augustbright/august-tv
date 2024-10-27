@@ -3,15 +3,13 @@
 import { getUserCurrent } from '@/api/user';
 import { TUserEndpointResult } from '@august-tv/generated-types';
 
-import { redirect } from 'next/navigation';
-import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { Query, TQueryChildrenProps } from './Query';
 
 export const RedirectHome = () => {
-  useEffect(() => {
-    redirect('/');
-  });
+  const router = useRouter();
+  router.replace('/');
   return null;
 };
 

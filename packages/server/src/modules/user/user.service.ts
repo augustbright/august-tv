@@ -50,13 +50,17 @@ export class UserService implements IWithPermissions {
             decodedIdToken.uid
         );
 
-        const existingUser = await this.prisma.user.findUnique({
+        let user = await this.prisma.user.findUnique({
             where: { id: userRecord.uid },
-            select: { id: true },
+            select: {
+                id: true,
+                nickname: true,
+                email: true,
+            },
         });
 
-        if (!existingUser) {
-            await this.prisma.user.create({
+        if (!user) {
+            user = await this.prisma.user.create({
                 data: {
                     id: userRecord.uid,
                     email: userRecord.email,
@@ -66,8 +70,15 @@ export class UserService implements IWithPermissions {
                         create: {},
                     },
                 },
+                select: {
+                    id: true,
+                    nickname: true,
+                    email: true,
+                },
             });
         }
+
+        return user;
     }
 
     async setProfilePicture(userId: string, imageId: string) {

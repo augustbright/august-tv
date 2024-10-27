@@ -77,10 +77,16 @@ export class TranscodeService {
           thumbnailsFolderName,
         );
 
+        const isValid = await this.isVideoFileValid(params.inputPath);
+        if (!isValid) {
+          throw new Error('Invalid video file');
+        }
+
         // Transcode video to different resolutions
+        let error: Error | null = null;
         const transcodedFiles = Promise.all(
           resolutions.map((resolution, index) => {
-            return new Promise<string>((resolve, reject) => {
+            return new Promise<string>((resolve) => {
               const outputPath = path.join(
                 videoOutputDir,
                 `${resolution.resolution}_variant.m3u8`,
@@ -124,7 +130,8 @@ export class TranscodeService {
                     `❌ Failed to transcode video to ${resolution.resolution}`,
                     err,
                   );
-                  reject(err);
+                  resolve(outputPath);
+                  error = err;
                 })
                 .on('progress', (progress) => {
                   if (!progress.percent) return;
@@ -178,6 +185,9 @@ export class TranscodeService {
         );
 
         await transcodedFiles;
+        if (error) {
+          throw error;
+        }
 
         const folderName = generateString(10);
         const masterOutputPath = path.join(videoOutputDir, 'master.m3u8');
@@ -206,5 +216,35 @@ export class TranscodeService {
         };
       },
     );
+  }
+
+  async isVideoFileValid(inputPath: string) {
+    try {
+      await fs.access(inputPath);
+    } catch (error) {
+      this.logger.error(`Invalid video file ${inputPath}: ${error}`);
+      return error;
+    }
+
+    return new Promise((resolve) => {
+      ffmpeg.ffprobe(inputPath, (error, metadata) => {
+        if (error) {
+          this.logger.error(`Invalid video file ${inputPath}: ${error}`);
+          resolve(false);
+        } else {
+          const hasVideoStream = metadata.streams.some(
+            (stream) => stream.codec_type === 'video',
+          );
+          if (hasVideoStream) {
+            resolve(true);
+          } else {
+            this.logger.error(
+              `Invalid video file ${inputPath}: no video stream`,
+            );
+            resolve(false);
+          }
+        }
+      });
+    });
   }
 }
