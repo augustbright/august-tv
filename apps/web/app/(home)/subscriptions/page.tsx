@@ -7,7 +7,7 @@ import { Videos } from '@/components/videos';
 export default function Page() {
   return (
     <Guard
-      roles={['user']}
+      roles={[]}
       fallback={<RedirectHome />}
     >
       <main className='flex flex-col gap-4 grow'>

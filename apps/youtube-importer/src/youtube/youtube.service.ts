@@ -222,6 +222,7 @@ export class YoutubeService {
         channelId ? `channelId=${channelId}` : '',
         `videoDuration=short`,
         `videoLicense=creativeCommon`,
+        `videoCategoryId=20`,
         `key=${this.API_KEY}`,
       ]
         .filter(Boolean)
@@ -255,10 +256,14 @@ export class YoutubeService {
 
       // Step 3: Filter videos based on duration (e.g., less than 10 minutes)
       let filteredVideos = videoDetails.filter((video) => {
-        const duration = this.parseISO8601Duration(
-          video.contentDetails.duration,
-        );
-        return duration < 10 * 60; // Videos less than 10 minutes
+        try {
+          const duration = this.parseISO8601Duration(
+            video.contentDetails.duration,
+          );
+          return duration < 10 * 60; // Videos less than 10 minutes
+        } catch {
+          return false;
+        }
       });
 
       const alreadyImported = await this.prismaService.imported.findMany({

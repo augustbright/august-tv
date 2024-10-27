@@ -24,12 +24,12 @@ export const AsideButton = ({
         variant='ghost'
         className={cn(
           'flex flex-col h-16 w-full px-2',
-          currentSegment === segment && 'text-rose-600'
+          currentSegment === segment && ''
         )}
       >
         <Icon
           icon={icon}
-          className='w-8'
+          className='w-7 h-7 mb-2'
         />
         <span className='text-xs'>{title}</span>
       </Button>

@@ -5,7 +5,8 @@ export const ThumbnailPicture = ({
   thumbnail,
   width = 200,
   height = 200,
-  alt
+  alt,
+  className
 }: {
   thumbnail: {
     medium: {
@@ -15,9 +16,10 @@ export const ThumbnailPicture = ({
   width?: number;
   height?: number;
   alt: string;
+  className?: string;
 }) => {
   return (
-    <div>
+    <div className={className}>
       {thumbnail ? (
         <Image
           style={{ width }}

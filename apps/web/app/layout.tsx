@@ -9,8 +9,8 @@ import { AppHeader } from './_app-header/app-header';
 import './global.css';
 
 export const metadata = {
-  title: 'August TV',
-  description: 'Watch your favorite videos here!'
+  title: 'SWARM',
+  description: 'Join the Swarm!'
 };
 
 const getHealth = async () => {
@@ -45,7 +45,7 @@ export default async function Layout({
             ) : (
               <div className='flex flex-col items-center justify-center h-screen gap-4'>
                 <div className='text-3xl text-gray-500'>
-                  The server is not healthy :(
+                  The server is not healthy 😵
                 </div>
                 <div className='text-sm text-gray-500'>
                   Let&apos;s hope it gets better soon!
