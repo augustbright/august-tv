@@ -21,11 +21,9 @@ export const AppHeader = () => {
   const { setOpen } = useSignInDialog();
 
   return (
-    <header
-      className={cn(data?.decoded?.email_verified === false ? 'h-24' : 'h-16')}
-    >
+    <header className={cn(data?.emailVerified === false ? 'h-24' : 'h-16')}>
       <div className='fixed top-0 z-50 w-full border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
-        {data?.decoded?.email_verified === false && (
+        {data?.emailVerified === false && (
           <div className='h-10 flex items-center gap-4 px-4 py-2 bg-amber-300 text-black'>
             <TriangleAlert className='h-5 text-black' />
             <p>

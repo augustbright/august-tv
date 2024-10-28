@@ -65,10 +65,20 @@ export class UserController {
         data: await promiseUser,
         roles: await promiseRoles,
         decoded,
+        emailVerified:
+          decoded.email_verified ||
+          (await this.userService.isEmailVerified(decoded.uid)),
       };
     } else {
       return null;
     }
+  }
+
+  @Post('send-verification-email')
+  @Guard.scope('user')
+  async sendVerificationEmail(@User({ required: true }) user: DecodedIdToken) {
+    await this.userService.sendEmailVerification(user.uid);
+    return {};
   }
 
   @Post('sign-out')

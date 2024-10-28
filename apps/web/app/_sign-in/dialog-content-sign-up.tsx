@@ -1,3 +1,4 @@
+import { Loader } from '@/components/ui/loader';
 import { useMutateCreateAccount } from '@/mutations/createAccount';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -26,18 +27,18 @@ import { TSignInMachine } from './state-machine';
 
 const signUpFormSchema = z
   .object({
-    email: z
+    email: z.string().min(1, 'is required').email({ message: 'is invalid' }),
+    password: z
       .string()
-      .min(1, 'Email is required')
-      .email({ message: 'Email is invalid' }),
-    password: z.string().min(1, 'Password is required'),
-    passwordConfirmation: z.string().min(1, 'Password confirmation is required')
+      .min(1, 'is required')
+      .min(6, 'must be at least 6 characters'),
+    passwordConfirmation: z.string().min(1, 'required')
   })
   .superRefine(({ password, passwordConfirmation }, ctx) => {
-    if (password !== passwordConfirmation) {
+    if (password && password !== passwordConfirmation) {
       ctx.addIssue({
         code: 'custom',
-        message: 'Passwords do not match',
+        message: ' - does not match',
         path: ['passwordConfirmation']
       });
     }
@@ -96,75 +97,79 @@ export const DialogContentSignUp = ({
       </DialogHeader>
       <Form {...signUpForm}>
         <form
-          className='grid gap-4'
+          className='grid grid-cols-3 gap-4'
           onSubmit={signUpForm.handleSubmit(handleSubmit)}
         >
-          <div className='grid gap-2'>
+          <div className='col-span-3 gap-2'>
             <FormField
               control={signUpForm.control}
               name='email'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>
+                    Email <FormMessage className='inline' />
+                  </FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       type='email'
                       placeholder='m@example.com'
-                      required
                     />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-          <div className='grid gap-2'>
+          <div className='col-span-3 gap-2'>
             <FormField
               control={signUpForm.control}
               name='password'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor='password'>Password</FormLabel>
+                  <FormLabel htmlFor='password'>
+                    Password <FormMessage className='inline' />
+                  </FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       type='password'
-                      required
                     />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-          <div className='grid gap-2'>
+          <div className='col-span-3 gap-2'>
             <FormField
               control={signUpForm.control}
               name='passwordConfirmation'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel htmlFor='passwordConfirmation'>
-                    Confirm password
+                    Confirm password <FormMessage className='inline' />
                   </FormLabel>
                   <FormControl>
                     <Input
                       {...field}
                       type='password'
-                      required
                     />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-          <Button
-            type='submit'
-            className='w-full'
-          >
-            Register
-          </Button>
+          {isCreatingAccount ? (
+            <div className='col-span-3 flex items-center justify-center mt-8 h-10'>
+              <Loader />
+            </div>
+          ) : (
+            <Button
+              type='submit'
+              className='col-start-2 col-end-3 mt-8'
+            >
+              Register
+            </Button>
+          )}
         </form>
       </Form>
 

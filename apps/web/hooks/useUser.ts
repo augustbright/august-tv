@@ -13,7 +13,16 @@ import { ws } from '../websocket';
 const jobsAtom = atom<Job[]>([]);
 
 export const useUser = () => {
-  const { data: current } = getUserCurrent.useQuery();
+  const { data: current } = useQuery(
+    getUserCurrent.query(undefined, {
+      refetchOnWindowFocus({ state }) {
+        if (!state.data?.emailVerified) {
+          return 'always';
+        }
+        return true;
+      }
+    })
+  );
   const queryClient = useQueryClient();
   const [rawJobs, setJobs] = useAtom(jobsAtom);
   const { refetch: refetchMyJobs } = useQuery({

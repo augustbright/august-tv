@@ -85,3 +85,39 @@ button {
 [data-radix-popper-content-wrapper] {
   z-index: 9999 !important;
 }
+
+.loader-1 {
+  width: 80px;
+  height: 70px;
+  border: 5px solid transparent;
+  padding: 0 8px;
+  box-sizing: border-box;
+  background:
+    linear-gradient(#fff 0 0) 0 0/8px 20px,
+    linear-gradient(#fff 0 0) 100% 0/8px 20px,
+    radial-gradient(farthest-side, #fff 90%, transparent) 0 5px/8px 8px
+      content-box,
+    transparent;
+  background-repeat: no-repeat;
+  animation: l3 2s infinite linear;
+}
+@keyframes l3 {
+  25% {
+    background-position:
+      0 0,
+      100% 100%,
+      100% calc(100% - 5px);
+  }
+  50% {
+    background-position:
+      0 100%,
+      100% 100%,
+      0 calc(100% - 5px);
+  }
+  75% {
+    background-position:
+      0 100%,
+      100% 0,
+      100% 5px;
+  }
+}

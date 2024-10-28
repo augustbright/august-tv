@@ -1,3 +1,4 @@
+import { Loader } from '@/components/ui/loader';
 import { Separator } from '@/components/ui/separator';
 import { useUser } from '@/hooks/useUser';
 import { useMutateSignInWithEmailAndPassword } from '@/mutations/signInWithPassword';
@@ -6,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FirebaseError } from 'firebase/app';
 import { LogIn } from 'lucide-react';
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFormState } from 'react-hook-form';
 import { z } from 'zod';
 
 import { toast } from '../../components/hooks/use-toast';
@@ -57,21 +58,24 @@ export const DialogContentSignIn = ({
     }
   });
 
+  const rootError = useFormState(signInForm).errors.root?.message;
+
   const handleSubmit = async (values: SignInFormValues) => {
     try {
       await signInWithEmailAndPassword(values);
       setOpen(null);
     } catch (error) {
+      console.dir(error);
       if (error instanceof FirebaseError) {
         switch (error.code) {
           case 'auth/user-not-found':
             signInForm.setError('email', {
               type: 'manual',
-              message: 'User not found'
+              message: 'not found'
             });
             return;
           case 'auth/user-disabled':
-            signInForm.setError('email', {
+            signInForm.setError('root', {
               type: 'manual',
               message: 'User is disabled'
             });
@@ -79,13 +83,19 @@ export const DialogContentSignIn = ({
           case 'auth/wrong-password':
             signInForm.setError('password', {
               type: 'manual',
-              message: 'Wrong password'
+              message: 'is incorrect'
             });
             return;
           case 'auth/invalid-credential':
-            signInForm.setError('email', {
+            signInForm.setError('root', {
               type: 'manual',
               message: 'Wrong email or password'
+            });
+            return;
+          case 'auth/too-many-requests':
+            signInForm.setError('root', {
+              type: 'manual',
+              message: 'Too many requests. Try again later'
             });
             return;
           default:
@@ -164,13 +174,28 @@ export const DialogContentSignIn = ({
               )}
             />
           </div>
-          <Button
-            className='col-start-2 col-end-3 mt-8'
-            type='submit'
-          >
-            <LogIn className='w-4 h-4 mr-2' />
-            Sign In
-          </Button>
+
+          {rootError && (
+            <p className='col-span-3 flex justify-center text-sm text-destructive'>
+              {rootError}
+            </p>
+          )}
+
+          {isSigningInWithEmailAndPassword ? (
+            <div className='col-span-3 flex items-center justify-center mt-8 h-10'>
+              <Loader />
+            </div>
+          ) : (
+            <Button
+              className='col-start-2 col-end-3 mt-8'
+              type='submit'
+              disabled={isSigningInWithEmailAndPassword}
+            >
+              <LogIn className='w-4 h-4 mr-2' />
+              Sign In
+            </Button>
+          )}
+
           <div className='col-span-3 text-center text-sm'>
             Don&apos;t have an account?{' '}
             <Button

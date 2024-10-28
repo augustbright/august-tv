@@ -54,26 +54,31 @@ export class SocketsGateway
       return;
     }
 
-    const { uid } = await getAuth(firebaseApp).verifySessionCookie(
-      sessionCookie,
-      true,
-    );
+    try {
+      const { uid } = await getAuth(firebaseApp).verifySessionCookie(
+        sessionCookie,
+        true,
+      );
 
-    if (!uid) {
+      if (!uid) {
+        client.disconnect();
+        return;
+      }
+
+      if (!this.connections.has(uid)) {
+        this.connections.set(uid, new Set());
+      }
+      const userConnections = this.connections.get(uid)!;
+      userConnections.add(client);
+
+      client.on('disconnect', () => {
+        this.logger.log(`Client disconnected: ${client.id}`);
+        userConnections.delete(client);
+      });
+    } catch (error) {
+      this.logger.error(`Error verifying session cookie: ${error}`);
       client.disconnect();
-      return;
     }
-
-    if (!this.connections.has(uid)) {
-      this.connections.set(uid, new Set());
-    }
-    const userConnections = this.connections.get(uid)!;
-    userConnections.add(client);
-
-    client.on('disconnect', () => {
-      this.logger.log(`Client disconnected: ${client.id}`);
-      userConnections.delete(client);
-    });
   }
 
   sendToUser(uid: string, message: TMessage) {

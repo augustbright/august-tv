@@ -97,6 +97,12 @@ export const envSchema = z.object({
     TMP_DIR: z.string({
         required_error: "Missing TMP_DIR environment variable",
     }),
+    EMAIL_USER: z.string({
+        required_error: "Missing EMAIL_USER environment variable",
+    }),
+    EMAIL_PASSWORD: z.string({
+        required_error: "Missing EMAIL_PASS environment variable",
+    }),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

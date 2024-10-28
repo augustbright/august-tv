@@ -13,8 +13,14 @@ type TReadableEndpointConfig<P> = {
 
 type TReadableEndpoint<P, R> = {
   get: (params: P) => Promise<R>;
-  query: (params: P) => UndefinedInitialDataOptions<R>;
-  useQuery: (params: P) => UseQueryResult<R>;
+  query: (
+    params: P,
+    options?: Partial<UndefinedInitialDataOptions<R>>
+  ) => UndefinedInitialDataOptions<R>;
+  useQuery: (
+    params: P,
+    options?: Partial<UndefinedInitialDataOptions<R>>
+  ) => UseQueryResult<R>;
 };
 
 export const createReadableEndpoint = <P, R>(
@@ -30,17 +36,22 @@ export const createReadableEndpoint = <P, R>(
     return data;
   };
 
-  const query = (params: P) => ({
+  const query = (
+    params: P,
+    options?: Partial<UndefinedInitialDataOptions<R>>
+  ) => ({
     queryKey: [
       ...config.prepareUrl(params).replace(/^\//, '').split('/'),
       params
     ],
-    queryFn: () => get(params)
+    queryFn: () => get(params),
+    ...(options ?? {})
   });
 
   return {
     get,
     query,
-    useQuery: (params: P) => useQuery(query(params))
+    useQuery: (params: P, options?: Partial<UndefinedInitialDataOptions<R>>) =>
+      useQuery(query(params, options))
   };
 };

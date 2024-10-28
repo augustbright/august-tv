@@ -1,11 +1,9 @@
+import { postUserSendVerificationEmail } from '@/api/user';
 import { Query } from '@/components/Query';
 import { Guard } from '@/components/guard';
 import { toast } from '@/components/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
-import { auth } from '@/firebase';
-import { useMutation } from '@tanstack/react-query';
 
-import { sendEmailVerification } from 'firebase/auth';
 import React from 'react';
 
 import { Button } from '../../components/ui/button';
@@ -22,13 +20,9 @@ export const DialogContentResendEmail = ({
 }: {
   machine: TSignInMachine;
 }) => {
-  const { mutateAsync: resendEmail, isPending: isResendingEmail } = useMutation(
-    {
-      mutationFn: async () => {
-        await sendEmailVerification(auth.currentUser!);
-      }
-    }
-  );
+  const { mutateAsync: resendEmail, isPending: isResendingEmail } =
+    postUserSendVerificationEmail.useMutation();
+
   const { setOpen } = useSignInDialog();
   return (
     <Guard
@@ -65,7 +59,7 @@ export const DialogContentResendEmail = ({
               variant='default'
               disabled={isResendingEmail}
               onClick={async () => {
-                await resendEmail(current.email!);
+                await resendEmail();
                 toast.success('Email sent');
                 setOpen(null);
               }}

@@ -19,6 +19,11 @@ export const postUserSessionLogin = createMutableEndpoint<
   }
 });
 
+export const postUserSendVerificationEmail = createMutableEndpoint<void, void>({
+  method: 'post',
+  prepareUrl: () => '/user/send-verification-email'
+});
+
 export const postUserSignOut = createMutableEndpoint<
   void,
   TUserEndpointResult<'signOut'>

@@ -30,3 +30,6 @@ export { CategoriesService } from "./categories/categories.service";
 
 export { TagsModule } from "./tags/tags.module";
 export { TagsService } from "./tags/tags.service";
+
+export { EmailModule } from "./email/email.module";
+export { EmailService } from "./email/email.service";

@@ -1,5 +1,5 @@
 import { TCursorQueryParams } from "@august-tv/common/types";
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 import { getAuth } from "firebase-admin/auth";
 import { IWithPermissions } from "src/utils";
 import { PrismaService } from "../prisma/prisma.service";
@@ -7,12 +7,15 @@ import { ImageService } from "../image/image.service";
 import { TActionType } from "src/utils/IWithPermissions";
 import { firebaseApp } from "../../firebase";
 import { ImageCropDto } from "src/dto";
+import { EmailService } from "../email/email.service";
 
 @Injectable()
 export class UserService implements IWithPermissions {
+    private readonly logger = new Logger(UserService.name);
     constructor(
         private readonly prisma: PrismaService,
-        private readonly imageService: ImageService
+        private readonly imageService: ImageService,
+        private readonly emailService: EmailService
     ) {}
 
     async getPermissionsForUser(
@@ -30,6 +33,39 @@ export class UserService implements IWithPermissions {
         }
 
         return [];
+    }
+
+    async isEmailVerified(uid: string): Promise<boolean> {
+        const userRecord = await getAuth(firebaseApp).getUser(uid);
+        return userRecord.emailVerified;
+    }
+
+    async sendEmailVerification(uid: string) {
+        const userRecord = await getAuth(firebaseApp).getUser(uid);
+        if (userRecord.emailVerified) {
+            throw new Error("Email is already verified");
+        }
+        const userEmail = userRecord.email;
+        if (!userEmail) {
+            throw new Error("User does not have an email");
+        }
+
+        try {
+            const link =
+                await getAuth(firebaseApp).generateEmailVerificationLink(
+                    userEmail
+                );
+
+            await this.emailService.sendMail({
+                to: userEmail,
+                subject: "Verify your email",
+                text: `Please verify your email by clicking on this link: ${link}`,
+                html: `<p>Please verify your email by clicking on this link: <a href="${link}">${link}</a></p>`,
+            });
+        } catch (error) {
+            this.logger.error(error);
+            throw new Error("Failed to send email verification");
+        }
     }
 
     async assertPermissionsForUser(
